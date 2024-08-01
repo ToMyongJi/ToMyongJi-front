@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'GmarketSansLight';
+  src: url('./assets/GmarketSansTTFLight.ttf');
+}
+
+@font-face {
+  font-family: 'GmarketSansMedium';
+  src: url('./assets/GmarketSansTTFMedium.ttf');
+}
+
+@font-face {
+  font-family: 'GmarketSansBold';
+  src: url('./assets/GmarketSansTTFBold.ttf');
+}
