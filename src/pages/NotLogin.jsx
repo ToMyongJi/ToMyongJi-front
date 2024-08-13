@@ -2,7 +2,7 @@ import React from 'react';
 import notFoundImage from '../assets/images/notFound.png';
 import Header from '../components/Header';
 
-const NotFound = () => {
+const NotLogin = () => {
   return (
     <div className="max-w-[600px] min-h-screen ml-auto mr-auto bg-white">
       <Header />
@@ -12,10 +12,10 @@ const NotFound = () => {
           <img src={notFoundImage} alt="접근 권한 없음 이미지" className="sm:w-[200px] w-[150px]" />
           <div className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center mb-3 text-xs text-center font-GmarketLight sm:text-sm">
-              <span>현재 페이지는</span>
-              <span>잘못된 페이지입니다.</span>
+              <span>로그인 하지 않은 회원은</span>
+              <span>이 페이지에 접근할 수 없습니다.</span>
             </div>
-            <span className="text-xs sm:text-sm font-GmarketMedium">뒤로 돌아가주세요.</span>
+            <span className="text-xs sm:text-sm font-GmarketMedium">로그인 후 다시 시도해주세요</span>
           </div>
         </div>
       </div>
@@ -23,4 +23,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default NotLogin;
