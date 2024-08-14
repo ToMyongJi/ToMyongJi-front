@@ -10,16 +10,30 @@ const MyPage = () => {
     type: '회장',
   });
 
-  const sampleCouncilMember = [
+  const [councilMembers, setCouncilMembers] = useState([
     { studentId: '60222126', name: '이준규' },
     { studentId: '60222117', name: '이서현' },
     { studentId: '60211665', name: '박진형' },
-  ];
+  ]);
+
+  const [newMember, setNewMember] = useState({ studentId: '', name: '' });
 
   const handleUserUpdate = (e) => {
     e.preventDefault();
-    // 여기에 사용자 정보 업데이트 로직 추가
+    // 실제 API 호출
     alert('사용자 정보가 업데이트되었습니다.');
+  };
+
+  const handleAddMember = (e) => {
+    e.preventDefault();
+    if (newMember.studentId && newMember.name) {
+      setCouncilMembers([...councilMembers, newMember]);
+      setNewMember({ studentId: '', name: '' });
+    }
+  };
+
+  const handleDeleteMember = (studentId) => {
+    setCouncilMembers(councilMembers.filter((member) => member.studentId !== studentId));
   };
 
   return (
@@ -104,16 +118,49 @@ const MyPage = () => {
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
               />
             </div>
-            <button className="w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300 mb-4">
-              소속부원 추가
-            </button>
+            <form onSubmit={handleAddMember} className="mb-4">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  placeholder="학번"
+                  value={newMember.studentId}
+                  onChange={(e) => setNewMember({ ...newMember, studentId: e.target.value })}
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                />
+                <input
+                  type="text"
+                  placeholder="이름"
+                  value={newMember.name}
+                  onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
+                >
+                  추가
+                </button>
+              </div>
+            </form>
             <div className="space-y-2">
-              {sampleCouncilMember.map((member) => (
-                <div key={member.studentId} className="flex items-center justify-between">
-                  <span>
-                    {member.studentId} - {member.name}
-                  </span>
-                  <button className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300">
+              {councilMembers.map((member) => (
+                <div key={member.studentId} className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={member.studentId}
+                    readOnly
+                    className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                  />
+                  <input
+                    type="text"
+                    value={member.name}
+                    readOnly
+                    className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                  />
+                  <button
+                    onClick={() => handleDeleteMember(member.studentId)}
+                    className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
+                  >
                     삭제
                   </button>
                 </div>
