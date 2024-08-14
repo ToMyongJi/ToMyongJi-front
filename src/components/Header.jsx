@@ -25,8 +25,9 @@ const Header = () => {
         <button
           className="w-[104px] sm:w-[110px] h-[35px] sm:h-[40px] bg-no-repeat bg-cover flex items-center justify-center relative"
           style={{ backgroundImage: `url(${buttonBackground})` }}
+          onClick={handleOnClick('/login')}
         >
-          <span className="hover:text-[#5e73ed] transition duration-300 z-10 text-[#002e72] font-GmarketLight text-[11px] sm:text-xs">
+          <span className="hover:text-[#CED3FF] transition duration-300 z-10 text-[#002e72] font-GmarketLight text-[11px] sm:text-xs">
             로그인
           </span>
         </button>
@@ -34,19 +35,19 @@ const Header = () => {
       {/* 네비바 */}
       <div className="text-sm sm:text-[16px] text-[#002D72] flex items-center justify-evenly font-GmarketLight w-[100%] border-t border-[#4E67EC] border-b py-3">
         <button
-          className="px-3 py-2 rounded-md hover:text-[#5e73ed] transition duration-300"
+          className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
           onClick={handleOnClick('/receipts-list')}
         >
           조회
         </button>
         <button
-          className="px-3 py-2 rounded-md hover:text-[#5e73ed] transition duration-300"
+          className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
           onClick={handleOnClick('/create-receipt')}
         >
           작성
         </button>
         <button
-          className="px-3 py-2 rounded-md hover:text-[#5e73ed] transition duration-300"
+          className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
           onClick={handleOnClick('/my-page')}
         >
           마이
