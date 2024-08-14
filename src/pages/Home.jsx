@@ -29,6 +29,7 @@ const Home = () => {
             <IntroduceCard
               contentText={'원하는 대학과 소속을 선택하면 조회가 가능합니다.'}
               buttonText={'학과 학생회비 사용 내역 조회 하러 가기'}
+              path={'/receipts-list'}
             />
           </div>
           <div className="w-[45%] flex justify-end">
@@ -44,6 +45,7 @@ const Home = () => {
             <IntroduceCard
               contentText={'관리자일 경우 수기 또는 사진을 찍어 영수증 작성이 가능합니다.'}
               buttonText={'학과 학생회비 사용 내역 작성 하러 가기'}
+              path={'/create-receipt'}
             />
           </div>
         </div>
@@ -53,6 +55,7 @@ const Home = () => {
             <IntroduceCard
               contentText={'내 정보 관리 또는 소속 관리를 할 수 있습니다.'}
               buttonText={'마이 페이지 조회 하러 가기'}
+              path={'/my-page'}
             />
           </div>
           <div className="w-[45%] flex justify-end">
