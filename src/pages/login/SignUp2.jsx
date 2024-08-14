@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../../components/Header';
 
-const SignUp = () => {
+const SignUp2 = () => {
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
@@ -19,7 +19,7 @@ const SignUp = () => {
                     type="text"
                     className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-2 sm:mb-0 sm:mr-2"
                   />
-                  <button className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-4 py-2 text-white bg-[#CED3FF] rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300 whitespace-nowrap">
                     중복확인
                   </button>
                 </div>
@@ -54,7 +54,7 @@ const SignUp = () => {
                     type="email"
                     className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-2 sm:mb-0 sm:mr-2"
                   />
-                  <button className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-4 py-2 text-white bg-[#CED3FF] rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300 whitespace-nowrap">
                     인증코드 발송
                   </button>
                 </div>
@@ -67,7 +67,7 @@ const SignUp = () => {
                     type="text"
                     className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-2 sm:mb-0 sm:mr-2"
                   />
-                  <button className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-4 py-2 text-white bg-[#CED3FF] rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300 whitespace-nowrap">
                     인증하기
                   </button>
                 </div>
@@ -104,7 +104,7 @@ const SignUp = () => {
                     <option value="ICT학생회">ICT학생회</option>
                     <option value="융합소프트웨어학부 학생회">융합소프트웨어학부 학생회</option>
                   </select>
-                  <button className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-4 py-2 text-white bg-[#CED3FF] rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300 whitespace-nowrap">
                     소속 인증하기
                   </button>
                 </div>
@@ -122,7 +122,7 @@ const SignUp = () => {
             </div>
 
             {/* 가입하기 버튼 */}
-            <button className="w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300">
+            <button className="w-full py-2 text-white bg-[#CED3FF] rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300">
               가입하기
             </button>
           </div>
@@ -132,4 +132,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignUp2;
