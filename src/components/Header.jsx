@@ -67,7 +67,7 @@ const Header = () => {
             조회
           </button>
           {showDropdown && (
-            <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute left-0 mt-2 sm:w-[450px] w-[300px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
+            <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute sm:left-[-63px] left-[-30px] mt-2 sm:w-[500px] w-[320px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
               <ul className="w-1/2">
                 {groups.map((group) => (
                   <li

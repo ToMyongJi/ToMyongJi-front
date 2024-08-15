@@ -7,11 +7,11 @@ const ReceiptsList = () => {
   const { groupId } = useParams();
 
   const sampleData = [
-    { date: '2024-08-14', content: '청소도구', deposit: 0, withdrawal: 15000 },
-    { date: '2024-08-10', content: '회식비', deposit: 0, withdrawal: 50000 },
-    { date: '2024-08-05', content: '학생회비', deposit: 100000, withdrawal: 0 },
-    { date: '2024-07-30', content: '문구류', deposit: 0, withdrawal: 8000 },
-    { date: '2024-07-25', content: '간식비', deposit: 0, withdrawal: 30000 },
+    { id: 1, date: '2024-08-14', content: '청소도구', deposit: 0, withdrawal: 15000 },
+    { id: 2, date: '2024-08-10', content: '회식비', deposit: 0, withdrawal: 50000 },
+    { id: 3, date: '2024-08-05', content: '학생회비', deposit: 100000, withdrawal: 0 },
+    { id: 4, date: '2024-07-30', content: '문구류', deposit: 0, withdrawal: 8000 },
+    { id: 5, date: '2024-07-25', content: '간식비', deposit: 0, withdrawal: 30000 },
   ];
 
   // 실제로는 api로
@@ -20,7 +20,7 @@ const ReceiptsList = () => {
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
-      <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
+      <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
         <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px] mb-4 self-start">{groupName}</h2>
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
           <div className="flex items-center justify-between font-GmarketMedium my-1 pb-4 text-[12px] sm:text-[14px] text-[#002e72]">

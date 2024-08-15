@@ -86,6 +86,16 @@ const SignUp = () => {
                   className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
               </div>
+              {/* 대학 */}
+              <div className="flex flex-wrap items-center">
+                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">대학</label>
+                <select className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]">
+                  <option value="">대학를 선택해주세요.</option>
+                  <option value="ICT융합대학">ICT융합대학</option>
+                  <option value="공과대학">공과대학</option>
+                  <option value="자연과학대학">자연과학대학</option>
+                </select>
+              </div>
               {/* 학부/학과 */}
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">학부/학과</label>
@@ -114,9 +124,8 @@ const SignUp = () => {
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">자격</label>
                 <select className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]">
                   <option value="">자격을 선택해주세요.</option>
-                  <option value="학생회 소속원">학생회 소속원</option>
-                  <option value="학생회 회장">학생회 회장</option>
-                  <option value="관리자">관리자</option>
+                  <option value="STU">학생회 소속원</option>
+                  <option value="PRESIDENT">학생회 회장</option>
                 </select>
               </div>
             </div>

@@ -30,7 +30,7 @@ const Login = () => {
             placeholder="비밀번호"
             className="text-[#002e72] p-2 mb-4 border rounded-lg w-[90%] focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
           />
-          <button className=" w-[90%] py-2 mb-4 text-white bg-[#CED3FF] border-none rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300">
+          <button className=" w-[90%] py-2 mb-4 text-[#002e72] bg-[#CED3FF] border-none rounded shadow-[0_4px_6px_rgba(156,163,255,0.5)] hover:shadow-[0_6px_8px_rgba(156,163,255,0.7)] transition-shadow duration-300">
             로그인
           </button>
           <div className="flex justify-between w-[90%] mb-4">

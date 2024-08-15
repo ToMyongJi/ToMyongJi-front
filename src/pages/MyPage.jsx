@@ -1,23 +1,39 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const MyPage = () => {
   const [sampleUser, setSampleUser] = useState({
+    userId: 'wnsrb0407',
     name: '이준규',
-    studentId: '60222126',
-    major: '융합소프트웨어학부',
+    studentNum: '60222126',
+    college: 'ICT',
+    major: 'software',
     council: 'ICT융합대학 학생회',
-    type: '회장',
+    role: '회장',
   });
 
+  const getKoreanMajor = (major) => {
+    const majorMap = {
+      software: '융합소프트웨어학부',
+    };
+    return majorMap[major];
+  };
+
+  const getKoreanCollege = (college) => {
+    const collegeMap = {
+      ICT: 'ICT융합대학',
+    };
+    return collegeMap[college];
+  };
+
   const [councilMembers, setCouncilMembers] = useState([
-    { studentId: '60222126', name: '이준규' },
-    { studentId: '60222117', name: '이서현' },
-    { studentId: '60211665', name: '박진형' },
+    { studentNum: '60222126', name: '이준규' },
+    { studentNum: '60222117', name: '이서현' },
+    { studentNum: '60211665', name: '박진형' },
   ]);
 
-  const [newMember, setNewMember] = useState({ studentId: '', name: '' });
+  const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
 
   const handleUserUpdate = (e) => {
     e.preventDefault();
@@ -27,14 +43,14 @@ const MyPage = () => {
 
   const handleAddMember = (e) => {
     e.preventDefault();
-    if (newMember.studentId && newMember.name) {
+    if (newMember.studentNum && newMember.name) {
       setCouncilMembers([...councilMembers, newMember]);
-      setNewMember({ studentId: '', name: '' });
+      setNewMember({ studentNum: '', name: '' });
     }
   };
 
-  const handleDeleteMember = (studentId) => {
-    setCouncilMembers(councilMembers.filter((member) => member.studentId !== studentId));
+  const handleDeleteMember = (studentNum) => {
+    setCouncilMembers(councilMembers.filter((member) => member.studentNum !== studentNum));
   };
 
   return (
@@ -48,7 +64,7 @@ const MyPage = () => {
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
               <input
-                type="text"
+                role="text"
                 value={sampleUser.name}
                 onChange={(e) => setSampleUser({ ...sampleUser, name: e.target.value })}
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
@@ -57,11 +73,23 @@ const MyPage = () => {
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학번</label>
               <input
-                type="text"
-                value={sampleUser.studentId}
-                onChange={(e) => setSampleUser({ ...sampleUser, studentId: e.target.value })}
+                role="text"
+                value={sampleUser.studentNum}
+                onChange={(e) => setSampleUser({ ...sampleUser, studentNum: e.target.value })}
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
+            </div>
+            <div className="flex flex-wrap items-center">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">대학</label>
+              <select
+                value={sampleUser.college}
+                onChange={(e) => setSampleUser({ ...sampleUser, major: e.target.value })}
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              >
+                <option value="ICT">ICT융합대학</option>
+                <option value="Tech">공과대학</option>
+                <option value="Science">자연과학대학</option>
+              </select>
             </div>
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학부/학과</label>
@@ -70,8 +98,8 @@ const MyPage = () => {
                 onChange={(e) => setSampleUser({ ...sampleUser, major: e.target.value })}
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               >
-                <option value="융합소프트웨어학부">융합소프트웨어학부</option>
-                <option value="디지털콘텐츠디자인학과">디지털콘텐츠디자인학과</option>
+                <option value="software">융합소프트웨어학부</option>
+                <option value="digitalDesign">디지털콘텐츠디자인학과</option>
               </select>
             </div>
             <div className="flex flex-wrap items-center">
@@ -91,14 +119,14 @@ const MyPage = () => {
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">자격</label>
               <input
-                type="text"
-                value={sampleUser.type}
+                role="text"
+                value={sampleUser.role}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
               />
             </div>
             <button
-              type="submit"
+              role="submit"
               className="w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
             >
               수정하기
@@ -107,13 +135,13 @@ const MyPage = () => {
         </div>
 
         {/* 소속 관리 박스 (관리자 또는 회장만 볼 수 있음) */}
-        {(sampleUser.type === '관리자' || sampleUser.type === '회장') && (
+        {(sampleUser.role === '관리자' || sampleUser.role === '회장') && (
           <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
             <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
             <div className="flex flex-wrap items-center mb-4">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
               <input
-                type="text"
+                role="text"
                 value={sampleUser.council}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
@@ -122,21 +150,21 @@ const MyPage = () => {
             <form onSubmit={handleAddMember} className="mb-4">
               <div className="flex space-x-2">
                 <input
-                  type="text"
+                  role="text"
                   placeholder="학번"
-                  value={newMember.studentId}
-                  onChange={(e) => setNewMember({ ...newMember, studentId: e.target.value })}
+                  value={newMember.studentNum}
+                  onChange={(e) => setNewMember({ ...newMember, studentNum: e.target.value })}
                   className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <input
-                  type="text"
+                  role="text"
                   placeholder="이름"
                   value={newMember.name}
                   onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
                   className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <button
-                  type="submit"
+                  role="submit"
                   className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
                 >
                   추가
@@ -145,21 +173,21 @@ const MyPage = () => {
             </form>
             <div className="space-y-2">
               {councilMembers.map((member) => (
-                <div key={member.studentId} className="flex items-center space-x-2">
+                <div key={member.studentNum} className="flex items-center space-x-2">
                   <input
-                    type="text"
-                    value={member.studentId}
+                    role="text"
+                    value={member.studentNum}
                     readOnly
                     className="flex-1 p-2 bg-gray-100 border rounded-lg"
                   />
                   <input
-                    type="text"
+                    role="text"
                     value={member.name}
                     readOnly
                     className="flex-1 p-2 bg-gray-100 border rounded-lg"
                   />
                   <button
-                    onClick={() => handleDeleteMember(member.studentId)}
+                    onClick={() => handleDeleteMember(member.studentNum)}
                     className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
                   >
                     삭제
