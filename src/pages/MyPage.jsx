@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const MyPage = () => {
   const [sampleUser, setSampleUser] = useState({
     name: '이준규',
     studentId: '60222126',
     major: '융합소프트웨어학부',
-    council: 'ICT 학생회',
+    council: 'ICT융합대학 학생회',
     type: '회장',
   });
 
@@ -82,7 +83,7 @@ const MyPage = () => {
                   className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 >
                   <option value="">소속을 선택해주세요.</option>
-                  <option value="ICT 학생회">ICT 학생회</option>
+                  <option value="ICT융합대학 학생회">ICT융합대학 학생회</option>
                   <option value="융합소프트웨어학부 학생회">융합소프트웨어학부 학생회</option>
                 </select>
               </div>
@@ -169,6 +170,7 @@ const MyPage = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };
