@@ -136,7 +136,7 @@ const MyPage = () => {
 
         {/* 소속 관리 박스 (관리자 또는 회장만 볼 수 있음) */}
         {(sampleUser.role === '관리자' || sampleUser.role === '회장') && (
-          <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
+          <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5">
             <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
             <div className="flex flex-wrap items-center mb-4">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
@@ -167,7 +167,8 @@ const MyPage = () => {
                   role="submit"
                   className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
                 >
-                  추가
+                  <span className="hidden sm:inline">추가</span>
+                  <span className="sm:hidden text-[12px]">+</span>
                 </button>
               </div>
             </form>
@@ -190,7 +191,8 @@ const MyPage = () => {
                     onClick={() => handleDeleteMember(member.studentNum)}
                     className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
                   >
-                    삭제
+                    <span className="hidden sm:inline">삭제</span>
+                    <span className="sm:hidden text-[12px]">-</span>
                   </button>
                 </div>
               ))}

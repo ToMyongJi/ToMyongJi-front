@@ -29,7 +29,6 @@ const Header = () => {
       subGroups: [
         { name: 'ICT융합대학 학생회', id: 61 },
         { name: '융합소프트웨어학부 학생회', id: 62 },
-        { name: '디지털콘텐츠디자인전공 학생회', id: 63 },
       ],
     },
     { name: '자연과학대학', id: 7 },
@@ -58,7 +57,7 @@ const Header = () => {
         </button>
       </div>
       {/* 네비바 */}
-      <div className="text-sm sm:text-[16px] text-[#002D72] flex items-center justify-evenly font-GmarketLight w-[100%] border-t border-[#4E67EC] border-b py-3">
+      <div className="text-sm sm:text-[16px] text-[#002D72] flex items-center justify-evenly font-GmarketLight w-[100%] border-t border-[#4E67EC] border-b py-1 sm:py-3">
         <div className="relative">
           <button
             className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
