@@ -18,7 +18,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/find" element={<Find />} />
-        <Route path="/receipts-list" element={<ReceiptsList />} />
+        <Route path="/receipts-list/:groupId" element={<ReceiptsList />} />
         <Route path="/create-receipt" element={<CreateReceipt />} />
         <Route path="/my-page" element={<MyPage />} />
         <Route path="/not-login" element={<NotLogin />} />
