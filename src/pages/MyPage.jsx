@@ -60,7 +60,7 @@ const MyPage = () => {
         {/* 내 정보 관리 박스 */}
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
           <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">내 정보 관리</h2>
-          <form onSubmit={handleUserUpdate} className="space-y-4">
+          <form onSubmit={handleUserUpdate} className="space-y-5">
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
               <input
@@ -89,17 +89,6 @@ const MyPage = () => {
                 <option value="ICT">ICT융합대학</option>
                 <option value="Tech">공과대학</option>
                 <option value="Science">자연과학대학</option>
-              </select>
-            </div>
-            <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학부/학과</label>
-              <select
-                value={sampleUser.major}
-                onChange={(e) => setSampleUser({ ...sampleUser, major: e.target.value })}
-                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-              >
-                <option value="software">융합소프트웨어학부</option>
-                <option value="digitalDesign">디지털콘텐츠디자인학과</option>
               </select>
             </div>
             <div className="flex flex-wrap items-center">
@@ -136,7 +125,7 @@ const MyPage = () => {
 
         {/* 소속 관리 박스 (관리자 또는 회장만 볼 수 있음) */}
         {(sampleUser.role === '관리자' || sampleUser.role === '회장') && (
-          <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5">
+          <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
             <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
             <div className="flex flex-wrap items-center mb-4">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
