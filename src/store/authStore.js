@@ -4,15 +4,20 @@ import { persist } from 'zustand/middleware';
 const useAuthStore = create(
   persist(
     (set) => ({
-      accessToken: null,
-      refreshToken: null,
-      grantType: null,
-      setAuthData: (grantType, accessToken, refreshToken) => set({ grantType, accessToken, refreshToken }),
-      clearAuthData: () => set({ grantType: null, accessToken: null, refreshToken: null }),
+      authData: null,
+      setAuthData: (data) => set({ authData: data }),
+      clearAuthData: () => set({ authData: null }),
     }),
     {
       name: 'auth-storage',
-      getStorage: () => localStorage,
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          return str ? JSON.parse(str) : null;
+        },
+        setItem: (name, value) => localStorage.setItem(name, JSON.stringify(value)),
+        removeItem: (name) => localStorage.removeItem(name),
+      },
     }
   )
 );
