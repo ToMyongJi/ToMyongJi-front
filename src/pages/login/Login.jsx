@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 import useAuthStore from '../../store/authStore';
 import useUserStore from '../../store/userStore';
@@ -13,8 +13,17 @@ const Login = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-  const setTokens = useAuthStore((state) => state.setTokens);
-  const fetchUser = useUserStore((state) => state.fetchUser);
+  const [rememberMe, setRememberMe] = useState(false);
+  const setAuthData = useAuthStore((state) => state.setAuthData);
+  const setUser = useUserStore((state) => state.setUser);
+
+  useEffect(() => {
+    const savedUserId = localStorage.getItem('rememberedUserId');
+    if (savedUserId) {
+      setUserId(savedUserId);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleOnClick = useCallback(
     (path) => {
@@ -27,13 +36,21 @@ const Login = () => {
     e.preventDefault();
     try {
       const { accessToken, refreshToken } = await loginUser(userId, password);
-      setTokens(accessToken, refreshToken);
+      setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 
-      // accessToken을 디코딩하여 userId 추출
+      // accessToken 디코딩 및 사용자 정보 설정
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
-      const userIdFromToken = decodedToken.userId;
+      setUser({
+        id: decodedToken.id,
+        role: decodedToken.auth,
+        userId: decodedToken.sub,
+      });
 
-      await fetchUser(userIdFromToken);
+      if (rememberMe) {
+        localStorage.setItem('rememberedUserId', userId);
+      } else {
+        localStorage.removeItem('rememberedUserId');
+      }
       navigate('/');
     } catch (error) {
       console.error('로그인 실패:', error);
@@ -71,15 +88,20 @@ const Login = () => {
           </button>
           <div className="flex justify-between w-[90%] mb-4">
             <label className="flex items-center text-[#002e72]">
-              <input type="checkbox" className="mr-1 accent-[#CED3FF]" />
-              로그인 유지
+              <input
+                type="checkbox"
+                className="mr-1 accent-[#CED3FF]"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              아이디 저장
             </label>
             <button
               type="button"
               className="text-[#002e72] hover:text-[#CED3FF] transition duration-300"
               onClick={handleOnClick('/find')}
             >
-              아이디/비밀번호 찾기
+              아이디 찾기
             </button>
           </div>
           <button

@@ -1,5 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import useUserStore from '../store/userStore';
+import useAuthStore from '../store/authStore';
+import useCollegeStore from '../store/collegeStore';
+import { fetchAllColleges } from '../utils/receiptApi';
 
 import logo from '../assets/images/logo.png';
 import buttonBackground from '../assets/images/buttonBackground.png';
@@ -7,8 +11,25 @@ import buttonBackground from '../assets/images/buttonBackground.png';
 const Header = () => {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showICTSubMenu, setShowICTSubMenu] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showSubMenu, setShowSubMenu] = useState(false);
+  const [selectedCollege, setSelectedCollege] = useState(null);
+
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const clearAuthData = useAuthStore((state) => state.clearAuthData);
+  const { colleges, setColleges } = useCollegeStore();
+
+  useEffect(() => {
+    const loadColleges = async () => {
+      try {
+        const collegesData = await fetchAllColleges();
+        setColleges(collegesData);
+      } catch (error) {
+        console.error('대학 정보를 불러오는데 실패했습니다:', error);
+      }
+    };
+    loadColleges();
+  }, [setColleges]);
 
   const handleOnClick = useCallback(
     (path) => {
@@ -17,26 +38,12 @@ const Header = () => {
     [navigate]
   );
 
-  const groups = [
-    { name: '총학생회', id: 1 },
-    { name: '인문대학', id: 2 },
-    { name: '사회과학대학', id: 3 },
-    { name: '경영대학', id: 4 },
-    { name: '법과대학', id: 5 },
-    {
-      name: 'ICT융합대학',
-      id: 6,
-      subGroups: [
-        { name: 'ICT융합대학 학생회', id: 61 },
-        { name: '융합소프트웨어학부 학생회', id: 62 },
-      ],
-    },
-    { name: '자연과학대학', id: 7 },
-    { name: '공과대학', id: 8 },
-    { name: '예술체육대학', id: 9 },
-    { name: '건축대학', id: 10 },
-    { name: '방목기초대학', id: 11 },
-  ];
+  const handleLogout = () => {
+    clearUser();
+    clearAuthData();
+    navigate('/login');
+    alert('로그아웃 되었습니다');
+  };
 
   return (
     <div className="flex flex-col items-center justify-center p-[10px]">
@@ -44,15 +51,15 @@ const Header = () => {
       <button className="w-60 sm:w-80" onClick={handleOnClick('/')}>
         <img src={logo} alt="투명지 로고 이미지" />
       </button>
-      {/* 로그인 버튼 */}
+      {/* 로그인/로그아웃 버튼 */}
       <div className="w-[100%] flex justify-end items-center p-[10px] mb-4">
         <button
           className="w-[104px] sm:w-[110px] h-[35px] sm:h-[40px] bg-no-repeat bg-cover flex items-center justify-center relative"
           style={{ backgroundImage: `url(${buttonBackground})` }}
-          onClick={handleOnClick('/login')}
+          onClick={user ? handleLogout : handleOnClick('/login')}
         >
           <span className="hover:text-[#CED3FF] transition duration-300 z-10 text-[#002e72] font-GmarketLight text-[11px] sm:text-xs">
-            로그인
+            {user ? '로그아웃' : '로그인'}
           </span>
         </button>
       </div>
@@ -68,51 +75,41 @@ const Header = () => {
           {showDropdown && (
             <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute sm:left-[-63px] left-[-30px] mt-2 sm:w-[500px] w-[320px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
               <ul className="w-1/2">
-                {groups.map((group) => (
+                {colleges.map((college) => (
                   <li
-                    key={group.id}
+                    key={college.id}
                     className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
-                      selectedGroup === group.id
+                      selectedCollege === college.id
                         ? 'bg-[#CED3FF] font-GmarketMedium'
                         : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedGroup(group.id);
-                      if (group.id === 6) {
-                        setShowICTSubMenu(!showICTSubMenu);
-                      } else {
-                        navigate(`/receipts-list/${group.id}`);
-                        setShowDropdown(false);
-                      }
+                      setSelectedCollege(college.id);
+                      setShowSubMenu(true);
                     }}
                   >
-                    {group.name}
+                    {college.collegeName}
                   </li>
                 ))}
               </ul>
               <div className="w-px bg-[#A0B0FF] my-2"></div>
-              {showICTSubMenu && (
+              {showSubMenu && selectedCollege && (
                 <ul className="w-1/2">
-                  {groups
-                    .find((g) => g.id === 6)
-                    .subGroups.map((subGroup) => (
+                  {colleges
+                    .find((c) => c.id === selectedCollege)
+                    .studentClubs.map((club) => (
                       <li
-                        key={subGroup.id}
-                        className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
-                          selectedGroup === subGroup.id
-                            ? 'bg-[#CED3FF] font-GmarketMedium'
-                            : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
-                        }`}
+                        key={club.id}
+                        className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 hover:bg-[#CED3FF] hover:font-GmarketMedium`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedGroup(subGroup.id);
-                          navigate(`/receipts-list/${subGroup.id}`);
+                          navigate(`/receipts-list/${club.id}`, { state: { clubName: club.studentClubName } });
                           setShowDropdown(false);
-                          setShowICTSubMenu(false);
+                          setShowSubMenu(false);
                         }}
                       >
-                        {subGroup.name}
+                        {club.studentClubName}
                       </li>
                     ))}
                 </ul>

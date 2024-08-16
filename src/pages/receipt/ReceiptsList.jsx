@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { fetchClubReceipts } from '../../utils/receiptApi';
 
 import Header from '../../components/Header';
@@ -13,8 +13,9 @@ const ReceiptsList = () => {
   const [endDate, setEndDate] = useState('');
   const [filteredData, setFilteredData] = useState([]);
 
-  const { groupId } = useParams();
-  const clubId = 1; // 샘플로 1로 설정
+  const { clubId } = useParams();
+  const location = useLocation();
+  const clubName = location.state?.clubName || '동아리 이름';
 
   useEffect(() => {
     const loadReceipts = async () => {
@@ -34,8 +35,6 @@ const ReceiptsList = () => {
     loadReceipts();
   }, [clubId]);
 
-  const groupName = '융합소프트웨어학부 학생회';
-
   const filterDataByDateRange = () => {
     const filtered = receipts.filter((item) => {
       const itemDate = new Date(item.date);
@@ -51,7 +50,7 @@ const ReceiptsList = () => {
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
-        <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px] mb-4 self-start">{groupName}</h2>
+        <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px] mb-4 self-start">{clubName}</h2>
 
         {/* 기간별 조회 기능 */}
         <div className="w-full mb-10">

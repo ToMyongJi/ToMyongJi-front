@@ -12,7 +12,6 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [studentNum, setStudentNum] = useState('');
   const [college, setCollege] = useState('');
-  const [major, setMajor] = useState('');
   const [role, setRole] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -87,7 +86,6 @@ const SignUp = () => {
         email,
         studentNum,
         college,
-        major,
         role,
       };
       const response = await signUpUser(userData);
@@ -231,19 +229,6 @@ const SignUp = () => {
                   <option value="ICT">ICT융합대학</option>
                   <option value="TECH">공과대학</option>
                   <option value="SCIENCE">자연과학대학</option>
-                </select>
-              </div>
-              {/* 학과 */}
-              <div className="flex flex-wrap items-center">
-                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">학과</label>
-                <select
-                  value={major}
-                  onChange={(e) => setMajor(e.target.value)}
-                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                >
-                  <option value="">학부/학과를 선택해주세요.</option>
-                  <option value="software">융합소프트웨어학부</option>
-                  <option value="digitalDesign">디지털컨텐츠디자인학과</option>
                 </select>
               </div>
               {/* 자격 */}

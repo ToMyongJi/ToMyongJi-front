@@ -32,3 +32,14 @@ export const deleteReceipt = async (receiptId) => {
     throw error;
   }
 };
+
+// 모든 대학 조회
+export const fetchAllColleges = async () => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/api/college`);
+    return response.data;
+  } catch (error) {
+    console.error('모든 대학 정보를 가져오는 데 실패했습니다:', error);
+    throw error;
+  }
+};
