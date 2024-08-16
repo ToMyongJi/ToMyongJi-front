@@ -1,9 +1,35 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { fetchReceiptInfo } from '../../utils/api';
+
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
 const ReceiptsList = () => {
+  //   const [receipts, setReceipts] = useState([]);
+  //   const [loading, setLoading] = useState(true);
+  //   const [error, setError] = useState(null);
+
+  //   useEffect(() => {
+  //     const loadReceipts = async () => {
+  //       try {
+  //         setLoading(true);
+  //         const data = await fetchReceiptInfo(groupId);
+  //         setReceipts(data);
+  //         setError(null);
+  //       } catch (err) {
+  //         setError('영수증을 불러오는 데 실패했습니다.');
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+
+  //     loadReceipts();
+  //   }, [groupId]);
+
+  //   if (loading) return <div>로딩 중...</div>;
+  // if (error) return <div>{error}</div>;
+
   const { groupId } = useParams();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');

@@ -1,10 +1,10 @@
 const Footer = () => {
   return (
     <footer className="bg-[#DDE5FA] px-20 py-10 text-left text-[#747474] text-[8px] sm:text-[10px]">
-      <span className="font-GmarketMedium">(주) 멋쟁이 백마처럼 사업자 정보</span>
+      <span className="font-GmarketMedium">(주) 멋쟁이백마처럼 사업자 정보</span>
       <p className="font-GmarketLight">
         <br />
-        명지대학교(인문) 멋쟁이 백마처럼
+        명지대학교(인문) 멋쟁이백마처럼
         <br />
         대표자 : 이준규
         <br />
