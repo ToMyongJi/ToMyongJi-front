@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { fetchUserInfo } from '../utils/api';
+import { fetchUserInfo } from '../utils/authApi';
 
 const useUserStore = create((set) => ({
   user: null,

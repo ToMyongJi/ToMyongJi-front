@@ -6,8 +6,9 @@ const useAuthStore = create(
     (set) => ({
       accessToken: null,
       refreshToken: null,
-      setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
-      clearTokens: () => set({ accessToken: null, refreshToken: null }),
+      grantType: null,
+      setAuthData: (grantType, accessToken, refreshToken) => set({ grantType, accessToken, refreshToken }),
+      clearAuthData: () => set({ grantType: null, accessToken: null, refreshToken: null }),
     }),
     {
       name: 'auth-storage',

@@ -1,18 +1,27 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
-import { signUpUser, checkUserIdDuplicate, sendEmailVerification, verifyEmailCode } from '../../utils/api';
+import { signUpUser, checkUserIdDuplicate, sendEmailVerification, verifyEmailCode } from '../../utils/authApi';
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [studentNum, setStudentNum] = useState('');
   const [college, setCollege] = useState('');
+  const [major, setMajor] = useState('');
   const [role, setRole] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
+    return regex.test(password);
+  };
 
   const handleCheckDuplicate = async () => {
     if (!userId) {
@@ -27,7 +36,7 @@ const SignUp = () => {
         alert('이미 사용 중인 아이디입니다.');
       }
     } catch (error) {
-      console.error('아이디 중복 확인 실패:', error);
+      console.error('아디 중복 확인 실패:', error);
       alert('아이디 중복 확인에 실패했습니다. 다시 시도해주세요.');
     }
   };
@@ -38,9 +47,9 @@ const SignUp = () => {
       return;
     }
     try {
-      await sendEmailVerification(email);
-      setIsCodeSent(true);
       alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
+      setIsCodeSent(true);
+      await sendEmailVerification(email);
     } catch (error) {
       alert('인증코드 발송에 실패했습니다. 다시 시도해주세요.');
     }
@@ -54,7 +63,7 @@ const SignUp = () => {
     try {
       await verifyEmailCode(email, verificationCode);
       setIsEmailVerified(true);
-      alert('이메일이 성공적으로 인증되었습니다.');
+      alert('이메일 인증이 성공적으로 인증되었습니다.');
     } catch (error) {
       alert('인증코드가 올바르지 않습니다. 다시 확인해주세요.');
     }
@@ -66,6 +75,10 @@ const SignUp = () => {
       alert('이메일 인증을 완료해주세요.');
       return;
     }
+    if (!validatePassword(password)) {
+      alert('비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상씩 포함된 8자 ~ 20자여야 합니다.');
+      return;
+    }
     try {
       const userData = {
         userId,
@@ -74,15 +87,16 @@ const SignUp = () => {
         email,
         studentNum,
         college,
+        major,
         role,
       };
       const response = await signUpUser(userData);
       console.log('회원가입 성공:', response);
       alert('회원가입이 완료되었습니다.');
-      // 여기에 회원가입 성공 후 처리 로직 추가 (예: 로그인 페이지로 이동)
+      navigate('/login');
     } catch (error) {
       console.error('회원가입 실패:', error);
-      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+      alert('입력하지 않거나, 잘못입력한 정보가 있는지 확인해주세요.');
     }
   };
 
@@ -117,18 +131,23 @@ const SignUp = () => {
               {/* 비밀번호 */}
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">비밀번호</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                />
+                <div className="w-full sm:w-[calc(100%-65px)] flex flex-col">
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  />
+                  <p className="w-full mt-1 text-xs text-gray-500">
+                    비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상씩 포함된 8자 ~ 20자여야 합니다.
+                  </p>
+                </div>
               </div>
             </div>
 
             <hr className="border-t border-[#eeeffe]" />
 
-            {/* 이름/이메일/인증코드 트 */}
+            {/* 이름/이메일/인증코드  */}
             <div className="py-3 space-y-7">
               {/* 이름 */}
               <div className="flex flex-wrap items-center">
@@ -188,7 +207,7 @@ const SignUp = () => {
 
             <hr className="border-t border-[#eeeffe]" />
 
-            {/* 학번/대학/소속이름/자격 파트 */}
+            {/* 학번/대학/학과/자격 파트 */}
             <div className="py-3 space-y-7">
               {/* 학번 */}
               <div className="flex flex-wrap items-center">
@@ -209,9 +228,22 @@ const SignUp = () => {
                   className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 >
                   <option value="">대학를 선택해주세요.</option>
-                  <option value="ICT융합대학">ICT융합대학</option>
-                  <option value="공과대학">공과대학</option>
-                  <option value="자연과학대학">자연과학대학</option>
+                  <option value="ICT">ICT융합대학</option>
+                  <option value="TECH">공과대학</option>
+                  <option value="SCIENCE">자연과학대학</option>
+                </select>
+              </div>
+              {/* 학과 */}
+              <div className="flex flex-wrap items-center">
+                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">학과</label>
+                <select
+                  value={major}
+                  onChange={(e) => setMajor(e.target.value)}
+                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                >
+                  <option value="">학부/학과를 선택해주세요.</option>
+                  <option value="software">융합소프트웨어학부</option>
+                  <option value="digitalDesign">디지털컨텐츠디자인학과</option>
                 </select>
               </div>
               {/* 자격 */}
