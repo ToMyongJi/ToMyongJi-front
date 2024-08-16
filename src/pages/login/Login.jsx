@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 
 import useAuthStore from '../../store/authStore';
 import useUserStore from '../../store/userStore';
-import { loginUser } from '../../utils/api';
+import { loginUser } from '../../utils/authApi';
 
 import Header from '../../components/Header';
 

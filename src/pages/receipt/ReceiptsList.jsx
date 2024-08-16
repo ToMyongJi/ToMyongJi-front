@@ -1,58 +1,51 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchReceiptInfo } from '../../utils/api';
+import { fetchClubReceipts } from '../../utils/receiptApi';
 
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
 const ReceiptsList = () => {
-  //   const [receipts, setReceipts] = useState([]);
-  //   const [loading, setLoading] = useState(true);
-  //   const [error, setError] = useState(null);
-
-  //   useEffect(() => {
-  //     const loadReceipts = async () => {
-  //       try {
-  //         setLoading(true);
-  //         const data = await fetchReceiptInfo(groupId);
-  //         setReceipts(data);
-  //         setError(null);
-  //       } catch (err) {
-  //         setError('영수증을 불러오는 데 실패했습니다.');
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
-
-  //     loadReceipts();
-  //   }, [groupId]);
-
-  //   if (loading) return <div>로딩 중...</div>;
-  // if (error) return <div>{error}</div>;
-
-  const { groupId } = useParams();
+  const [receipts, setReceipts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [filteredData, setFilteredData] = useState([]);
 
-  const sampleData = [
-    { id: 1, date: '2024-08-14', content: '청소도구', deposit: 0, withdrawal: 15000 },
-    { id: 2, date: '2024-08-10', content: '회식비', deposit: 0, withdrawal: 50000 },
-    { id: 3, date: '2024-08-05', content: '학생회비', deposit: 100000, withdrawal: 0 },
-    { id: 4, date: '2024-06-05', content: '학생회비', deposit: 200000, withdrawal: 0 },
-    { id: 5, date: '2024-07-30', content: '문구류', deposit: 0, withdrawal: 8000 },
-    { id: 6, date: '2024-07-25', content: '간식비', deposit: 0, withdrawal: 30000 },
-  ];
+  const { groupId } = useParams();
+  const clubId = 1; // 샘플로 1로 설정
+
+  useEffect(() => {
+    const loadReceipts = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchClubReceipts(clubId);
+        setReceipts(data);
+        setFilteredData(data);
+        setError(null);
+      } catch (err) {
+        setError('영수증을 불러오는 데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReceipts();
+  }, [clubId]);
 
   const groupName = '융합소프트웨어학부 학생회';
 
   const filterDataByDateRange = () => {
-    const filtered = sampleData.filter((item) => {
+    const filtered = receipts.filter((item) => {
       const itemDate = new Date(item.date);
       return (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate));
     });
     setFilteredData(filtered);
   };
+
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
@@ -60,7 +53,7 @@ const ReceiptsList = () => {
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
         <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px] mb-4 self-start">{groupName}</h2>
 
-        {/* 기간별 조회 기능 추가 */}
+        {/* 기간별 조회 기능 */}
         <div className="w-full mb-10">
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <div className="flex space-x-2 sm:w-2/3">
@@ -94,10 +87,10 @@ const ReceiptsList = () => {
             <span className="w-1/4 text-right">출금</span>
           </div>
           <div className="flex flex-col space-y-7">
-            {(filteredData.length > 0 ? filteredData : sampleData)
+            {filteredData
               .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
+              .map((item) => (
+                <div key={item.id} className="flex items-center justify-between">
                   <span className="w-1/4">{item.date}</span>
                   <span className="w-1/4">{item.content}</span>
                   <span className="w-1/4 text-right text-blue-500">

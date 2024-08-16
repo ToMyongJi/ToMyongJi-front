@@ -13,6 +13,7 @@
     "@material-tailwind/react": "^2.1.9",
     "autoprefixer": "^10.4.19",
     "axios": "^1.7.3",
+    "base-64": "^1.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0",

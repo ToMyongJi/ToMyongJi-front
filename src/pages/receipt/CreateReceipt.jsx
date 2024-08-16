@@ -1,26 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { fetchClubReceipts, createClubReceipt, deleteReceipt } from '../../utils/receiptApi';
 
 import addCircle from '../../assets/images/add-circle.png';
 import addFile from '../../assets/images/add-file.png';
 import deleteButton from '../../assets/images/delete.png';
 
 const CreateReceipt = () => {
-  // 해당 groupId의 영수증 데이터를 가져옴
+  const clubId = 1; // 샘플 데이터로 clubId를 1로 설정
+
   const [date, setDate] = useState('');
   const [content, setContent] = useState('');
   const [deposit, setDeposit] = useState('');
   const [withdrawal, setWithdrawal] = useState('');
-  const [receiptData, setReceiptData] = useState([
-    { date: '2024-08-13', content: '회비', deposit: 50000, withdrawal: 0 },
-    { date: '2024-08-14', content: '간식 구매', deposit: 0, withdrawal: 30000 },
-    { date: '2024-08-15', content: '간식 구매', deposit: 0, withdrawal: 30000 },
-  ]);
+  const [receiptData, setReceiptData] = useState([]);
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    fetchReceipts();
+  }, []);
+
+  useEffect(() => {
+    filterDataByDateRange();
+  }, [receiptData, startDate, endDate]);
+
+  const fetchReceipts = async () => {
+    try {
+      const data = await fetchClubReceipts(clubId);
+      setReceiptData(data);
+    } catch (error) {
+      console.error('영수증 데이터를 가져오는데 실패했습니다:', error);
+    }
+  };
 
   const filterDataByDateRange = () => {
     const filtered = receiptData.filter((item) => {
@@ -30,7 +45,7 @@ const CreateReceipt = () => {
     setFilteredData(filtered);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!date || !content) {
       alert('빠진 내용이 없나 확인해주세요.');
@@ -42,24 +57,33 @@ const CreateReceipt = () => {
       deposit: Number(deposit) || 0,
       withdrawal: Number(withdrawal) || 0,
     };
-    setReceiptData([...receiptData, newItem]);
-    setDate('');
-    setContent('');
-    setDeposit('');
-    setWithdrawal('');
+    try {
+      await createClubReceipt(clubId, newItem);
+      fetchReceipts();
+      setDate('');
+      setContent('');
+      setDeposit('');
+      setWithdrawal('');
+    } catch (error) {
+      console.error('영수증 생성에 실패했습니다:', error);
+    }
   };
 
   const handleImageUpload = () => {
-    // 이미지 업로드
+    // 이미지 업로드 로직
   };
 
-  const handleDelete = (index) => {
-    setReceiptData(receiptData.filter((_, i) => i !== index));
+  const handleDelete = async (receiptId) => {
+    try {
+      await deleteReceipt(receiptId);
+      fetchReceipts(); // 삭제 후 목록 갱신
+    } catch (error) {
+      console.error('영수증 삭제에 실패했습니다:', error);
+    }
   };
 
   const handleSave = () => {
-    // 저장 로직
-    alert('영수증이 저장되었습니다.');
+    alert('모든 변경사항이 저장되었습니다.');
   };
 
   return (
@@ -116,7 +140,6 @@ const CreateReceipt = () => {
           </form>
         </div>
 
-        {/* 기간별 조회 기능 추가 */}
         <div className="w-full mt-8 mb-4">
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <div className="flex space-x-2 sm:w-2/3">
@@ -142,7 +165,6 @@ const CreateReceipt = () => {
           </div>
         </div>
 
-        {/* 영수증 내역 */}
         <div className="w-full mb-10 p-2 sm:p-4 rounded-md shadow-[0_0_10px_#CED3FF] mt-5">
           <div className="flex justify-center font-GmarketMedium my-1 pb-4 text-[12px] sm:text-[14px] text-[#002e72]">
             <div className="flex items-center w-4/5">
@@ -155,8 +177,8 @@ const CreateReceipt = () => {
           <div className="flex flex-col space-y-7">
             {(filteredData.length > 0 ? filteredData : receiptData)
               .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
+              .map((item) => (
+                <div key={item.id} className="flex items-center justify-between">
                   <span className="w-1/5">{item.date}</span>
                   <span className="w-1/5">{item.content}</span>
                   <span className="w-1/5 text-right text-blue-500">
@@ -166,7 +188,7 @@ const CreateReceipt = () => {
                     {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
                   </span>
                   <button
-                    onClick={() => handleDelete(index)}
+                    onClick={() => handleDelete(item.id)}
                     className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
                   >
                     <img src={deleteButton} alt="삭제" className="w-2 h-2 sm:w-4 sm:h-4" />
@@ -176,7 +198,6 @@ const CreateReceipt = () => {
           </div>
         </div>
 
-        {/* 작성하기 버튼 추가 */}
         <div className="flex justify-center w-full mt-4 mb-10">
           <button
             onClick={handleSave}
