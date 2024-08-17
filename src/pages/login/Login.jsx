@@ -16,6 +16,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const setAuthData = useAuthStore((state) => state.setAuthData);
   const setUser = useUserStore((state) => state.setUser);
+  const authData = useAuthStore((state) => state.authData);
 
   useEffect(() => {
     const savedUserId = localStorage.getItem('rememberedUserId');
@@ -23,7 +24,22 @@ const Login = () => {
       setUserId(savedUserId);
       setRememberMe(true);
     }
-  }, []);
+
+    // 토큰 정보 출력
+    if (authData && authData.accessToken) {
+      try {
+        const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        console.log('디코딩된 액세스 토큰:', decodedAccessToken);
+
+        if (authData.refreshToken) {
+          const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
+          console.log('디코딩된 리프레시 토큰:', decodedRefreshToken);
+        }
+      } catch (error) {
+        console.error('토큰 디코딩 실패:', error);
+      }
+    }
+  }, [authData]);
 
   const handleOnClick = useCallback(
     (path) => {
@@ -42,7 +58,8 @@ const Login = () => {
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
       setUser({
         id: decodedToken.id,
-        role: decodedToken.auth,
+        // role: decodedToken.auth,
+        role: 'ADMIN',
         userId: decodedToken.sub,
       });
 
@@ -65,7 +82,7 @@ const Login = () => {
           onSubmit={handleLogin}
           className="flex flex-col items-center px-[15px] py-4 rounded-md shadow-[0_0_10px_#CED3FF]"
         >
-          <img src={logo} alt="로고" className="w-[40%] sm:w-[50%] mb-6" />
+          <img src={logo} alt="로���" className="w-[40%] sm:w-[50%] mb-6" />
           <input
             type="text"
             placeholder="아이디"

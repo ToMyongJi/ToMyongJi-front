@@ -124,7 +124,7 @@ const MyPage = () => {
         </div>
 
         {/* 소속 관리 박스 (관리자 또는 회장만 볼 수 있음) */}
-        {(sampleUser.role === '관리자' || sampleUser.role === '회장') && (
+        {sampleUser.role === '회장' && (
           <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
             <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
             <div className="flex flex-wrap items-center mb-4">
