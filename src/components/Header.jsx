@@ -45,6 +45,22 @@ const Header = () => {
     alert('로그아웃 되었습니다');
   };
 
+  const handleCreateReceipt = () => {
+    if (user) {
+      navigate('/create-receipt');
+    } else {
+      navigate('/not-login');
+    }
+  };
+
+  const handleMyPage = () => {
+    if (user) {
+      navigate('/my-page');
+    } else {
+      navigate('/not-login');
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-[10px]">
       {/* 로고 */}
@@ -117,18 +133,24 @@ const Header = () => {
             </div>
           )}
         </div>
-        <button
-          className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-          onClick={handleOnClick('/create-receipt')}
-        >
-          작성
-        </button>
-        <button
-          className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-          onClick={handleOnClick('/my-page')}
-        >
-          마이
-        </button>
+        {user && user.role === 'ADMIN' ? (
+          <span className="font-GmarketBold text-[#002D72]">관리자용 페이지</span>
+        ) : (
+          <>
+            <button
+              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+              onClick={handleCreateReceipt}
+            >
+              작성
+            </button>
+            <button
+              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+              onClick={handleMyPage}
+            >
+              마이
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import SignUp from './pages/login/SignUp';
 import ReceiptsList from './pages/receipt/ReceiptsList';
 import CreateReceipt from './pages/receipt/CreateReceipt';
 import NotLogin from './pages/NotLogin';
+import Admin from './pages/Admin';
 
 const App = () => {
   const { user, setUser } = useUserStore();
@@ -20,7 +21,6 @@ const App = () => {
 
   useEffect(() => {
     if (authData && !user) {
-      // authData를 사용해서 사용자 정보 설정
       const { accessToken } = authData;
       if (accessToken) {
         try {
@@ -61,6 +61,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/not-login" element={<NotLogin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

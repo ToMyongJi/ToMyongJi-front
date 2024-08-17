@@ -57,7 +57,7 @@ const Home = () => {
               contentText={
                 '학생회 소속일 경우 내 정보 관리를 할 수 있고, 학생회 회장일 경우 소속원 관리까지 할 수 있습니다.'
               }
-              buttonText={'마이 ���이지 조회 하러 가기'}
+              buttonText={'마이 페이지 조회 하러 가기'}
               path={'/my-page'}
             />
           </div>

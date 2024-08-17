@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import { signUpUser, checkUserIdDuplicate, sendEmailVerification, verifyEmailCode } from '../../utils/authApi';
+import { fetchAllColleges, fetchCollegeClubs } from '../../utils/receiptApi';
+import useCollegeStore from '../../store/collegeStore';
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { colleges, setColleges } = useCollegeStore();
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +19,22 @@ const SignUp = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const [clubs, setClubs] = useState([]);
+  const [selectedClub, setSelectedClub] = useState('');
+
+  useEffect(() => {
+    const loadColleges = async () => {
+      try {
+        const collegeData = await fetchAllColleges();
+        setColleges(collegeData);
+      } catch (error) {
+        console.error('대학 정보를 불러오는 데 실패했습니다:', error);
+      }
+    };
+    if (colleges.length === 0) {
+      loadColleges();
+    }
+  }, [colleges.length, setColleges]);
 
   const validatePassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
@@ -96,6 +115,22 @@ const SignUp = () => {
       console.error('회원가입 실패:', error);
       alert('입력하지 않거나, 잘못입력한 정보가 있는지 확인해주세요.');
     }
+  };
+
+  const handleCollegeChange = async (e) => {
+    const selectedCollegeId = e.target.value;
+    setCollege(selectedCollegeId);
+    if (selectedCollegeId) {
+      try {
+        const clubsData = await fetchCollegeClubs(selectedCollegeId);
+        setClubs(clubsData);
+      } catch (error) {
+        console.error('학생회 정보를 불러오는 데 실패했습니다:', error);
+      }
+    } else {
+      setClubs([]);
+    }
+    setSelectedClub('');
   };
 
   return (
@@ -222,13 +257,15 @@ const SignUp = () => {
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">대학</label>
                 <select
                   value={college}
-                  onChange={(e) => setCollege(e.target.value)}
+                  onChange={handleCollegeChange}
                   className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 >
-                  <option value="">대학를 선택해주세요.</option>
-                  <option value="ICT">ICT융합대학</option>
-                  <option value="TECH">공과대학</option>
-                  <option value="SCIENCE">자연과학대학</option>
+                  <option value="">대학을 선택해주세요.</option>
+                  {colleges.map((college) => (
+                    <option key={college.id} value={college.id}>
+                      {college.collegeName}
+                    </option>
+                  ))}
                 </select>
               </div>
               {/* 자격 */}
@@ -249,12 +286,25 @@ const SignUp = () => {
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
               <div className="w-full sm:w-[calc(100%-65px)] flex flex-col sm:flex-row">
-                <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-4 sm:mb-0 sm:mr-2">
+                <select
+                  value={selectedClub}
+                  onChange={(e) => setSelectedClub(e.target.value)}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-4 sm:mb-0 sm:mr-2"
+                >
                   <option value="">소속을 선택해주세요.</option>
-                  <option value="ICT학생회">ICT학생회</option>
-                  <option value="융합소프트웨어학부 학생회">융합소프트웨어학부 학생회</option>
+                  {clubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.studentClubName}
+                    </option>
+                  ))}
                 </select>
-                <button className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    /* 소속 인증 로직 */
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
+                >
                   소속 인증하기
                 </button>
               </div>
