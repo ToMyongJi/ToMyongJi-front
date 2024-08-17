@@ -58,8 +58,8 @@ const Login = () => {
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
       setUser({
         id: decodedToken.id,
-        // role: decodedToken.auth,
-        role: 'ADMIN',
+        role: decodedToken.auth,
+        // role: 'ADMIN',
         userId: decodedToken.sub,
       });
 
