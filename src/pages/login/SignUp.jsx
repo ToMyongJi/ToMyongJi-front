@@ -258,7 +258,7 @@ const SignUp = () => {
                 <select
                   value={college}
                   onChange={handleCollegeChange}
-                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:w-[calc(100%-65px)] px-2 py-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 >
                   <option value="">대학을 선택해주세요.</option>
                   {colleges.map((college) => (
