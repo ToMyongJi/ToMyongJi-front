@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from 'react';
 
 import useAuthStore from '../../store/authStore';
 import useUserStore from '../../store/userStore';
-import { loginUser } from '../../utils/authApi';
+import { loginUser, fetchMyInfo } from '../../utils/authApi';
 
 import Header from '../../components/Header';
 
@@ -56,11 +56,18 @@ const Login = () => {
 
       // accessToken 디코딩 및 사용자 정보 설정
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+
+      // 내정보 조회 API 호출
+      const userInfo = await fetchMyInfo(decodedToken.id);
+
       setUser({
         id: decodedToken.id,
         role: decodedToken.auth,
-        // role: 'ADMIN',
         userId: decodedToken.sub,
+        name: userInfo.name,
+        studentNum: userInfo.studentNum,
+        college: userInfo.college,
+        studentClubId: userInfo.studentClubId,
       });
 
       if (rememberMe) {
@@ -82,7 +89,7 @@ const Login = () => {
           onSubmit={handleLogin}
           className="flex flex-col items-center px-[15px] py-4 rounded-md shadow-[0_0_10px_#CED3FF]"
         >
-          <img src={logo} alt="로���" className="w-[40%] sm:w-[50%] mb-6" />
+          <img src={logo} alt="로" className="w-[40%] sm:w-[50%] mb-6" />
           <input
             type="text"
             placeholder="아이디"
