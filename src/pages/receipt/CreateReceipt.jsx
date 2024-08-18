@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { fetchClubReceipts, createClubReceipt, deleteReceipt } from '../../utils/receiptApi';
+import useUserStore from '../../store/userStore';
 
 import addCircle from '../../assets/images/add-circle.png';
 import addFile from '../../assets/images/add-file.png';
 import deleteButton from '../../assets/images/delete.png';
 
 const CreateReceipt = () => {
-  const clubId = 1; // 샘플 데이터로 clubId를 1로 설정
+  const user = useUserStore((state) => state.user);
+  const clubId = user?.studentClubId;
 
   const [date, setDate] = useState('');
   const [content, setContent] = useState('');
@@ -21,14 +23,17 @@ const CreateReceipt = () => {
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
-    fetchReceipts();
-  }, []);
+    if (clubId) {
+      fetchReceipts();
+    }
+  }, [clubId]);
 
   useEffect(() => {
     filterDataByDateRange();
   }, [receiptData, startDate, endDate]);
 
   const fetchReceipts = async () => {
+    if (!clubId) return;
     try {
       const data = await fetchClubReceipts(clubId);
       setReceiptData(data);
@@ -91,7 +96,7 @@ const CreateReceipt = () => {
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
         <div className="flex items-center justify-between w-full mb-4">
-          <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">융합소프트웨어학부 학생회</h2>
+          <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">{user?.college}</h2>
           <div className="flex space-x-2">
             <button
               type="button"

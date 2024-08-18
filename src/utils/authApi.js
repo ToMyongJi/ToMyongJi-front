@@ -32,7 +32,7 @@ export const signUpUser = async (userData) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.status === 400) {
-      alert('회원가입에 실패했습니다. 입력 ��보를 확인해주세요.');
+      alert('회원가입에 실패했습니다. 입력 정보를 확인해주세요.');
     } else {
       console.error('회원가입 요청 실패:', error);
     }
@@ -102,5 +102,16 @@ export const findUserId = async (email) => {
     } else {
       throw new Error('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.');
     }
+  }
+};
+
+// 내정보 조회
+export const fetchMyInfo = async (userId) => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/api/my/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('내정보 조회 실패:', error);
+    throw error;
   }
 };

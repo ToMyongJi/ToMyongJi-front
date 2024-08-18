@@ -44,6 +44,17 @@ export const fetchAllColleges = async () => {
   }
 };
 
+// 모든 학생회 조회
+export const fetchAllClubs = async () => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/api/club`);
+    return response.data;
+  } catch (error) {
+    console.error('모든 학생회 정보를 가져오는 데 실패했습니다:', error);
+    throw error;
+  }
+};
+
 // 대학에 맞는 학생회 조회
 export const fetchCollegeClubs = async (collegeId) => {
   try {
