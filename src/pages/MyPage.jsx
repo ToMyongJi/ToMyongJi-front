@@ -1,28 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import useUserStore from '../store/userStore';
+import useStudentClubStore from '../store/studentClubStore';
 
 const MyPage = () => {
-  const [sampleUser, setSampleUser] = useState({
-    userId: 'wnsrb0407',
-    name: '이준규',
-    studentNum: '60222126',
-    college: 'ICT',
-    major: 'software',
-    council: 'ICT융합대학 학생회',
-    role: '회장',
-  });
+  const { user } = useUserStore();
+  const { clubs, fetchClubs } = useStudentClubStore();
+  const [studentClubName, setStudentClubName] = useState('');
 
-  const getKoreanMajor = (major) => {
-    const majorMap = {
-      software: '융합소프트웨어학부',
+  useEffect(() => {
+    fetchClubs();
+  }, [fetchClubs]);
+
+  useEffect(() => {
+    if (user && user.studentClubId && clubs.length > 0) {
+      const club = clubs.find((club) => club.id === user.studentClubId);
+      setStudentClubName(club ? club.studentClubName : '');
+    }
+  }, [user, clubs]);
+
+  const getKoreanRole = (role) => {
+    const roleMap = {
+      STU: '소속원',
+      PRESIDENT: '회장',
     };
-    return majorMap[major];
+    return roleMap[role] || role;
   };
 
   const getKoreanCollege = (college) => {
     const collegeMap = {
-      ICT: 'ICT융합대학',
+      ict: 'ICT융합대학',
     };
     return collegeMap[college];
   };
@@ -65,73 +73,59 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
               <input
                 role="text"
-                value={sampleUser.name}
-                onChange={(e) => setSampleUser({ ...sampleUser, name: e.target.value })}
-                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                value={user?.name || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
               />
             </div>
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학번</label>
               <input
                 role="text"
-                value={sampleUser.studentNum}
-                onChange={(e) => setSampleUser({ ...sampleUser, studentNum: e.target.value })}
-                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                value={user?.studentNum || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
               />
             </div>
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">대학</label>
-              <select
-                value={sampleUser.college}
-                onChange={(e) => setSampleUser({ ...sampleUser, major: e.target.value })}
-                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-              >
-                <option value="ICT">ICT융합대학</option>
-                <option value="Tech">공과대학</option>
-                <option value="Science">자연과학대학</option>
-              </select>
+              <input
+                role="text"
+                value={getKoreanCollege(user?.college) || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
+              />
             </div>
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
-              <div className="w-full sm:w-[calc(100%-100px)]">
-                <select
-                  value={sampleUser.council}
-                  onChange={(e) => setSampleUser({ ...sampleUser, council: e.target.value })}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                >
-                  <option value="">소속을 선택해주세요.</option>
-                  <option value="ICT융합대학 학생회">ICT융합대학 학생회</option>
-                  <option value="융합소프트웨어학부 학생회">융합소프트웨어학부 학생회</option>
-                </select>
-              </div>
+              <input
+                role="text"
+                value={studentClubName}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
+              />
             </div>
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">자격</label>
               <input
                 role="text"
-                value={sampleUser.role}
+                value={getKoreanRole(user?.role)}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
               />
             </div>
-            <button
-              role="submit"
-              className="w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
-            >
-              수정하기
-            </button>
           </form>
         </div>
 
-        {/* 소속 관리 박스 (관리자 또는 회장만 볼 수 있음) */}
-        {sampleUser.role === '회장' && (
+        {/* 소속 관리 박스 (회장만 볼 수 있음) */}
+        {user?.role === 'PRESIDENT' && (
           <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
             <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
             <div className="flex flex-wrap items-center mb-4">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
               <input
                 role="text"
-                value={sampleUser.council}
+                value={studentClubName}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100"
               />
