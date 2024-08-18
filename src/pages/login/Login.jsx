@@ -16,6 +16,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const setAuthData = useAuthStore((state) => state.setAuthData);
   const setUser = useUserStore((state) => state.setUser);
+  const clearUser = useUserStore((state) => state.clearUser);
   const authData = useAuthStore((state) => state.authData);
 
   useEffect(() => {
@@ -51,6 +52,9 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      // 로그인 전에 기존 사용자 정보 초기화
+      clearUser();
+
       const { accessToken, refreshToken } = await loginUser(userId, password);
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 

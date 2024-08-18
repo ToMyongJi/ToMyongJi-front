@@ -48,7 +48,6 @@ export const fetchAllColleges = async () => {
 export const fetchAllClubs = async () => {
   try {
     const response = await api.get(`${API_BASE_URL}/api/club`);
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('모든 학생회 정보를 가져오는 데 실패했습니다:', error);

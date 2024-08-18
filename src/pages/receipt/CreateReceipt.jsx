@@ -27,10 +27,16 @@ const CreateReceipt = () => {
   const { getClubNameById } = useStudentClubStore();
 
   useEffect(() => {
-    if (user) {
-      const decodedUser = JSON.parse(atob(user.split('.')[1]));
-      setDecodedUserId(decodedUser.id);
-      fetchUserData(decodedUser.id);
+    if (user && typeof user === 'string') {
+      try {
+        const decodedUser = JSON.parse(atob(user.split('.')[1]));
+        setDecodedUserId(decodedUser.id);
+        fetchUserData(decodedUser.id);
+      } catch (error) {
+        console.error('사용자 정보 디코딩 중 오류 발생:', error);
+      }
+    } else {
+      console.error('유효하지 않은 사용자 정보:', user);
     }
   }, [user]);
 
