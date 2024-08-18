@@ -11,19 +11,19 @@ export const fetchClubReceipts = async (clubId) => {
   }
 };
 
-// 특정 학생회 영수증 생성
-export const createClubReceipt = async (clubId, receiptData) => {
+// 특정 사용자의 영수증 생성
+export const createUserReceipt = async (userId, receiptData) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/receipt/${clubId}`, receiptData);
+    const response = await api.post(`${API_BASE_URL}/api/receipt/${userId}`, receiptData);
     return response.data;
   } catch (error) {
-    console.error('학생회 영수증 생성에 실패했습니다:', error);
+    console.error('사용자 영수증 생성에 실패했습니다:', error);
     throw error;
   }
 };
 
 // 특정 영수증 삭제
-export const deleteReceipt = async (receiptId) => {
+export const deleteUserReceipt = async (receiptId) => {
   try {
     const response = await api.delete(`${API_BASE_URL}/api/receipt/${receiptId}`);
     return response.data;
@@ -48,6 +48,7 @@ export const fetchAllColleges = async () => {
 export const fetchAllClubs = async () => {
   try {
     const response = await api.get(`${API_BASE_URL}/api/club`);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('모든 학생회 정보를 가져오는 데 실패했습니다:', error);
@@ -61,7 +62,7 @@ export const fetchCollegeClubs = async (collegeId) => {
     const response = await api.get(`${API_BASE_URL}/api/club/${collegeId}`);
     return response.data;
   } catch (error) {
-    console.error('대학에 맞는 학생회 정보를 가져오는 데 실패했습니다:', error);
+    console.error('대에 맞는 학생회 정보를 가져오는 데 실패했습니다:', error);
     throw error;
   }
 };

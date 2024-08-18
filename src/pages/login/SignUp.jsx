@@ -54,7 +54,7 @@ const SignUp = () => {
         alert('이미 사용 중인 아이디입니다.');
       }
     } catch (error) {
-      console.error('아디 중복 확인 실패:', error);
+      console.error('아이디 중복 확인 실패:', error);
       alert('아이디 중복 확인에 실패했습니다. 다시 시도해주세요.');
     }
   };
@@ -65,9 +65,9 @@ const SignUp = () => {
       return;
     }
     try {
-      alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
       setIsCodeSent(true);
       await sendEmailVerification(email);
+      alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
     } catch (error) {
       alert('인증코드 발송에 실패했습니다. 다시 시도해주세요.');
     }

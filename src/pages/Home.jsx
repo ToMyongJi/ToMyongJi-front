@@ -29,8 +29,7 @@ const Home = () => {
           <div className="w-[45%]">
             <IntroduceCard
               contentText={'화면 메뉴의 조회버튼을 클릭하여 원하는 대학과 소속을 선택하면 조회가 가능합니다.'}
-              buttonText={'융합소프트웨어학부 학생회비 사용 내역 조회 하러 가기'}
-              path={'/receipts-list/1'}
+              buttonText={'메뉴바의 조회를 통해 학생회비 사용 내역 조회 하러 가기'}
             />
           </div>
           <div className="w-[45%] flex justify-end">

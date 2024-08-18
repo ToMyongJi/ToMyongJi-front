@@ -54,21 +54,31 @@ const Login = () => {
       const { accessToken, refreshToken } = await loginUser(userId, password);
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 
-      // accessToken 디코딩 및 사용자 정보 설정
+      // accessToken 디코딩
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
 
-      // 내정보 조회 API 호출
-      const userInfo = await fetchMyInfo(decodedToken.id);
+      // 토큰에서 정보 추출
+      const { id, auth: role, sub: userIdFromToken } = decodedToken;
 
-      setUser({
-        id: decodedToken.id,
-        role: decodedToken.auth,
-        userId: decodedToken.sub,
+      // 내정보 조회 API 호출
+      const userInfo = await fetchMyInfo(id);
+
+      // 사용자 정보 구성
+      const userData = {
+        id,
+        role,
+        userId: userIdFromToken,
         name: userInfo.name,
         studentNum: userInfo.studentNum,
         college: userInfo.college,
         studentClubId: userInfo.studentClubId,
-      });
+      };
+
+      // userStore에 사용자 정보 저장
+      setUser(userData);
+
+      // 저장된 사용자 정보를 콘솔에 출력
+      console.log('저장된 사용자 정보:', userData);
 
       if (rememberMe) {
         localStorage.setItem('rememberedUserId', userId);
