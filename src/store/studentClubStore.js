@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { fetchAllClubs } from '../utils/receiptApi';
 
-const useStudentClubStore = create((set) => ({
+const useStudentClubStore = create((set, get) => ({
   clubs: [],
   isLoading: false,
   error: null,
@@ -14,6 +14,12 @@ const useStudentClubStore = create((set) => ({
       set({ error, isLoading: false });
     }
   },
+  getClubNameById: (clubId) => {
+    const club = get().clubs.find((club) => club.id === clubId);
+    return club ? club.studentClubName : '알 수 없는 동아리';
+  },
 }));
+
+useStudentClubStore.getState().fetchClubs();
 
 export default useStudentClubStore;
