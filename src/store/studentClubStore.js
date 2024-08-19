@@ -39,16 +39,14 @@ const useStudentClubStore = create((set, get) => ({
   fetchClubMembers: async (clubId) => {
     set({ isLoading: true });
     try {
-      console.log('Fetching club members for clubId:', clubId); // 추가된 로그
       const members = await fetchClubMembers(clubId);
-      console.log('Fetched members:', members); // 추가된 로그
+
       set((state) => ({
         currentClub: { ...state.currentClub, memberInfos: members },
         isLoading: false,
         error: null,
       }));
     } catch (error) {
-      console.error('Error fetching club members:', error); // 추가된 로그
       set({ error, isLoading: false });
     }
   },
@@ -88,9 +86,9 @@ const useStudentClubStore = create((set, get) => ({
   verifyClubMembership: async (clubId, studentNum, name) => {
     set({ isLoading: true });
     try {
-      console.log(clubId);
+      // console.log(clubId);
       let club = get().clubs.find((club) => club.id === clubId);
-      console.log(club);
+      // console.log(club);
       if (!club) {
         await get().fetchClubs();
         club = get().clubs.find((club) => club.id === clubId);

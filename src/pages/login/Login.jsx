@@ -30,11 +30,11 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        console.log('디코딩된 액세스 토큰:', decodedAccessToken);
+        // console.log('디코딩된 액세스 토큰:', decodedAccessToken);
 
         if (authData.refreshToken) {
           const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
-          console.log('디코딩된 리프레시 토큰:', decodedRefreshToken);
+          // console.log('디코딩된 리프레시 토큰:', decodedRefreshToken);
         }
       } catch (error) {
         console.error('토큰 디코딩 실패:', error);
@@ -82,7 +82,7 @@ const Login = () => {
       setUser(userData);
 
       // 저장된 사용자 정보를 콘솔에 출력
-      console.log('저장된 사용자 정보:', userData);
+      // console.log('저장된 사용자 정보:', userData);
 
       if (rememberMe) {
         localStorage.setItem('rememberedUserId', userId);

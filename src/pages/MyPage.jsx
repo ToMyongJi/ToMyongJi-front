@@ -36,10 +36,10 @@ const MyPage = () => {
       if (decodedToken) {
         setRole(decodedToken.auth || '');
         setLoginUserId(decodedToken.id || '');
-        console.log(decodedToken);
+        // console.log(decodedToken);
         try {
           const info = await fetchMyInfo(decodedToken.id);
-          console.log('Received info:', info);
+          // console.log('Received info:', info);
           setUserCollege(info.college);
           setUserInfo({
             name: info.name,
@@ -47,7 +47,7 @@ const MyPage = () => {
             college: info.collegeName,
             studentClubId: info.studentClubId,
           });
-          console.log('userInfo: ', userInfo);
+          // console.log('userInfo: ', userInfo);
           if (info.studentClubId) {
             await fetchClubs();
             const name = getClubNameById(info.studentClubId) || '';
