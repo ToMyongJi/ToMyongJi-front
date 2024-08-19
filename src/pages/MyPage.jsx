@@ -14,12 +14,8 @@ const MyPage = () => {
   const { getClubNameById, currentClub, setCurrentClub, fetchClubMembers, addMember, deleteMember, fetchClubs } =
     useStudentClubStore();
   const { colleges, setColleges } = useCollegeStore();
-  const [userInfo, setUserInfo] = useState({
-    name: '',
-    studentNum: '',
-    college: '',
-    studentClubId: null,
-  });
+  const [userCollege, setUserCollege] = useState('');
+  const [userInfo, setUserInfo] = useState({});
   const [clubName, setClubName] = useState('');
   const [decodedToken, setDecodedToken] = useState(null);
   const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
@@ -40,18 +36,20 @@ const MyPage = () => {
       if (decodedToken) {
         setRole(decodedToken.auth || '');
         setLoginUserId(decodedToken.id || '');
+        console.log(decodedToken);
         try {
           const info = await fetchMyInfo(decodedToken.id);
-          setUserInfo((prevInfo) => ({
-            ...prevInfo,
-            ...info,
-            name: info.name || '',
-            studentNum: info.studentNum || '',
-            college: info.college || '',
-            studentClubId: info.studentClubId || null,
-          }));
+          console.log('Received info:', info);
+          setUserCollege(info.college);
+          setUserInfo({
+            name: info.name,
+            studentNum: info.studentNum,
+            college: info.collegeName,
+            studentClubId: info.studentClubId,
+          });
+          console.log('userInfo: ', userInfo);
           if (info.studentClubId) {
-            await fetchClubs(); // 클럽 정보를 다시 가져옵니다.
+            await fetchClubs();
             const name = getClubNameById(info.studentClubId) || '';
             setClubName(name);
             setCurrentClub(info.studentClubId);
@@ -109,27 +107,18 @@ const MyPage = () => {
     return roleMap[role] || role;
   };
 
-  const handleUserUpdate = (e) => {
-    e.preventDefault();
-    // 실제 API 호출
-    alert('사용자 정보가 업데이되었습니다.');
-  };
-
   const handleAddMember = async (e) => {
     e.preventDefault();
     if (loginUserId && newMember.studentNum && newMember.name) {
       try {
         await addMember(loginUserId, newMember);
         setNewMember({ studentNum: '', name: '' });
-        // 멤버 추가 후 리스트 새로고침
         await fetchClubMembers(loginUserId);
       } catch (error) {
         console.error('멤버 추가 중 오류 발생:', error);
-        // 여기에 사용자에게 오류 메시지를 표시하는 로직을 추가할 수 있습니다.
       }
     } else {
       console.error('사용자 정보 또는 새 멤버 정보가 없습니다.');
-      // 여기에 사용자에게 필요한 정보를 입력하라는 메시지를 표시하는 로직을 추가할 수 있습니다.
     }
   };
 
@@ -159,7 +148,7 @@ const MyPage = () => {
         {/* 내 정보 관리  */}
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
           <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">내 정보</h2>
-          <form onSubmit={handleUserUpdate} className="space-y-5">
+          <form className="space-y-5">
             <div className="flex flex-wrap items-center">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
               <input
@@ -182,7 +171,7 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">대학</label>
               <input
                 role="text"
-                value={userInfo.college || ''}
+                value={userCollege}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -273,7 +262,7 @@ const MyPage = () => {
                             console.error('일치하는 사용자를 찾을 수 없습니다.');
                           }
                         } else {
-                          console.error('현재 클럽 정보 또는 사용자 목록이 없습니다.');
+                          console.error('현재 클럽 정보 또는 사용자 록이 없습니다.');
                         }
                       }}
                       className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
