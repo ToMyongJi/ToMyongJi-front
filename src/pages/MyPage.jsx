@@ -5,7 +5,7 @@ import useStudentClubStore from '../store/studentClubStore';
 import useCollegeStore from '../store/collegeStore';
 import useAuthStore from '../store/authStore';
 import { fetchMyInfo } from '../utils/authApi';
-import { fetchAllColleges, fetchClubById } from '../utils/receiptApi';
+import { fetchAllColleges, fetchClubById, fetchAllClubs } from '../utils/receiptApi';
 import { deleteClubMember } from '../utils/studentClubMemberApi';
 
 const MyPage = () => {
@@ -18,7 +18,7 @@ const MyPage = () => {
   const [userCollege, setUserCollege] = useState('');
   const [userInfo, setUserInfo] = useState({});
   const [clubName, setClubName] = useState('');
-  const [decodedToken, setDecodedToken] = useState(null);
+  const [decodedToken, setDecodedToken] = useState({});
   const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
   const [currentUserClub, setCurrentUserClub] = useState(null);
 
@@ -35,36 +35,46 @@ const MyPage = () => {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      if (decodedToken) {
-        setRole(decodedToken.auth || '');
-        setLoginUserId(decodedToken.id || '');
-        // console.log(decodedToken);
+      // console.log('디코딩된 토큰:', decodedToken);
+      if (authData && authData.accessToken) {
         try {
-          const info = await fetchMyInfo(decodedToken.id);
-          // console.log('Received info:', info);
-          setUserCollege(info.college);
-          setUserInfo({
-            name: info.name,
-            studentNum: info.studentNum,
-            college: info.collegeName,
-            studentClubId: info.studentClubId,
-          });
-          // console.log('userInfo: ', userInfo);
-          if (info.studentClubId) {
-            await fetchClubs();
-            const name = getClubNameById(info.studentClubId) || '';
-            setClubName(name);
-            setCurrentClub(info.studentClubId);
-            fetchClubMembers(decodedToken.id);
+          const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
+          // console.log('새로 디코딩된 토큰:', decoded);
+          if (decoded && decoded.id) {
+            setRole(decoded.auth || '');
+            setLoginUserId(decoded.id);
+            try {
+              const info = await fetchMyInfo(decoded.id);
+              setUserCollege(info.college);
+              setUserInfo({
+                name: info.name,
+                studentNum: info.studentNum,
+                college: info.collegeName,
+                studentClubId: info.studentClubId,
+              });
+              if (info.studentClubId) {
+                await fetchClubs();
+                const name = getClubNameById(info.studentClubId) || '';
+                setClubName(name);
+                setCurrentClub(info.studentClubId);
+                fetchClubMembers(decoded.id);
+              }
+            } catch (error) {
+              console.error('사용자 정보 조회 실패:', error);
+            }
+          } else {
+            console.error('디코딩된 토큰에 유효한 사용자 ID가 없습니다.');
           }
         } catch (error) {
-          console.error('사용자 정보 조회 실패:', error);
+          console.error('토큰 디코딩 실패:', error);
         }
+      } else {
+        console.error('유효한 액세스 토큰이 없습니다.');
       }
     };
 
     fetchUserInfo();
-  }, [decodedToken, getClubNameById, setCurrentClub, fetchClubMembers, fetchClubs]);
+  }, [authData, getClubNameById, setCurrentClub, fetchClubMembers, fetchClubs]);
 
   useEffect(() => {
     if (currentClub) {
@@ -104,8 +114,13 @@ const MyPage = () => {
     const fetchClubData = async () => {
       if (userInfo && userInfo.studentClubId) {
         try {
-          const clubData = await fetchClubById(userInfo.studentClubId);
-          setCurrentUserClub(clubData[0]);
+          const clubData = await fetchAllClubs();
+          const matchingClub = clubData.find((club) => club.id === userInfo.studentClubId);
+          if (matchingClub) {
+            setCurrentUserClub(matchingClub);
+          } else {
+            console.error('일치하는 학생회를 찾을 수 없습니다.');
+          }
         } catch (error) {
           console.error('학생회 정보 조회 실패:', error);
         }
@@ -134,6 +149,12 @@ const MyPage = () => {
         const updatedClubData = await fetchClubById(userInfo.studentClubId);
         setCurrentUserClub(updatedClubData[0]);
         alert('정상적으로 소속원이 추가되었습니다.');
+
+        const allClubsData = await fetchAllClubs();
+        const updatedCurrentClub = allClubsData.find((club) => club.id === userInfo.studentClubId);
+        if (updatedCurrentClub) {
+          setCurrentUserClub(updatedCurrentClub);
+        }
       } catch (error) {
         console.error('멤버 추가 중 오류 발생:', error);
         alert('소속원 추가 중 오류가 발생했습니다.');
@@ -150,13 +171,17 @@ const MyPage = () => {
       if (memberToDelete) {
         try {
           await deleteClubMember(memberToDelete.id);
-          // 삭제 후 학생회 정보를 다시 불러옵니다.
-          const updatedClubData = await fetchClubById(userInfo.studentClubId);
-          setCurrentUserClub(updatedClubData[0]);
+
+          const allClubsData = await fetchAllClubs();
+          const updatedCurrentClub = allClubsData.find((club) => club.id === userInfo.studentClubId);
+          if (updatedCurrentClub) {
+            setCurrentUserClub(updatedCurrentClub);
+          }
+
           alert('정상적으로 소속원이 삭제되었습니다.');
         } catch (error) {
           console.error('멤버 삭제 중 오류 발생:', error);
-          alert('소속원 삭제 중 오류가 발생했습니다.');
+          alert('회원가입된 소속원은 삭제할 수 없습니다.');
         }
       } else {
         console.error('삭제할 멤버를 찾을 수 없습니다.');

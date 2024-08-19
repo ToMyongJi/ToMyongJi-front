@@ -13,7 +13,8 @@ import SignUp from './pages/login/SignUp';
 import ReceiptsList from './pages/receipt/ReceiptsList';
 import CreateReceipt from './pages/receipt/CreateReceipt';
 import NotLogin from './pages/NotLogin';
-import Admin from './pages/Admin';
+import Admin from './pages/admin/Admin';
+import HomeAdmin from './pages/admin/HomeAdmin';
 
 const App = () => {
   const { user, setUser } = useUserStore();
@@ -61,7 +62,8 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/:clubId" element={<Admin />} />
+        <Route path="/home-admin" element={<HomeAdmin />} />
         <Route path="/not-login" element={<NotLogin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

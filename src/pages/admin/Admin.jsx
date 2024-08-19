@@ -1,43 +1,97 @@
-import React, { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import { updatePresident, createMember, deleteMember } from '../../utils/adminApi';
+import { fetchAllClubs } from '../../utils/receiptApi';
+import useStudentClubStore from '../../store/studentClubStore';
 
 const Admin = () => {
-  const [studentClubName, setStudentClubName] = useState('ICT융합대학 학생회');
-  const [president, setPresident] = useState({ studentNum: '60222126', name: '이준규' });
+  const { clubId } = useParams();
+  const [studentClubName, setStudentClubName] = useState('');
+  const [president, setPresident] = useState({ studentNum: '', name: '' });
   const [newPresident, setNewPresident] = useState({ studentNum: '', name: '' });
   const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
-  const [members, setMembers] = useState([
-    { studentNum: '60222117', name: '이서현' },
-    { studentNum: '60211665', name: '박진형' },
-  ]);
+  const [members, setMembers] = useState([]);
+
+  const { setCurrentClub, currentClub } = useStudentClubStore();
+
+  const fetchClubData = async () => {
+    try {
+      const clubData = await fetchAllClubs();
+      const club = clubData.find((club) => club.id === parseInt(clubId));
+      if (club) {
+        setStudentClubName(club.studentClubName);
+        setPresident(club.presidentInfo);
+        setMembers(club.memberInfos);
+      } else {
+        throw new Error('해당 클럽 정보를 찾을 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('데이터 로드 실패:', error);
+      alert('데이터를 불러오는데 실패했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    setCurrentClub(parseInt(clubId));
+    fetchClubData();
+  }, [clubId, setCurrentClub]);
 
   const handleNewPresidentChange = (e) => {
     setNewPresident({ ...newPresident, [e.target.name]: e.target.value });
   };
 
-  const handleSavePresident = (e) => {
+  const handleSavePresident = async (e) => {
     e.preventDefault();
     if (newPresident.studentNum && newPresident.name) {
-      setPresident(newPresident);
-      setNewPresident({ studentNum: '', name: '' });
-      console.log('회장 정보 저장:', newPresident);
-      alert('회장 정보가 저장되었습니다.');
+      try {
+        // 새로운 회장 정보 업데이트
+        await updatePresident(clubId, newPresident);
+
+        // 기존 회장이 있었다면 삭제
+        // if (president.id) {
+        //   await handleDeleteMember(president.id);
+        // }
+        setNewPresident({ studentNum: '', name: '' });
+        await fetchClubData();
+
+        alert('새로운 회장 정보가 저장되었고, 기존 회장은 소속원 목록으로 내려갔습니다.');
+      } catch (error) {
+        console.error('회장 정보 업데이트 실패:', error);
+        alert('회장 정보 업데이트에 실패했습니다.');
+      }
     } else {
-      alert('학번과 이름을 모두 입��해주세요.');
+      alert('학번과 이름을 모두 입력해주세요.');
     }
   };
 
-  const handleAddMember = (e) => {
+  const handleAddMember = async (e) => {
     e.preventDefault();
     if (newMember.studentNum && newMember.name) {
-      setMembers([...members, newMember]);
-      setNewMember({ studentNum: '', name: '' });
+      try {
+        const createdMember = await createMember(clubId, newMember);
+        setMembers([...members, createdMember]);
+        setNewMember({ studentNum: '', name: '' });
+        alert('새 부원이 추가되었습니다.');
+      } catch (error) {
+        console.error('부원 추가 실패:', error);
+        alert('부원 추가에 실패했습니다.');
+      }
+    } else {
+      alert('학번과 이름을 모두 입력해주세요.');
     }
   };
 
-  const handleDeleteMember = (studentNum) => {
-    setMembers(members.filter((member) => member.studentNum !== studentNum));
+  const handleDeleteMember = async (memberId) => {
+    try {
+      await deleteMember(memberId);
+      setMembers(members.filter((member) => member.id !== memberId));
+      alert('부원이 삭제되었습니다.');
+    } catch (error) {
+      console.error('부원 삭제 실패:', error);
+      alert('회원가입된 부원은 삭제할 수 없습니다.');
+    }
   };
 
   return (
@@ -120,7 +174,7 @@ const Admin = () => {
           </form>
           <div className="space-y-2">
             {members.map((member) => (
-              <div key={member.studentNum} className="flex items-center space-x-2">
+              <div key={member.id} className="flex items-center space-x-2">
                 <input
                   type="text"
                   value={member.studentNum}
@@ -134,7 +188,7 @@ const Admin = () => {
                   className="flex-1 p-1 bg-gray-100 border rounded-lg sm:p-2"
                 />
                 <button
-                  onClick={() => handleDeleteMember(member.studentNum)}
+                  onClick={() => handleDeleteMember(member.id)}
                   className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
                 >
                   <span className="hidden sm:inline">삭제</span>

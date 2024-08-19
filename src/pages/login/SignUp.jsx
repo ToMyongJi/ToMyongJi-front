@@ -30,6 +30,7 @@ const SignUp = () => {
   const [collegeApiData, setCollegeApiData] = useState([]);
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
   const [isClubVerified, setIsClubVerified] = useState(false);
+  const [isIdDuplicateChecked, setIsIdDuplicateChecked] = useState(false);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -54,19 +55,22 @@ const SignUp = () => {
 
   const handleCheckDuplicate = async () => {
     if (!userId) {
-      alert('아이디를 입력주세요.');
+      alert('아이디를 입력해주세요.');
       return;
     }
     try {
       const result = await checkUserIdDuplicate(userId);
       if (result === true) {
         alert('이미 존재하는 아이디입니다.');
+        setIsIdDuplicateChecked(false);
       } else {
         alert('사용 가능한 아이디입니다.');
+        setIsIdDuplicateChecked(true);
       }
     } catch (error) {
       console.error('아이디 중복 확인 실패:', error);
       alert('아이디 중복 확인에 실패했습니다. 다시 시도해주세요.');
+      setIsIdDuplicateChecked(false);
     }
   };
 
@@ -100,6 +104,10 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    if (!isIdDuplicateChecked) {
+      alert('아이디 중복 확인을 완료해주세요.');
+      return;
+    }
     if (!isEmailVerified) {
       alert('이메일 인증을 완료해주세요.');
       return;
@@ -110,6 +118,10 @@ const SignUp = () => {
     }
     if (!validatePassword(password)) {
       alert('비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상씩 포함된 8자 ~ 20자여야 합니다.');
+      return;
+    }
+    if (!college) {
+      alert('대학을 선택해주세요.');
       return;
     }
     try {
@@ -146,6 +158,7 @@ const SignUp = () => {
         setClubs(clubsData);
       } catch (error) {
         console.error('학생회 정보를 불러오는 데 실패했습니다:', error);
+        setClubs([]);
       }
     } else {
       setCollege('');

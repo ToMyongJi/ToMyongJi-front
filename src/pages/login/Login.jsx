@@ -30,6 +30,8 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        // console.log('액세스 토큰:', authData.accessToken);
+
         // console.log('디코딩된 액세스 토큰:', decodedAccessToken);
 
         if (authData.refreshToken) {
@@ -81,15 +83,17 @@ const Login = () => {
       // userStore에 사용자 정보 저장
       setUser(userData);
 
-      // 저장된 사용자 정보를 콘솔에 출력
-      // console.log('저장된 사용자 정보:', userData);
-
       if (rememberMe) {
         localStorage.setItem('rememberedUserId', userId);
       } else {
         localStorage.removeItem('rememberedUserId');
       }
-      navigate('/');
+
+      if (role === 'ADMIN') {
+        navigate('/home-admin');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.error('로그인 실패:', error);
     }
