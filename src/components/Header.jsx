@@ -33,9 +33,15 @@ const Header = () => {
 
   const handleOnClick = useCallback(
     (path) => {
-      return () => navigate(path);
+      return () => {
+        if (user && user.role === 'ADMIN' && path === '/') {
+          navigate('/home-admin');
+        } else {
+          navigate(path);
+        }
+      };
     },
-    [navigate]
+    [navigate, user]
   );
 
   const handleLogout = () => {
@@ -61,6 +67,10 @@ const Header = () => {
     }
   };
 
+  const handleAdminQuery = () => {
+    setShowDropdown(!showDropdown);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-[10px]">
       {/* 로고 */}
@@ -84,9 +94,9 @@ const Header = () => {
         <div className="relative">
           <button
             className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-            onClick={() => setShowDropdown(!showDropdown)}
+            onClick={user && user.role === 'ADMIN' ? handleAdminQuery : () => setShowDropdown(!showDropdown)}
           >
-            조회
+            {user && user.role === 'ADMIN' ? '학생회 정보 관리' : '조회'}
           </button>
           {showDropdown && (
             <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute sm:left-[-63px] left-[-30px] mt-2 sm:w-[500px] w-[320px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
@@ -120,7 +130,11 @@ const Header = () => {
                         className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 hover:bg-[#CED3FF] hover:font-GmarketMedium`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/receipts-list/${club.id}`, { state: { clubName: club.studentClubName } });
+                          if (user && user.role === 'ADMIN') {
+                            navigate(`/admin/${club.id}`);
+                          } else {
+                            navigate(`/receipts-list/${club.id}`, { state: { clubName: club.studentClubName } });
+                          }
                           setShowDropdown(false);
                           setShowSubMenu(false);
                         }}
@@ -134,7 +148,7 @@ const Header = () => {
           )}
         </div>
         {user && user.role === 'ADMIN' ? (
-          <span className="font-GmarketBold text-[#002D72]">관리자용 페이지</span>
+          <></>
         ) : (
           <>
             <button

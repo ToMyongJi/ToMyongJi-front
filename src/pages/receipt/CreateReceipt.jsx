@@ -3,7 +3,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { fetchClubReceipts, createUserReceipt, deleteUserReceipt } from '../../utils/receiptApi';
 import { fetchMyInfo } from '../../utils/authApi';
-import useUserStore from '../../store/userStore';
+import useAuthStore from '../../store/authStore';
 import useStudentClubStore from '../../store/studentClubStore';
 
 import addCircle from '../../assets/images/add-circle.png';
@@ -11,8 +11,8 @@ import addFile from '../../assets/images/add-file.png';
 import deleteButton from '../../assets/images/delete.png';
 
 const CreateReceipt = () => {
-  const user = useUserStore((state) => state.user);
-  const [decodedUserId, setDecodedUserId] = useState(null);
+  const { authData } = useAuthStore();
+  const [userId, setUserId] = useState(null);
   const [userData, setUserData] = useState(null);
   const [date, setDate] = useState('');
   const [content, setContent] = useState('');
@@ -27,18 +27,21 @@ const CreateReceipt = () => {
   const { getClubNameById } = useStudentClubStore();
 
   useEffect(() => {
-    if (user && typeof user === 'string') {
+    if (authData && authData.accessToken) {
       try {
-        const decodedUser = JSON.parse(atob(user.split('.')[1]));
-        setDecodedUserId(decodedUser.id);
-        fetchUserData(decodedUser.id);
+        const decodedToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        setUserId(decodedToken.id);
       } catch (error) {
-        console.error('사용자 정보 디코딩 중 오류 발생:', error);
+        console.error('액세스 토큰 디코딩 중 오류 발생:', error);
       }
-    } else {
-      console.error('유효하지 않은 사용자 정보:', user);
     }
-  }, [user]);
+  }, [authData]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchUserData(userId);
+    }
+  }, [userId]);
 
   const fetchUserData = async (userId) => {
     try {
@@ -95,7 +98,7 @@ const CreateReceipt = () => {
       clubId: userData.studentClubId,
     };
     try {
-      await createUserReceipt(decodedUserId, newItem);
+      await createUserReceipt(userId, newItem);
       fetchReceipts();
       setDate('');
       setContent('');
