@@ -4,10 +4,12 @@ import Header from '../../components/Header';
 import { signUpUser, checkUserIdDuplicate, sendEmailVerification, verifyEmailCode } from '../../utils/authApi';
 import { fetchAllColleges, fetchCollegeClubs } from '../../utils/receiptApi';
 import useCollegeStore from '../../store/collegeStore';
+import useStudentClubStore from '../../store/studentClubStore';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { colleges, setColleges } = useCollegeStore();
+  const { verifyClubMembership } = useStudentClubStore();
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -21,11 +23,15 @@ const SignUp = () => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [clubs, setClubs] = useState([]);
   const [selectedClub, setSelectedClub] = useState('');
+  const [collegeApiData, setCollegeApiData] = useState([]);
+  const [selectedCollegeId, setSelectedCollegeId] = useState('');
 
   useEffect(() => {
     const loadColleges = async () => {
       try {
         const collegeData = await fetchAllColleges();
+        console.log(collegeData);
+        setCollegeApiData(collegeData);
         setColleges(collegeData);
       } catch (error) {
         console.error('대학 정보를 불러오는 데 실패했습니다:', error);
@@ -43,15 +49,15 @@ const SignUp = () => {
 
   const handleCheckDuplicate = async () => {
     if (!userId) {
-      alert('아이디를 입력해주세요.');
+      alert('아이디를 입력주세요.');
       return;
     }
     try {
       const result = await checkUserIdDuplicate(userId);
-      if (result.isDuplicate === false) {
-        alert('사용 가능한 아이디입니다.');
+      if (result === true) {
+        alert('이미 존재하는 아이디입니다.');
       } else {
-        alert('이미 사용 중인 아이디입니다.');
+        alert('사용 가능한 아이디입니다.');
       }
     } catch (error) {
       console.error('아이디 중복 확인 실패:', error);
@@ -106,6 +112,7 @@ const SignUp = () => {
         studentNum,
         college,
         role,
+        studentClubId: selectedClub,
       };
       const response = await signUpUser(userData);
       console.log('회원가입 성공:', response);
@@ -118,19 +125,44 @@ const SignUp = () => {
   };
 
   const handleCollegeChange = async (e) => {
-    const selectedCollegeId = e.target.value;
-    setCollege(selectedCollegeId);
-    if (selectedCollegeId) {
+    const selectedId = e.target.value;
+    setSelectedCollegeId(selectedId);
+
+    const selectedCollege = collegeApiData.find((college) => college.id === parseInt(selectedId));
+
+    if (selectedCollege) {
+      setCollege(selectedCollege.collegeName);
       try {
-        const clubsData = await fetchCollegeClubs(selectedCollegeId);
+        const clubsData = await fetchCollegeClubs(selectedId);
         setClubs(clubsData);
       } catch (error) {
         console.error('학생회 정보를 불러오는 데 실패했습니다:', error);
       }
     } else {
+      setCollege('');
       setClubs([]);
     }
     setSelectedClub('');
+  };
+
+  const handleVerifyClub = async () => {
+    if (!selectedClub || !studentNum || !name) {
+      alert('소속, 학번, 이름을 모두 입력해주세요.');
+      return;
+    }
+    try {
+      console.log('Verifying club membership:', { selectedClub, studentNum, name });
+      const isVerified = await verifyClubMembership(selectedClub, studentNum, name);
+      console.log('Verification result:', isVerified);
+      if (isVerified) {
+        alert('소속 인증이 완료되었습니다.');
+      } else {
+        alert('소속 인증에 실패했습니다. 입력한 정보를 확인해주세요.');
+      }
+    } catch (error) {
+      console.error('소속 인증 실패:', error);
+      alert('소속 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   };
 
   return (
@@ -256,14 +288,14 @@ const SignUp = () => {
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">대학</label>
                 <select
-                  value={college}
+                  value={selectedCollegeId}
                   onChange={handleCollegeChange}
                   className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 >
                   <option value="">대학을 선택해주세요.</option>
-                  {colleges.map((college) => (
-                    <option key={college.id} value={college.id}>
-                      {college.collegeName}
+                  {collegeApiData.map((collegeItem) => (
+                    <option key={collegeItem.id} value={collegeItem.id}>
+                      {collegeItem.collegeName}
                     </option>
                   ))}
                 </select>
@@ -300,9 +332,7 @@ const SignUp = () => {
                 </select>
                 <button
                   type="button"
-                  onClick={() => {
-                    /* 소속 인증 로직 */
-                  }}
+                  onClick={handleVerifyClub}
                   className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
                 >
                   소속 인증하기

@@ -32,7 +32,7 @@ export const signUpUser = async (userData) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.status === 400) {
-      alert('회원가입에 실패했습니다. 입력 정보를 확인해주세요.');
+      alert('회원가입에 실패했습니다. 입력 ��보를 확인해주세요.');
     } else {
       console.error('회원가입 요청 실패:', error);
     }
@@ -46,12 +46,8 @@ export const checkUserIdDuplicate = async (userId) => {
     const response = await api.get(`${API_BASE_URL}/api/users/${userId}`);
     return response.data;
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      return { isDuplicate: false };
-    } else {
-      console.error('아이디 중복 확인 요청 실패:', error);
-      throw error;
-    }
+    console.error('아이디 중복 확인 실패:', error);
+    throw error;
   }
 };
 

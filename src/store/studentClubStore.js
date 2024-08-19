@@ -36,16 +36,19 @@ const useStudentClubStore = create((set, get) => ({
         });
     }
   },
-  fetchClubMembers: async (userId) => {
+  fetchClubMembers: async (clubId) => {
     set({ isLoading: true });
     try {
-      const members = await fetchClubMembers(userId);
+      console.log('Fetching club members for clubId:', clubId); // 추가된 로그
+      const members = await fetchClubMembers(clubId);
+      console.log('Fetched members:', members); // 추가된 로그
       set((state) => ({
         currentClub: { ...state.currentClub, memberInfos: members },
         isLoading: false,
         error: null,
       }));
     } catch (error) {
+      console.error('Error fetching club members:', error); // 추가된 로그
       set({ error, isLoading: false });
     }
   },
@@ -80,6 +83,36 @@ const useStudentClubStore = create((set, get) => ({
       }));
     } catch (error) {
       set({ error, isLoading: false });
+    }
+  },
+  verifyClubMembership: async (clubId, studentNum, name) => {
+    set({ isLoading: true });
+    try {
+      console.log(clubId);
+      let club = get().clubs.find((club) => club.id === clubId);
+      console.log(club);
+      if (!club) {
+        await get().fetchClubs();
+        club = get().clubs.find((club) => club.id === clubId);
+      }
+
+      if (!club) {
+        throw new Error('클럽을 찾을 수 없습니다.');
+      }
+
+      await get().fetchClubMembers(clubId);
+      const currentClub = get().currentClub;
+      if (!currentClub || !currentClub.memberInfos) {
+        throw new Error('클럽 멤버 정보를 가져올 수 없습니다.');
+      }
+
+      const member = currentClub.memberInfos.find((member) => member.studentNum === studentNum && member.name === name);
+
+      set({ isLoading: false, error: null });
+      return !!member;
+    } catch (error) {
+      set({ isLoading: false, error });
+      throw error;
     }
   },
 }));
