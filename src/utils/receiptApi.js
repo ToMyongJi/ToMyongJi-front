@@ -65,3 +65,14 @@ export const fetchCollegeClubs = async (collegeId) => {
     throw error;
   }
 };
+
+// 특정 학생회 조회
+export const fetchClubById = async (clubId) => {
+  try {
+    const response = await api.get(`${API_BASE_URL}/api/club/${clubId}`);
+    return response.data;
+  } catch (error) {
+    console.error('특정 학생회 정보를 가져오는 데 실패했습니다:', error);
+    throw error;
+  }
+};

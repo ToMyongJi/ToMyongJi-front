@@ -5,7 +5,8 @@ import useStudentClubStore from '../store/studentClubStore';
 import useCollegeStore from '../store/collegeStore';
 import useAuthStore from '../store/authStore';
 import { fetchMyInfo } from '../utils/authApi';
-import { fetchAllColleges } from '../utils/receiptApi';
+import { fetchAllColleges, fetchClubById } from '../utils/receiptApi';
+import { deleteClubMember } from '../utils/studentClubMemberApi';
 
 const MyPage = () => {
   const { authData } = useAuthStore();
@@ -19,6 +20,7 @@ const MyPage = () => {
   const [clubName, setClubName] = useState('');
   const [decodedToken, setDecodedToken] = useState(null);
   const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
+  const [currentUserClub, setCurrentUserClub] = useState(null);
 
   useEffect(() => {
     if (authData && authData.accessToken) {
@@ -98,6 +100,21 @@ const MyPage = () => {
     }
   }, [authData, setCurrentClub, fetchClubMembers]);
 
+  useEffect(() => {
+    const fetchClubData = async () => {
+      if (userInfo && userInfo.studentClubId) {
+        try {
+          const clubData = await fetchClubById(userInfo.studentClubId);
+          setCurrentUserClub(clubData[0]);
+        } catch (error) {
+          console.error('학생회 정보 조회 실패:', error);
+        }
+      }
+    };
+
+    fetchClubData();
+  }, [userInfo]);
+
   const getKoreanRole = (role) => {
     const roleMap = {
       STU: '소속원',
@@ -114,32 +131,39 @@ const MyPage = () => {
         await addMember(loginUserId, newMember);
         setNewMember({ studentNum: '', name: '' });
         await fetchClubMembers(loginUserId);
+        const updatedClubData = await fetchClubById(userInfo.studentClubId);
+        setCurrentUserClub(updatedClubData[0]);
+        alert('정상적으로 소속원이 추가되었습니다.');
       } catch (error) {
         console.error('멤버 추가 중 오류 발생:', error);
+        alert('소속원 추가 중 오류가 발생했습니다.');
       }
     } else {
       console.error('사용자 정보 또는 새 멤버 정보가 없습니다.');
+      alert('사용자 정보 또는 새 멤버 정보가 없습니다.');
     }
   };
 
-  const handleDeleteMember = async (memberId) => {
-    if (currentClub) {
-      console.log(currentClub.users);
-
-      try {
-        await deleteMember(memberId);
-        await fetchClubMembers(loginUserId);
-      } catch (error) {
-        console.error('멤버 삭제 중 오류 발생:', error);
+  const handleDeleteMember = async (studentNum) => {
+    if (currentUserClub && currentUserClub.memberInfos) {
+      const memberToDelete = currentUserClub.memberInfos.find((member) => member.studentNum === studentNum);
+      if (memberToDelete) {
+        try {
+          await deleteClubMember(memberToDelete.id);
+          // 삭제 후 학생회 정보를 다시 불러옵니다.
+          const updatedClubData = await fetchClubById(userInfo.studentClubId);
+          setCurrentUserClub(updatedClubData[0]);
+          alert('정상적으로 소속원이 삭제되었습니다.');
+        } catch (error) {
+          console.error('멤버 삭제 중 오류 발생:', error);
+          alert('소속원 삭제 중 오류가 발생했습니다.');
+        }
+      } else {
+        console.error('삭제할 멤버를 찾을 수 없습니다.');
+        alert('삭제할 멤버를 찾을 수 없습니다.');
       }
-    } else {
-      console.error('현재 클럽 정보가 없습니다.');
     }
   };
-
-  // const handleCollegeChange = (e) => {
-  //   setUserInfo({ ...userInfo, college: e.target.value });
-  // };
 
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
@@ -199,14 +223,14 @@ const MyPage = () => {
         </div>
 
         {/* 소속 관리 박스(회장만 보임) */}
-        {getKoreanRole(role) === '회장' && currentClub && (
+        {getKoreanRole(role) === '회장' && currentUserClub && (
           <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
             <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
             <div className="flex flex-wrap items-center mb-4">
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
               <input
                 role="text"
-                value={currentClub.studentClubName || ''}
+                value={currentUserClub.studentClubName || ''}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -237,9 +261,9 @@ const MyPage = () => {
               </div>
             </form>
             <div className="space-y-2">
-              {currentClub.memberInfos &&
-                currentClub.memberInfos.map((member, index) => (
-                  <div key={member.id || `member-${index}`} className="flex items-center space-x-2">
+              {currentUserClub.memberInfos &&
+                currentUserClub.memberInfos.map((member) => (
+                  <div key={member.id} className="flex items-center space-x-2">
                     <input
                       role="text"
                       value={member.studentNum}
@@ -253,18 +277,7 @@ const MyPage = () => {
                       className="flex-1 p-2 bg-gray-100 border rounded-lg"
                     />
                     <button
-                      onClick={() => {
-                        if (currentClub && currentClub.users) {
-                          const userToDelete = currentClub.users.find((user) => user.studentNum === member.studentNum);
-                          if (userToDelete) {
-                            handleDeleteMember(userToDelete.id);
-                          } else {
-                            console.error('일치하는 사용자를 찾을 수 없습니다.');
-                          }
-                        } else {
-                          console.error('현재 클럽 정보 또는 사용자 록이 없습니다.');
-                        }
-                      }}
+                      onClick={() => handleDeleteMember(member.studentNum)}
                       className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
                     >
                       <span className="hidden sm:inline">삭제</span>

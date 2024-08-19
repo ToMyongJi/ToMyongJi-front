@@ -5,7 +5,7 @@ import useAuthStore from '../store/authStore';
 export const loginUser = async (userId, password) => {
   try {
     const response = await api.post(`${API_BASE_URL}/api/users/login`, { userId, password });
-    console.log(response.data);
+    // console.log(response.data);
 
     const { grantType, accessToken, refreshToken } = response.data;
     useAuthStore.getState().setAuthData(grantType, accessToken, refreshToken);
