@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
-import { signUpUser, checkUserIdDuplicate, sendEmailVerification, verifyEmailCode } from '../../utils/authApi';
+import {
+  signUpUser,
+  checkUserIdDuplicate,
+  sendEmailVerification,
+  verifyEmailCode,
+  verifyClubMembership,
+} from '../../utils/authApi';
 import { fetchAllColleges, fetchCollegeClubs } from '../../utils/receiptApi';
 import useCollegeStore from '../../store/collegeStore';
-import useStudentClubStore from '../../store/studentClubStore';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { colleges, setColleges } = useCollegeStore();
-  const { verifyClubMembership } = useStudentClubStore();
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +29,7 @@ const SignUp = () => {
   const [selectedClub, setSelectedClub] = useState('');
   const [collegeApiData, setCollegeApiData] = useState([]);
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
+  const [isClubVerified, setIsClubVerified] = useState(false);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -99,6 +104,10 @@ const SignUp = () => {
       alert('이메일 인증을 완료해주세요.');
       return;
     }
+    if (!isClubVerified) {
+      alert('소속 인증을 완료해주세요.');
+      return;
+    }
     if (!validatePassword(password)) {
       alert('비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상씩 포함된 8자 ~ 20자여야 합니다.');
       return;
@@ -146,21 +155,22 @@ const SignUp = () => {
   };
 
   const handleVerifyClub = async () => {
-    if (!selectedClub || !studentNum || !name) {
-      alert('소속, 학번, 이름을 모두 입력해주세요.');
+    if (!selectedClub || !studentNum) {
+      alert('소속과 학번을 모두 입력해주세요.');
       return;
     }
     try {
-      console.log('Verifying club membership:', { selectedClub, studentNum, name });
-      const isVerified = await verifyClubMembership(selectedClub, studentNum, name);
-      console.log('Verification result:', isVerified);
+      const isVerified = await verifyClubMembership(selectedClub, studentNum);
       if (isVerified) {
+        setIsClubVerified(true);
         alert('소속 인증이 완료되었습니다.');
       } else {
+        setIsClubVerified(false);
         alert('소속 인증에 실패했습니다. 입력한 정보를 확인해주세요.');
       }
     } catch (error) {
       console.error('소속 인증 실패:', error);
+      setIsClubVerified(false);
       alert('소속 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
@@ -338,6 +348,7 @@ const SignUp = () => {
                   소속 인증하기
                 </button>
               </div>
+              {isClubVerified && <p className="text-[#4CAF50] text-[9px] sm:text-xs mt-1">소속 인증 완료</p>}
             </div>
 
             <hr className="sm:hidden border-t border-[#eeeffe]" />

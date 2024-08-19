@@ -9,7 +9,6 @@ const useUserStore = create(
         set({ user });
       },
       clearUser: () => {
-        console.log('사용자 정보 초기화');
         set({ user: null });
       },
     }),
