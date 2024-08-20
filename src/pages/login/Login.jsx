@@ -30,7 +30,7 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        // console.log('액세스 토큰:', authData.accessToken);
+        console.log('액세스 토큰:', authData.accessToken);
 
         // console.log('디코딩된 액세스 토큰:', decodedAccessToken);
 

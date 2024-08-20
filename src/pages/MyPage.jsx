@@ -178,7 +178,7 @@ const MyPage = () => {
             setCurrentUserClub(updatedCurrentClub);
           }
 
-          alert('정상적으로 소속원이 삭제되었습니다.');
+          alert('정상적으로 소속원이 삭제되��습니다.');
         } catch (error) {
           console.error('멤버 삭제 중 오류 발생:', error);
           alert('회원가입된 소속원은 삭제할 수 없습니다.');
@@ -261,52 +261,50 @@ const MyPage = () => {
               />
             </div>
             <form onSubmit={handleAddMember} className="mb-4">
-              <div className="flex space-x-2">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                 <input
                   role="text"
                   placeholder="학번"
                   value={newMember.studentNum}
                   onChange={(e) => setNewMember({ ...newMember, studentNum: e.target.value })}
-                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <input
                   role="text"
                   placeholder="이름"
                   value={newMember.name}
                   onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
-                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <button
                   role="submit"
-                  className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
+                  className="w-full sm:w-auto px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
                 >
-                  <span className="hidden sm:inline">추가</span>
-                  <span className="sm:hidden text-[12px]">+</span>
+                  <span className="inline sm:inline">추가</span>
                 </button>
               </div>
             </form>
             <div className="space-y-2">
               {currentUserClub.memberInfos &&
                 currentUserClub.memberInfos.map((member) => (
-                  <div key={member.id} className="flex items-center space-x-2">
+                  <div key={member.id} className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                     <input
                       role="text"
                       value={member.studentNum}
                       readOnly
-                      className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                      className="w-full p-2 bg-gray-100 border rounded-lg sm:flex-1"
                     />
                     <input
                       role="text"
                       value={member.name}
                       readOnly
-                      className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                      className="w-full p-2 bg-gray-100 border rounded-lg sm:flex-1"
                     />
                     <button
                       onClick={() => handleDeleteMember(member.studentNum)}
-                      className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
+                      className="w-full sm:w-auto px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
                     >
-                      <span className="hidden sm:inline">삭제</span>
-                      <span className="sm:hidden text-[12px]">-</span>
+                      <span className="inline sm:inline">삭제</span>
                     </button>
                   </div>
                 ))}

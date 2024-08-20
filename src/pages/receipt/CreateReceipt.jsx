@@ -154,7 +154,7 @@ const CreateReceipt = () => {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-1/5 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                className="w-full sm:w-1/5 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF] text-sm sm:text-base"
                 placeholder="날짜"
               />
               <input
