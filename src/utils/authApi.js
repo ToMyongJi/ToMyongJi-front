@@ -83,7 +83,7 @@ export const fetchUserInfo = async (userId) => {
 export const findUserId = async (email) => {
   try {
     const response = await api.post(`${API_BASE_URL}/api/users/find-id`, { email });
-    return response.data; // 서버에서 반환된 아이디 문자열
+    return response.data; // 서버에서 반환된 아이디 문자
   } catch (error) {
     console.error('아이디 찾기 요청 실패:', error);
     if (error.response) {
