@@ -178,7 +178,7 @@ const MyPage = () => {
             setCurrentUserClub(updatedCurrentClub);
           }
 
-          alert('정상적으로 소속원이 삭제되��습니다.');
+          alert('정상적으로 소속원이 삭제되었습니다.');
         } catch (error) {
           console.error('멤버 삭제 중 오류 발생:', error);
           alert('회원가입된 소속원은 삭제할 수 없습니다.');
