@@ -1,26 +1,15 @@
-import React, { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import useUserStore from '../store/userStore';
-import useAuthStore from '../store/authStore';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
-  const { user, setUser } = useUserStore();
-  const { accessToken } = useAuthStore();
-  const navigate = useNavigate();
+const ProtectedRoute = ({ element }) => {
+  const { accessToken } = useAuth();
 
-  useEffect(() => {
-    if (accessToken) {
-      setUser(accessToken);
-    } else {
-      navigate('/not-login');
-    }
-  }, [accessToken, setUser, navigate]);
-
-  if (!user) {
-    return <Navigate to="/not-login" />;
+  if (!accessToken) {
+    return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return element;
 };
 
 export default ProtectedRoute;

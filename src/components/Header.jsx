@@ -1,171 +1,66 @@
-import { useNavigate } from 'react-router-dom';
-import { useCallback, useState, useEffect } from 'react';
-import useUserStore from '../store/userStore';
-import useAuthStore from '../store/authStore';
-import useCollegeStore from '../store/collegeStore';
-import { fetchAllColleges } from '../utils/receiptApi';
-
-import logo from '../assets/images/logo.png';
-import buttonBackground from '../assets/images/buttonBackground.png';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import CategorySideBar from './CategorySideBar';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
-  const navigate = useNavigate();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showSubMenu, setShowSubMenu] = useState(false);
-  const [selectedCollege, setSelectedCollege] = useState(null);
+  const { accessToken, logout } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const user = useUserStore((state) => state.user);
-  const clearUser = useUserStore((state) => state.clearUser);
-  const clearAuthData = useAuthStore((state) => state.clearAuthData);
-  const { colleges, setColleges } = useCollegeStore();
-
-  useEffect(() => {
-    const loadColleges = async () => {
-      try {
-        const collegesData = await fetchAllColleges();
-        setColleges(collegesData);
-      } catch (error) {
-        console.error('대학 정보를 불러오는데 실패했습니다:', error);
-      }
-    };
-    loadColleges();
-  }, [setColleges]);
-
-  const handleOnClick = useCallback(
-    (path) => {
-      return () => {
-        if (user && user.role === 'ADMIN' && path === '/') {
-          navigate('/home-admin');
-        } else {
-          navigate(path);
-        }
-      };
-    },
-    [navigate, user]
-  );
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const handleLogout = () => {
-    clearUser();
-    clearAuthData();
-    navigate('/login');
-    alert('로그아웃 되었습니다');
-  };
-
-  const handleCreateReceipt = () => {
-    if (user) {
-      navigate('/create-receipt');
-    } else {
-      navigate('/not-login');
-    }
-  };
-
-  const handleMyPage = () => {
-    if (user) {
-      navigate('/my-page');
-    } else {
-      navigate('/not-login');
-    }
-  };
-
-  const handleAdminQuery = () => {
-    setShowDropdown(!showDropdown);
+    logout();
+    window.location.href = '/';
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-[10px]">
-      {/* 로고 */}
-      <button className="w-60 sm:w-80" onClick={handleOnClick('/')}>
-        <img src={logo} alt="투명지 로고 이미지" />
-      </button>
-      {/* 로그인/로그아웃 버튼 */}
-      <div className="w-[100%] flex justify-end items-center p-[10px] mb-4">
-        <button
-          className="w-[104px] sm:w-[110px] h-[35px] sm:h-[40px] bg-no-repeat bg-cover flex items-center justify-center relative"
-          style={{ backgroundImage: `url(${buttonBackground})` }}
-          onClick={user ? handleLogout : handleOnClick('/login')}
-        >
-          <span className="hover:text-[#CED3FF] transition duration-300 z-10 text-[#002e72] font-GmarketLight text-[11px] sm:text-xs">
-            {user ? '로그아웃' : '로그인'}
-          </span>
-        </button>
-      </div>
-      {/* 네비바 */}
-      <div className="text-sm sm:text-[16px] text-[#002D72] flex items-center justify-evenly font-GmarketLight w-[100%] border-t border-[#4E67EC] border-b py-1 sm:py-3">
-        <div className="relative">
-          <button
-            className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-            onClick={user && user.role === 'ADMIN' ? handleAdminQuery : () => setShowDropdown(!showDropdown)}
-          >
-            {user && user.role === 'ADMIN' ? '학생회 정보 관리' : '조회'}
+    <div className="relative max-w-[600px] mx-auto">
+      <div className="w-full h-[30px] flex items-center py-6 px-5">
+        <div className="flex items-center justify-between w-full">
+          <button className="cursor-pointer hover:text-[#2EC4B6] active:text-black" onClick={toggleSidebar}>
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 fill-current">
+              <path
+                clipRule="evenodd"
+                d="M3 7C3 7.41421 3.33579 7.75 3.75 7.75H20.25C20.6642 7.75 21 7.41421 21 7C21 6.58579 20.6642 6.25 20.25 6.25H3.75C3.33579 6.25 3 6.58579 3 7ZM3 12C3 12.4142 3.33579 12.75 3.75 12.75H20.25C20.6642 12.75 21 12.4142 21 12C21 11.5858 20.6642 11.25 20.25 11.25H3.75C3.33579 11.25 3 11.5858 3 12ZM3 17C3 17.4142 3.33579 17.75 3.75 17.75H20.25C20.6642 17.75 21 17.4142 21 17C21 16.5858 20.6642 16.25 20.25 16.25H3.75C3.33579 16.25 3 16.5858 3 17Z"
+              />
+            </svg>
           </button>
-          {showDropdown && (
-            <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute sm:left-[-63px] left-[-30px] mt-2 sm:w-[500px] w-[320px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
-              <ul className="w-1/2">
-                {colleges.map((college) => (
-                  <li
-                    key={college.id}
-                    className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
-                      selectedCollege === college.id
-                        ? 'bg-[#CED3FF] font-GmarketMedium'
-                        : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedCollege(college.id);
-                      setShowSubMenu(true);
-                    }}
+          {accessToken ? (
+            <div className="flex items-center justify-end w-[110px]">
+              <Link to="/my-page">
+                <button className="w-[25px] h-[25px] flex items-center justify-center hover:text-[#2EC4B6] active:text-black mr-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="#000000"
+                    width="800px"
+                    height="800px"
+                    viewBox="0 0 56 56"
+                    className="w-6 h-6 fill-current"
                   >
-                    {college.collegeName}
-                  </li>
-                ))}
-              </ul>
-              <div className="w-px bg-[#A0B0FF] my-2"></div>
-              {showSubMenu && selectedCollege && (
-                <ul className="w-1/2">
-                  {colleges
-                    .find((c) => c.id === selectedCollege)
-                    .studentClubs.map((club) => (
-                      <li
-                        key={club.id}
-                        className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 hover:bg-[#CED3FF] hover:font-GmarketMedium`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (user && user.role === 'ADMIN') {
-                            navigate(`/admin/${club.id}`);
-                          } else {
-                            navigate(`/receipts-list/${club.id}`, { state: { clubName: club.studentClubName } });
-                          }
-                          setShowDropdown(false);
-                          setShowSubMenu(false);
-                        }}
-                      >
-                        {club.studentClubName}
-                      </li>
-                    ))}
-                </ul>
-              )}
+                    <path d="M 27.9999 51.9063 C 41.0546 51.9063 51.9063 41.0781 51.9063 28 C 51.9063 14.9453 41.0312 4.0937 27.9765 4.0937 C 14.8983 4.0937 4.0937 14.9453 4.0937 28 C 4.0937 41.0781 14.9218 51.9063 27.9999 51.9063 Z M 27.9999 35.9922 C 20.9452 35.9922 15.5077 38.5 13.1405 41.3125 C 9.9999 37.7968 8.1014 33.1328 8.1014 28 C 8.1014 16.9609 16.9140 8.0781 27.9765 8.0781 C 39.0155 8.0781 47.8983 16.9609 47.9219 28 C 47.9219 33.1563 46.0234 37.8203 42.8593 41.3359 C 40.4921 38.5234 35.0546 35.9922 27.9999 35.9922 Z M 27.9999 32.0078 C 32.4999 32.0547 36.0390 28.2109 36.0390 23.1719 C 36.0390 18.4375 32.4765 14.5 27.9999 14.5 C 23.4999 14.5 19.9140 18.4375 19.9609 23.1719 C 19.9843 28.2109 23.4765 31.9609 27.9999 32.0078 Z" />
+                  </svg>
+                </button>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-[50px] h-[25px] rounded-[5px] flex items-center justify-center border-solid border-[1.5px] border-black text-[11px] font-GmarketMedium hover:border-[#2EC4B6] hover:text-[#2EC4B6] active:border-black active:text-black"
+              >
+                로그아웃
+              </button>
             </div>
+          ) : (
+            <Link to={'/login'}>
+              <button className="w-[50px] h-[25px] rounded-[5px] flex items-center justify-center border-solid border-[1.5px] border-black text-[11px] font-GmarketMedium hover:border-[#2EC4B6] hover:text-[#2EC4B6] active:border-black active:text-black">
+                로그인
+              </button>
+            </Link>
           )}
         </div>
-        {user && user.role === 'ADMIN' ? (
-          <></>
-        ) : (
-          <>
-            <button
-              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-              onClick={handleCreateReceipt}
-            >
-              작성
-            </button>
-            <button
-              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-              onClick={handleMyPage}
-            >
-              마이
-            </button>
-          </>
-        )}
       </div>
+      <CategorySideBar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
     </div>
   );
 };

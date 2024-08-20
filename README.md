@@ -1,1 +1,1 @@
-## ToMyongJi frontend repository
+## per(fect)-form frontend repository
