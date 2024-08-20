@@ -46,7 +46,7 @@ const App = () => {
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/find" element={<Find />} />
         <Route path="/receipts-list/:clubId" element={<ReceiptsList />} />
-        <Route
+        {/* <Route
           path="/create-receipt"
           element={
             <ProtectedRoute>
@@ -54,14 +54,17 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
+        <Route */}
+        <Route path="/create-receipt" element={<CreateReceipt />} />
+        {/* <Route
           path="/my-page"
           element={
             <ProtectedRoute>
               <MyPage />
             </ProtectedRoute>
           }
-        />
+        /> */}
+        <Route path="/my-page" element={<MyPage />} />
         <Route path="/admin/:clubId" element={<Admin />} />
         <Route path="/home-admin" element={<HomeAdmin />} />
         <Route path="/not-login" element={<NotLogin />} />
