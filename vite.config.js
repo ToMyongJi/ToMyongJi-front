@@ -5,16 +5,6 @@ import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 5172,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8443',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
   css: {
     postcss: {
       plugins: [tailwindcss, autoprefixer],

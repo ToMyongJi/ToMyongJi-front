@@ -1,315 +1,320 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import AppBar from '../components/AppBar';
-import EditProfileModal from '../components/EditProfileModal';
-import defaultImage from '../assets/images/default.png';
-import axios from 'axios';
+import Footer from '../components/Footer';
+import useStudentClubStore from '../store/studentClubStore';
+import useCollegeStore from '../store/collegeStore';
+import useAuthStore from '../store/authStore';
+import { fetchMyInfo } from '../utils/authApi';
+import { fetchAllColleges, fetchClubById, fetchAllClubs } from '../utils/receiptApi';
+import { deleteClubMember } from '../utils/studentClubMemberApi';
 
 const MyPage = () => {
-  const [userInfo, setUserInfo] = useState({
-    id: '',
-    username: '사용자 이름',
-    profile: null,
-    email: 'user@example.com',
-    snsUrl: 'snsUrl을 설정해주세요',
-    expert: false,
-  });
-
-  const [posts, setPosts] = useState([]);
-  const navigate = useNavigate();
-  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [reviewPosts, setReviewPosts] = useState([]);
-
-  const fetchUserInfo = async () => {
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/my`, {
-        headers: {
-          Authorization: `${localStorage.getItem('accessToken')}`,
-        },
-      });
-
-      setUserInfo({
-        id: response.data.id,
-        username: response.data.username,
-        profile: response.data.profile,
-        email: response.data.email,
-        snsUrl: response.data.snsUrl || '@sns_url',
-        expert: response.data.expert,
-      });
-    } catch (error) {
-      console.error('사용자 정보를 가져오는 데 실패했습니다:', error);
-    }
-  };
-
-  const fetchMyPosts = async () => {
-    try {
-      const [postsResponse, reviewPostsResponse] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/post/my`, {
-          headers: {
-            Authorization: `${localStorage.getItem('accessToken')}`,
-          },
-        }),
-        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/reviewpost/my`, {
-          headers: {
-            Authorization: `${localStorage.getItem('accessToken')}`,
-          },
-        }),
-      ]);
-      setPosts(postsResponse.data);
-      setReviewPosts(reviewPostsResponse.data);
-    } catch (error) {
-      console.error('게시글을 가져오는 데 실패했습니다:', error);
-    }
-  };
+  const { authData } = useAuthStore();
+  const [role, setRole] = useState('');
+  const [loginUserId, setLoginUserId] = useState('');
+  const { getClubNameById, currentClub, setCurrentClub, fetchClubMembers, addMember, deleteMember, fetchClubs } =
+    useStudentClubStore();
+  const { colleges, setColleges } = useCollegeStore();
+  const [userCollege, setUserCollege] = useState('');
+  const [userInfo, setUserInfo] = useState({});
+  const [clubName, setClubName] = useState('');
+  const [decodedToken, setDecodedToken] = useState({});
+  const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
+  const [currentUserClub, setCurrentUserClub] = useState(null);
 
   useEffect(() => {
-    fetchUserInfo();
-    fetchMyPosts();
-  }, [refreshTrigger]);
-
-  const getCategoryKorean = (category) => {
-    const categoryMap = {
-      lower: '하체',
-      abs: '복근',
-      arm: '팔',
-      back: '등',
-      chest: '가슴',
-      shoulder: '어깨',
-      routine: '루틴',
-      nutrition: '영양',
-    };
-    return categoryMap[category] || category;
-  };
-
-  const handleEdit = (postId) => {
-    navigate(`/edit-post/${postId}`);
-  };
-
-  const handleDelete = async (postId) => {
-    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+    if (authData && authData.accessToken) {
       try {
-        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/post/${postId}`, {
-          headers: {
-            Authorization: `${localStorage.getItem('accessToken')}`,
-          },
-        });
-        setRefreshTrigger((prev) => prev + 1);
+        const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        setDecodedToken(decoded);
       } catch (error) {
-        console.error('게시글 삭제 중 오류가 발생했습니다:', error);
+        console.error('토큰 디코딩 실패:', error);
       }
     }
-  };
+  }, [authData]);
 
-  const handleEditProfile = () => {
-    setIsEditProfileModalOpen(true);
-  };
-
-  const handleSaveProfile = (updatedProfile) => {
-    if (updatedProfile instanceof FormData) {
-      // FormData에서 이미지 파일 추출
-      const imageFile = updatedProfile.get('profileImage');
-      if (imageFile) {
-        // 이미지 파일을 URL로 변환
-        const imageUrl = URL.createObjectURL(imageFile);
-        setUserInfo((prevInfo) => ({
-          ...prevInfo,
-          username: updatedProfile.get('username'),
-          snsUrl: updatedProfile.get('snsUrl'),
-          profile: imageUrl,
-        }));
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      // console.log('디코딩된 토큰:', decodedToken);
+      if (authData && authData.accessToken) {
+        try {
+          const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
+          // console.log('새로 디코딩된 토큰:', decoded);
+          if (decoded && decoded.id) {
+            setRole(decoded.auth || '');
+            setLoginUserId(decoded.id);
+            try {
+              const info = await fetchMyInfo(decoded.id);
+              setUserCollege(info.college);
+              setUserInfo({
+                name: info.name,
+                studentNum: info.studentNum,
+                college: info.collegeName,
+                studentClubId: info.studentClubId,
+              });
+              if (info.studentClubId) {
+                await fetchClubs();
+                const name = getClubNameById(info.studentClubId) || '';
+                setClubName(name);
+                setCurrentClub(info.studentClubId);
+                fetchClubMembers(decoded.id);
+              }
+            } catch (error) {
+              console.error('사용자 정보 조회 실패:', error);
+            }
+          } else {
+            console.error('디코딩된 토큰에 유효한 사용자 ID가 없습니다.');
+          }
+        } catch (error) {
+          console.error('토큰 디코딩 실패:', error);
+        }
       } else {
-        // 이미지가 변경되지 않은 경우
-        setUserInfo((prevInfo) => ({
-          ...prevInfo,
-          username: updatedProfile.get('username'),
-          snsUrl: updatedProfile.get('snsUrl'),
-        }));
+        console.error('유효한 액세스 토큰이 없습니다.');
+      }
+    };
+
+    fetchUserInfo();
+  }, [authData, getClubNameById, setCurrentClub, fetchClubMembers, fetchClubs]);
+
+  useEffect(() => {
+    if (currentClub) {
+      setClubName(currentClub.studentClubName || '');
+    }
+  }, [currentClub]);
+
+  useEffect(() => {
+    if (userInfo && userInfo.studentClubId) {
+      const name = getClubNameById(userInfo.studentClubId) || '';
+      setClubName(name);
+    }
+  }, [userInfo, getClubNameById]);
+
+  useEffect(() => {
+    const loadColleges = async () => {
+      try {
+        const collegeData = await fetchAllColleges();
+        setColleges(collegeData);
+      } catch (error) {
+        console.error('대학 정보를 불러오는 데 실패했습니다:', error);
+      }
+    };
+    if (colleges.length === 0) {
+      loadColleges();
+    }
+  }, [colleges.length, setColleges]);
+
+  useEffect(() => {
+    if (authData && authData.id && authData.studentClubId) {
+      setCurrentClub(authData.studentClubId);
+      fetchClubMembers(authData.id);
+    }
+  }, [authData, setCurrentClub, fetchClubMembers]);
+
+  useEffect(() => {
+    const fetchClubData = async () => {
+      if (userInfo && userInfo.studentClubId) {
+        try {
+          const clubData = await fetchAllClubs();
+          const matchingClub = clubData.find((club) => club.id === userInfo.studentClubId);
+          if (matchingClub) {
+            setCurrentUserClub(matchingClub);
+          } else {
+            console.error('일치하는 학생회를 찾을 수 없습니다.');
+          }
+        } catch (error) {
+          console.error('학생회 정보 조회 실패:', error);
+        }
+      }
+    };
+
+    fetchClubData();
+  }, [userInfo]);
+
+  const getKoreanRole = (role) => {
+    const roleMap = {
+      STU: '소속원',
+      PRESIDENT: '회장',
+    };
+
+    return roleMap[role] || role;
+  };
+
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    if (loginUserId && newMember.studentNum && newMember.name) {
+      try {
+        await addMember(loginUserId, newMember);
+        setNewMember({ studentNum: '', name: '' });
+        await fetchClubMembers(loginUserId);
+        const updatedClubData = await fetchClubById(userInfo.studentClubId);
+        setCurrentUserClub(updatedClubData[0]);
+        alert('정상적으로 소속원이 추가되었습니다.');
+
+        const allClubsData = await fetchAllClubs();
+        const updatedCurrentClub = allClubsData.find((club) => club.id === userInfo.studentClubId);
+        if (updatedCurrentClub) {
+          setCurrentUserClub(updatedCurrentClub);
+        }
+      } catch (error) {
+        console.error('멤버 추가 중 오류 발생:', error);
+        alert('소속원 추가 중 오류가 발생했습니다.');
       }
     } else {
-      // FormData가 아닌 경우
-      setUserInfo((prevInfo) => ({
-        ...prevInfo,
-        ...updatedProfile,
-      }));
+      console.error('사용자 정보 또는 새 멤버 정보가 없습니다.');
+      alert('사용자 정보 또는 새 멤버 정보가 없습니다.');
     }
-    setIsEditProfileModalOpen(false);
-    setRefreshTrigger((prev) => prev + 1);
   };
 
-  const handlePostClick = (post) => {
-    navigate(`/feedback/${post.id}`, {
-      state: {
-        postData: {
-          postId: post.id,
-          category: post.category,
-          title: post.title,
-          user: post.username,
-          userId: post.userId,
-          content: post.content,
-          date: new Date(post.createdDate).toLocaleDateString(),
-          likes: post.likesNum,
-          attachments: post.attachments,
-          liked: post.liked,
-        },
-      },
-    });
-  };
+  const handleDeleteMember = async (studentNum) => {
+    if (currentUserClub && currentUserClub.memberInfos) {
+      const memberToDelete = currentUserClub.memberInfos.find((member) => member.studentNum === studentNum);
+      if (memberToDelete) {
+        try {
+          await deleteClubMember(memberToDelete.id);
 
-  const handleEditReviewPost = (postId) => {
-    navigate(`/edit-evaluation-post/${postId}`);
-  };
+          const allClubsData = await fetchAllClubs();
+          const updatedCurrentClub = allClubsData.find((club) => club.id === userInfo.studentClubId);
+          if (updatedCurrentClub) {
+            setCurrentUserClub(updatedCurrentClub);
+          }
 
-  const handleDeleteReviewPost = async (postId) => {
-    if (window.confirm('정말로 이 심사 게시글을 삭제하시겠습니까?')) {
-      try {
-        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/reviewpost/${postId}`, {
-          headers: {
-            Authorization: `${localStorage.getItem('accessToken')}`,
-          },
-        });
-        setRefreshTrigger((prev) => prev + 1);
-      } catch (error) {
-        console.error('심사 게시글 삭제 중 오류가 발생했습니다:', error);
+          alert('정상적으로 소속원이 삭제되었습니다.');
+        } catch (error) {
+          console.error('멤버 삭제 중 오류 발생:', error);
+          alert('회원가입된 소속원은 삭제할 수 없습니다.');
+        }
+      } else {
+        console.error('삭제할 멤버를 찾을 수 없습니다.');
+        alert('삭제할 멤버를 찾을 수 없습니다.');
       }
     }
-  };
-
-  const handleReviewPostClick = (post) => {
-    navigate(`/evaluation/${post.id}`);
   };
 
   return (
-    <div className="max-w-[600px] min-h-screen mx-auto bg-white">
-      <Header isAuthenticated={true} />
-      <div className="p-4 pb-16">
-        <div className="flex items-center justify-between py-2 mb-6">
-          <div className="flex items-center mb-8">
-            <img
-              src={userInfo.profile || defaultImage}
-              alt="프로필 사진"
-              className="object-cover w-24 h-24 mr-4 rounded-full"
-            />
-            <div>
-              <div>
-                <h1 className="flex items-center mb-1 text-2xl font-GmarketBold">
-                  {userInfo.username}
-                  {userInfo.expert && (
-                    <span className="px-1 py-0.5 ml-2 text-xs text-white bg-[#2EC4B6] rounded-[10px] font-GmarketMedium">
-                      고수
-                    </span>
-                  )}
-                </h1>
-                <p className="mb-1 text-sm text-gray-600 font-GmarketMedium">{userInfo.email}</p>
-                <p className="text-sm text-gray-600 font-GmarketMedium">{userInfo.snsUrl}</p>
+    <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
+      <Header />
+      <div className="flex flex-col items-center justify-center px-4 sm:px-20 py-10 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
+        {/* 내 정보 관리  */}
+        <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
+          <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">내 정보</h2>
+          <form className="space-y-5">
+            <div className="flex flex-wrap items-center">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
+              <input
+                role="text"
+                value={userInfo.name || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+            <div className="flex flex-wrap items-center">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학번</label>
+              <input
+                role="text"
+                value={userInfo.studentNum || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+            <div className="flex flex-wrap items-center">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">대학</label>
+              <input
+                role="text"
+                value={userCollege}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
+              <input
+                role="text"
+                value={clubName || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+            <div className="flex flex-wrap items-center">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">자격</label>
+              <input
+                role="text"
+                value={decodedToken ? getKoreanRole(role) : ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* 소속 관리 박스(회장만 보임) */}
+        {getKoreanRole(role) === '회장' && currentUserClub && (
+          <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
+            <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
+            <div className="flex flex-wrap items-center mb-4">
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
+              <input
+                role="text"
+                value={currentUserClub.studentClubName || ''}
+                readOnly
+                className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+            <form onSubmit={handleAddMember} className="mb-4">
+              <div className="flex space-x-2">
+                <input
+                  role="text"
+                  placeholder="학번"
+                  value={newMember.studentNum}
+                  onChange={(e) => setNewMember({ ...newMember, studentNum: e.target.value })}
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                />
+                <input
+                  role="text"
+                  placeholder="이름"
+                  value={newMember.name}
+                  onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                />
+                <button
+                  role="submit"
+                  className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
+                >
+                  <span className="hidden sm:inline">추가</span>
+                  <span className="sm:hidden text-[12px]">+</span>
+                </button>
               </div>
+            </form>
+            <div className="space-y-2">
+              {currentUserClub.memberInfos &&
+                currentUserClub.memberInfos.map((member) => (
+                  <div key={member.id} className="flex items-center space-x-2">
+                    <input
+                      role="text"
+                      value={member.studentNum}
+                      readOnly
+                      className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                    />
+                    <input
+                      role="text"
+                      value={member.name}
+                      readOnly
+                      className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                    />
+                    <button
+                      onClick={() => handleDeleteMember(member.studentNum)}
+                      className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
+                    >
+                      <span className="hidden sm:inline">삭제</span>
+                      <span className="sm:hidden text-[12px]">-</span>
+                    </button>
+                  </div>
+                ))}
             </div>
           </div>
-          <div className="flex justify-center">
-            <button
-              onClick={handleEditProfile}
-              className="bg-[#2EC4B6] text-white px-3 py-2 rounded text-sm font-GmarketMedium hover:bg-[#2AB0A3]"
-            >
-              프로필 수정
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="mb-2 text-md font-GmarketBold text-[#2EC4B6]">내 게시글</h2>
-          {posts.length > 0 ? (
-            <ul className="space-y-2">
-              {posts.map((post) => {
-                return (
-                  <li key={post.id} className="pb-2 border-b">
-                    <div className="flex items-center justify-between">
-                      <div
-                        onClick={() => handlePostClick(post)}
-                        className="flex-grow block p-2 rounded cursor-pointer hover:bg-gray-100"
-                      >
-                        <div className="flex justify-between text-xs text-gray-600 font-GmarketLight mb-[5px]">
-                          <span className="text-[#2EC4B6] font-GmarketMedium">{getCategoryKorean(post.category)}</span>
-                          <span>{new Date(post.createdDate).toLocaleDateString()}</span>
-                        </div>
-                        <h3 className="text-sm font-GmarketLight">{post.title}</h3>
-                      </div>
-                      <div className="w-[16%] flex items-center justify-between ml-5">
-                        <button
-                          onClick={() => handleEdit(post.id)}
-                          className="px-2 py-1 text-xs text-[#2EC4B6] border border-[#2EC4B6] rounded hover:bg-[#2EC4B6] hover:text-white active:bg-white active:text-[#2EC4B6] transition-colors duration-200 font-GmarketMedium"
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={() => handleDelete(post.id)}
-                          className="px-2 py-1 text-xs text-[#FF6B6B] border border-[#FF6B6B] rounded hover:bg-[#FF6B6B] hover:text-white active:bg-white active:text-[#FF6B6B] transition-colors duration-200 font-GmarketMedium"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-gray-600">작성한 게시글이 없습니다.</p>
-          )}
-        </div>
-
-        <div className="mb-6">
-          <h2 className="mb-2 text-md font-GmarketBold text-[#2EC4B6]">내 심사 게시글</h2>
-          {reviewPosts.length > 0 ? (
-            <ul className="space-y-2">
-              {reviewPosts.map((post) => {
-                return (
-                  <li key={post.id} className="pb-2 border-b">
-                    <div className="flex items-center justify-between">
-                      <div
-                        onClick={() => handleReviewPostClick(post)}
-                        className="flex-grow block p-2 rounded cursor-pointer hover:bg-gray-100"
-                      >
-                        <div className="flex justify-between text-xs text-gray-600 font-GmarketLight mb-[5px]">
-                          <span className="text-[#2EC4B6] font-GmarketMedium">심사</span>
-                          <span>{new Date(post.createdDate).toLocaleDateString()}</span>
-                        </div>
-                        <h3 className="text-sm font-GmarketLight">{post.title}</h3>
-                      </div>
-                      <div className="w-[16%] flex items-center justify-between ml-5">
-                        <button
-                          onClick={() => handleEditReviewPost(post.id)}
-                          className="px-2 py-1 text-xs text-[#2EC4B6] border border-[#2EC4B6] rounded hover:bg-[#2EC4B6] hover:text-white active:bg-white active:text-[#2EC4B6] transition-colors duration-200 font-GmarketMedium"
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={() => handleDeleteReviewPost(post.id)}
-                          className="px-2 py-1 text-xs text-[#FF6B6B] border border-[#FF6B6B] rounded hover:bg-[#FF6B6B] hover:text-white active:bg-white active:text-[#FF6B6B] transition-colors duration-200 font-GmarketMedium"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-gray-600">작성한 심사 게시글이 없습니다.</p>
-          )}
-        </div>
+        )}
       </div>
-      {!isEditProfileModalOpen && <AppBar />}
-      {isEditProfileModalOpen && (
-        <EditProfileModal
-          userInfo={userInfo}
-          onSave={handleSaveProfile}
-          onClose={() => setIsEditProfileModalOpen(false)}
-          userId={userInfo.id}
-          accessToken={localStorage.getItem('accessToken')}
-        />
-      )}
+      <Footer />
     </div>
   );
 };
