@@ -13,6 +13,7 @@ import SignUp from './pages/login/SignUp';
 import ReceiptsList from './pages/receipt/ReceiptsList';
 import CreateReceipt from './pages/receipt/CreateReceipt';
 import NotLogin from './pages/NotLogin';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Admin from './pages/admin/Admin';
 import HomeAdmin from './pages/admin/HomeAdmin';
 
@@ -68,6 +69,7 @@ const App = () => {
         <Route path="/admin/:clubId" element={<Admin />} />
         <Route path="/home-admin" element={<HomeAdmin />} />
         <Route path="/not-login" element={<NotLogin />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
