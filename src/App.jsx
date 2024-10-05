@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
 import useUserStore from './store/userStore';
 import useAuthStore from './store/authStore';
 
@@ -47,24 +46,7 @@ const App = () => {
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/find" element={<Find />} />
         <Route path="/receipts-list/:clubId" element={<ReceiptsList />} />
-        {/* <Route
-          path="/create-receipt"
-          element={
-            <ProtectedRoute>
-              <CreateReceipt />
-            </ProtectedRoute>
-          }
-        />
-        <Route */}
         <Route path="/create-receipt" element={<CreateReceipt />} />
-        {/* <Route
-          path="/my-page"
-          element={
-            <ProtectedRoute>
-              <MyPage />
-            </ProtectedRoute>
-          }
-        /> */}
         <Route path="/my-page" element={<MyPage />} />
         <Route path="/admin/:clubId" element={<Admin />} />
         <Route path="/home-admin" element={<HomeAdmin />} />
