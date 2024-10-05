@@ -30,8 +30,7 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        console.log('액세스 토큰:', authData.accessToken);
-
+        // console.log('액세스 토큰:', authData.accessToken);
         // console.log('디코딩된 액세스 토큰:', decodedAccessToken);
 
         if (authData.refreshToken) {
@@ -57,7 +56,8 @@ const Login = () => {
       // 로그인 전에 기존 사용자 정보 초기화
       clearUser();
 
-      const { accessToken, refreshToken } = await loginUser(userId, password);
+      const { data } = await loginUser(userId, password);
+      const { accessToken, refreshToken } = data;
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 
       // accessToken 디코딩

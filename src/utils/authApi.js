@@ -7,7 +7,8 @@ export const loginUser = async (userId, password) => {
     const response = await api.post(`${API_BASE_URL}/api/users/login`, { userId, password });
     // console.log(response.data);
 
-    const { grantType, accessToken, refreshToken } = response.data;
+    const { grantType, accessToken, refreshToken } = response.data.data;
+
     useAuthStore.getState().setAuthData(grantType, accessToken, refreshToken);
 
     return response.data;
@@ -32,7 +33,7 @@ export const signUpUser = async (userData) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.status === 400) {
-      alert('회원가입에 실패했습니다. 입력 ��를 확인해주세요.');
+      alert('회원가입에 실패했습니다. 입력 를 확인해주세요.');
     } else {
       console.error('회원가입 요청 실패:', error);
     }
