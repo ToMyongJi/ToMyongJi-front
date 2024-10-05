@@ -8,19 +8,7 @@ const Footer = () => {
       </Link>
       <br />
       <span className="font-GmarketMedium">Copyright ⓒ ToMyongJi. All Rights Reserved</span>
-      <p className="font-GmarketLight">
-        {/* <br />
-        명지대학교(인문) 멋쟁이백마처럼
-        <br />
-        대표자 : 이준규
-        <br />
-        팀원 : 이서현, 박진형
-        <br />
-        주소 : 서울특별시 서대문구 거북골로 34
-        <br />
-        연락처 : 010 - 6540 -3642 */}
-        E-mail: junnkyuu22@gmail.com
-      </p>
+      <p className="font-GmarketLight">E-mail: tomyongji2024@gmail.com</p>
     </footer>
   );
 };
