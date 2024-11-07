@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { fetchClubReceipts, createUserReceipt, deleteUserReceipt } from '../../utils/receiptApi';
@@ -6,7 +7,6 @@ import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
 import useStudentClubStore from '../../store/studentClubStore';
 
-import addCircle from '../../assets/images/add-circle.png';
 import addFile from '../../assets/images/add-file.png';
 import deleteButton from '../../assets/images/delete.png';
 
@@ -25,6 +25,8 @@ const CreateReceipt = () => {
   const [filteredData, setFilteredData] = useState([]);
 
   const { getClubNameById } = useStudentClubStore();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (authData && authData.accessToken) {
@@ -134,16 +136,20 @@ const CreateReceipt = () => {
           <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">
             {getClubNameById(userData?.studentClubId)}
           </h2>
-          <div className="flex space-x-2">
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => navigate('/receipt/upload-csv')}
+              className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+            >
+              기존 데이터 추가
+            </button>
             <button
               type="button"
               onClick={handleImageUpload}
-              className="p-1 sm:p-2 rounded-lg hover:bg-[#CED3FF] transition duration-300"
+              className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
             >
-              <img src={addFile} alt="사진 첨부" className="w-4 h-4 sm:w-6 sm:h-6" />
-            </button>
-            <button onClick={handleSubmit} className="p-1 sm:p-2 rounded-lg hover:bg-[#CED3FF] transition duration-300">
-              <img src={addCircle} alt="추가" className="w-4 h-4 sm:w-6 sm:h-6" />
+              영수증 첨부
             </button>
           </div>
         </div>
@@ -246,10 +252,10 @@ const CreateReceipt = () => {
 
         <div className="flex justify-center w-full mt-4 mb-10">
           <button
-            onClick={handleSave}
+            onClick={handleSubmit}
             className="w-1/4 px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
           >
-            작성하기
+            저장하기
           </button>
         </div>
       </div>
