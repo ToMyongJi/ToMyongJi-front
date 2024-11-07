@@ -15,6 +15,7 @@ import NotLogin from './pages/NotLogin';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Admin from './pages/admin/Admin';
 import HomeAdmin from './pages/admin/HomeAdmin';
+import UploadCSVReceipt from './pages/receipt/UploadCSVReceipt';
 
 const App = () => {
   const { user, setUser } = useUserStore();
@@ -52,6 +53,7 @@ const App = () => {
         <Route path="/home-admin" element={<HomeAdmin />} />
         <Route path="/not-login" element={<NotLogin />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/receipt/upload-csv" element={<UploadCSVReceipt />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
