@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -6,30 +6,33 @@ import { fetchClubReceipts, createUserReceipt, deleteUserReceipt } from '../../u
 import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
 import useStudentClubStore from '../../store/studentClubStore';
-
-import addFile from '../../assets/images/add-file.png';
 import deleteButton from '../../assets/images/delete.png';
 
 const CreateReceipt = () => {
+  // State 관리
   const { authData } = useAuthStore();
+  const { getClubNameById } = useStudentClubStore();
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+
   const [userId, setUserId] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [receiptData, setReceiptData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+
+  // 폼 데이터
   const [date, setDate] = useState('');
   const [content, setContent] = useState('');
   const [deposit, setDeposit] = useState('');
   const [withdrawal, setWithdrawal] = useState('');
-  const [receiptData, setReceiptData] = useState([]);
 
+  // 필터 데이터
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
 
-  const { getClubNameById } = useStudentClubStore();
-
-  const navigate = useNavigate();
-
+  // 사용자 인증 및 데이터 로드
   useEffect(() => {
-    if (authData && authData.accessToken) {
+    if (authData?.accessToken) {
       try {
         const decodedToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
         setUserId(decodedToken.id);
@@ -45,6 +48,17 @@ const CreateReceipt = () => {
     }
   }, [userId]);
 
+  useEffect(() => {
+    if (userData?.studentClubId) {
+      fetchReceipts();
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    filterDataByDateRange();
+  }, [receiptData, startDate, endDate]);
+
+  // API 호출 함수
   const fetchUserData = async (userId) => {
     try {
       const data = await fetchMyInfo(userId);
@@ -54,14 +68,8 @@ const CreateReceipt = () => {
     }
   };
 
-  useEffect(() => {
-    if (userData && userData.studentClubId) {
-      fetchReceipts();
-    }
-  }, [userData]);
-
   const fetchReceipts = async () => {
-    if (!userData || !userData.studentClubId) return;
+    if (!userData?.studentClubId) return;
     try {
       const data = await fetchClubReceipts(userData.studentClubId);
       setReceiptData(data);
@@ -70,21 +78,10 @@ const CreateReceipt = () => {
     }
   };
 
-  useEffect(() => {
-    filterDataByDateRange();
-  }, [receiptData, startDate, endDate]);
-
-  const filterDataByDateRange = () => {
-    const filtered = receiptData.filter((item) => {
-      const itemDate = new Date(item.date);
-      return (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate));
-    });
-    setFilteredData(filtered);
-  };
-
+  // 이벤트 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!userData || !userData.studentClubId) {
+    if (!userData?.studentClubId) {
       alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
@@ -92,27 +89,45 @@ const CreateReceipt = () => {
       alert('빠진 내용이 없나 확인해주세요.');
       return;
     }
-    const newItem = {
-      date,
-      content,
-      deposit: Number(deposit) || 0,
-      withdrawal: Number(withdrawal) || 0,
-      clubId: userData.studentClubId,
-    };
+
     try {
+      const newItem = {
+        date,
+        content,
+        deposit: Number(deposit) || 0,
+        withdrawal: Number(withdrawal) || 0,
+        clubId: userData.studentClubId,
+      };
+
       await createUserReceipt(userId, newItem);
       fetchReceipts();
-      setDate('');
-      setContent('');
-      setDeposit('');
-      setWithdrawal('');
+      resetForm();
     } catch (error) {
       console.error('영수증 생성에 실패했습니다:', error);
     }
   };
 
   const handleImageUpload = () => {
-    // 이미지 업로드 로직
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!validImageTypes.includes(file.type)) {
+      alert('JPG, PNG 형식의 이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
+    // OCR API 연동 부분은 나중에 구현
   };
 
   const handleDelete = async (receiptId) => {
@@ -124,8 +139,20 @@ const CreateReceipt = () => {
     }
   };
 
-  const handleSave = () => {
-    alert('모든 변경사항이 저장되었습니다.');
+  // 유틸리티 함수
+  const filterDataByDateRange = () => {
+    const filtered = receiptData.filter((item) => {
+      const itemDate = new Date(item.date);
+      return (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate));
+    });
+    setFilteredData(filtered);
+  };
+
+  const resetForm = () => {
+    setDate('');
+    setContent('');
+    setDeposit('');
+    setWithdrawal('');
   };
 
   return (
@@ -137,6 +164,13 @@ const CreateReceipt = () => {
             {getClubNameById(userData?.studentClubId)}
           </h2>
           <div className="flex items-center space-x-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/jpeg,image/png,image/jpg"
+              className="hidden"
+            />
             <button
               type="button"
               onClick={() => navigate('/receipt/upload-csv')}
