@@ -90,7 +90,7 @@ const PrivacyPolicy = () => {
             개인정보보호책임자를 지정하고 있습니다:
             <br />- 개인정보보호책임자 성명: 이준규
             <br />- 전화번호: 010-6540-3642
-            <br />- 이메일: junnkyuu22@gmail.com
+            <br />- 이메일: tomyongji2024@gmail.com
           </p>
           <h2 className="mb-4 text-[12px] sm:text-[18px] text-[#061E5B] font-GmarketMedium">
             9. 개인정보 처리방침 변경
