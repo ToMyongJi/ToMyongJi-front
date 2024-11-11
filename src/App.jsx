@@ -4,6 +4,7 @@ import useUserStore from './store/userStore';
 import useAuthStore from './store/authStore';
 
 import Home from './pages/Home';
+import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import MyPage from './pages/MyPage';
 import Find from './pages/login/Find';
@@ -46,14 +47,62 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/find" element={<Find />} />
-        <Route path="/receipts-list/:clubId" element={<ReceiptsList />} />
-        <Route path="/create-receipt" element={<CreateReceipt />} />
-        <Route path="/my-page" element={<MyPage />} />
-        <Route path="/admin/:clubId" element={<Admin />} />
-        <Route path="/home-admin" element={<HomeAdmin />} />
-        <Route path="/not-login" element={<NotLogin />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/receipt/upload-csv" element={<UploadCSVReceipt />} />
+        <Route path="/not-login" element={<NotLogin />} />
+
+        <Route
+          path="/receipts-list/:clubId"
+          element={
+            <ProtectedRoute>
+              <ReceiptsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-receipt"
+          element={
+            <ProtectedRoute>
+              <CreateReceipt />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route path="/create-receipt" element={<CreateReceipt />} /> */}
+        <Route
+          path="/my-page"
+          element={
+            <ProtectedRoute>
+              <MyPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route path="/my-page" element={<MyPage />} /> */}
+        <Route
+          path="/admin/:clubId"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route path="/admin/:clubId" element={<Admin />} /> */}
+        <Route
+          path="/home-admin"
+          element={
+            <ProtectedRoute>
+              <HomeAdmin />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route path="/home-admin" element={<HomeAdmin />} /> */}
+        <Route
+          path="/receipt/upload-csv"
+          element={
+            <ProtectedRoute>
+              <UploadCSVReceipt />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route path="/receipt/upload-csv" element={<UploadCSVReceipt />} /> */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
