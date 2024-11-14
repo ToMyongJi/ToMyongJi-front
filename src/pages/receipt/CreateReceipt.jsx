@@ -106,13 +106,13 @@ const CreateReceipt = () => {
         resetForm();
         await fetchReceipts();
         setFilteredData([]);
-        alert('영수증이 성공적으로 저장되었습니다.');
+        alert('내역이 성공적으로 저장되었습니다.');
       } else {
-        alert('영수증 저장에 실패했습니다.');
+        alert('내역 저장에 실패했습니다.');
       }
     } catch (error) {
-      console.error('영수증 생성에 실패했습니다:', error);
-      alert('영수증 저장에 실패했습니다.');
+      console.error('내역 생성에 실패했습니다:', error);
+      alert('내역 저장에 실패했습니다.');
     }
   };
 
@@ -140,7 +140,7 @@ const CreateReceipt = () => {
   };
 
   const handleDelete = async (receiptId) => {
-    if (!window.confirm('정말로 이 영수증을 삭제하시겠습니까?')) {
+    if (!window.confirm('정말로 이 내역을 삭제하시겠습니까?')) {
       return;
     }
 
@@ -153,13 +153,13 @@ const CreateReceipt = () => {
           filterDataByDateRange();
         }
 
-        alert('영수증이 삭제되었습니다.');
+        alert('내역이 삭제되었습니다.');
       } else {
-        alert('영수증 삭제에 실패했습니다.');
+        alert('내역 삭제에 실패했습니다.');
       }
     } catch (error) {
-      console.error('영수증 삭제에 실패했습니다:', error);
-      alert('영수증 삭제에 실패했습니다.');
+      console.error('내역 삭제에 실패했습니다:', error);
+      alert('내역 삭제에 실패했습니다.');
     }
   };
 

@@ -17,7 +17,6 @@ const UploadCsvReceipt = () => {
     if (authData?.accessToken) {
       try {
         const decodedToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        console.log('decodedToken:', decodedToken);
         setUserId(decodedToken.id);
       } catch (error) {
         console.error('액세스 토큰 디코딩 중 오류 발생:', error);
@@ -40,7 +39,6 @@ const UploadCsvReceipt = () => {
 
     setIsLoading(true);
     try {
-      console.log('userId:', userId);
       if (!userId) {
         alert('사용자 ID를 찾을 수 없습니다.');
         return;
@@ -50,14 +48,14 @@ const UploadCsvReceipt = () => {
 
       if (response.statusCode === 200) {
         const receipts = response.data;
-        console.log('Receipts:', receipts);
-        alert('CSV 파일이 성공적으로 업로드되었습니다.');
+        alert('기존 데이터가 성공적으로 업로드되었습니다.');
+        navigate(`/create-receipt`);
       } else {
-        alert('CSV 파일 업로드에 실패했습니다.');
+        alert('기존 데이터 업로드에 실패했습니다.');
       }
     } catch (error) {
-      console.error('CSV 업로드 중 오류 발생:', error);
-      alert('CSV 파일 업로드 중 오류가 발생했습니다.');
+      console.error('데이터 업로드 중 오류 발생:', error);
+      alert('데이터 업로드 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -68,15 +66,15 @@ const UploadCsvReceipt = () => {
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
         <div className="flex items-center justify-between w-full mb-4">
-          <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">CSV 파일 업로드</h2>
+          <h2 className="font-GmarketMedium text-[#061E5B] text-[15px] sm:text-[18px]">기존 데이터 추가하기</h2>
         </div>
 
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-4">
           <h3 className="font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72] mb-3">CSV 파일 형식 안내</h3>
           <div className="space-y-3 text-[10px] sm:text-[12px] text-[#061E5B]">
-            <p className="mb-2">엑셀 파일을 다음과 같은 CSV 형식으로 변환해주세요:</p>
+            <p className="mb-2 text-red-500">엑셀 파일을 다음과 같은 CSV 형식으로 변환해주세요:</p>
             <div className="bg-gray-50 p-3 rounded-md font-mono text-[10px] sm:text-[11px]">
-              날짜, 내용, 입금, 출금
+              date, content, deposit, withdrawal
               <br />
               2024-11-01, 회비, 50000, 0
               <br />
@@ -96,7 +94,9 @@ const UploadCsvReceipt = () => {
             <div className="mt-4">
               <p className="mb-2 font-GmarketMedium">주의사항:</p>
               <ul className="ml-2 space-y-1 list-disc list-inside">
-                <li>위의 형식과 반드시 동일해야 합니다.</li>
+                <li className="text-red-500">위의 형식과 반드시 동일해야 합니다.</li>
+                <li className="text-red-500">날짜와 내용이 같은 줄은 영수증으로 인식되지 않습니다.</li>
+                <li>컬럼 명은 date, content, deposit, withdrawal 이어야 합니다.</li>
                 <li>날짜는 YYYY-MM-DD 형식으로 입력해주세요.</li>
                 <li>내용은 최대 10자까지 입력해주세요.</li>
                 <li>입금과 출금은 숫자만 입력해주세요.</li>
