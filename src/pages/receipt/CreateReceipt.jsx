@@ -49,7 +49,7 @@ const CreateReceipt = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (userData?.studentClubId) {
+    if (userData?.data?.studentClubId) {
       fetchReceipts();
     }
   }, [userData]);
@@ -61,27 +61,31 @@ const CreateReceipt = () => {
   // API 호출 함수
   const fetchUserData = async (userId) => {
     try {
-      const data = await fetchMyInfo(userId);
-      setUserData(data);
+      const response = await fetchMyInfo(userId);
+      setUserData(response);
     } catch (error) {
       console.error('사용자 정보를 가져오는데 실패했습니다:', error);
     }
   };
 
   const fetchReceipts = async () => {
-    if (!userData?.studentClubId) return;
+    if (!userData?.data?.studentClubId) return;
     try {
-      const data = await fetchClubReceipts(userData.studentClubId);
-      setReceiptData(data);
+      const response = await fetchClubReceipts(userData.data.studentClubId);
+      console.log(response.data);
+      setReceiptData(response.data || []);
+      setFilteredData(response.data || []);
     } catch (error) {
       console.error('영수증 데이터를 가져오는데 실패했습니다:', error);
+      setReceiptData([]);
+      setFilteredData([]);
     }
   };
 
   // 이벤트 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!userData?.studentClubId) {
+    if (!userData?.data?.studentClubId) {
       alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
@@ -91,19 +95,25 @@ const CreateReceipt = () => {
     }
 
     try {
-      const newItem = {
-        date,
-        content,
+      const requestData = {
+        date: new Date(date).toISOString(),
+        content: content,
         deposit: Number(deposit) || 0,
         withdrawal: Number(withdrawal) || 0,
-        clubId: userData.studentClubId,
       };
 
-      await createUserReceipt(userId, newItem);
-      fetchReceipts();
-      resetForm();
+      const response = await createUserReceipt(userId, requestData);
+      if (response.statusCode === 200) {
+        resetForm();
+        await fetchReceipts();
+        setFilteredData([]);
+        alert('영수증이 성공적으로 저장되었습니다.');
+      } else {
+        alert('영수증 저장에 실패했습니다.');
+      }
     } catch (error) {
       console.error('영수증 생성에 실패했습니다:', error);
+      alert('영수증 저장에 실패했습니다.');
     }
   };
 
@@ -131,20 +141,48 @@ const CreateReceipt = () => {
   };
 
   const handleDelete = async (receiptId) => {
+    if (!window.confirm('정말로 이 영수증을 삭제하시겠습니까?')) {
+      return;
+    }
+
     try {
-      await deleteUserReceipt(receiptId);
-      fetchReceipts();
+      const response = await deleteUserReceipt(receiptId);
+      if (response.statusCode === 200) {
+        await fetchReceipts();
+
+        if (startDate || endDate) {
+          filterDataByDateRange();
+        }
+
+        alert('영수증이 삭제되었습니다.');
+      } else {
+        alert('영수증 삭제에 실패했습니다.');
+      }
     } catch (error) {
       console.error('영수증 삭제에 실패했습니다:', error);
+      alert('영수증 삭제에 실패했습니다.');
     }
   };
 
   // 유틸리티 함수
   const filterDataByDateRange = () => {
+    if (!receiptData) return;
+
     const filtered = receiptData.filter((item) => {
       const itemDate = new Date(item.date);
-      return (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate));
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+
+      if (start && end) {
+        return itemDate >= start && itemDate <= end;
+      } else if (start) {
+        return itemDate >= start;
+      } else if (end) {
+        return itemDate <= end;
+      }
+      return true;
     });
+
     setFilteredData(filtered);
   };
 
@@ -161,7 +199,7 @@ const CreateReceipt = () => {
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
         <div className="flex items-center justify-between w-full mb-4">
           <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">
-            {getClubNameById(userData?.studentClubId)}
+            {getClubNameById(userData?.data.studentClubId)}
           </h2>
           <div className="flex items-center space-x-2">
             <input
@@ -260,9 +298,9 @@ const CreateReceipt = () => {
             {(filteredData.length > 0 ? filteredData : receiptData).length > 0 ? (
               (filteredData.length > 0 ? filteredData : receiptData)
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .map((item) => (
-                  <div key={item.id} className="flex items-center justify-between">
-                    <span className="w-1/5">{item.date}</span>
+                .map((item, index) => (
+                  <div key={`${item.id || ''}-${item.date}-${index}`} className="flex items-center justify-between">
+                    <span className="w-1/5">{new Date(item.date).toLocaleDateString()}</span>
                     <span className="w-1/5">{item.content}</span>
                     <span className="w-1/5 text-right text-blue-500">
                       {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
@@ -271,7 +309,7 @@ const CreateReceipt = () => {
                       {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
                     </span>
                     <button
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(item.receiptId)}
                       className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
                     >
                       <img src={deleteButton} alt="삭제" className="w-2 h-2 sm:w-4 sm:h-4" />

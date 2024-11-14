@@ -10,11 +10,13 @@ const useCollegeStore = create((set) => ({
     })),
   updateCollege: (updatedCollege) =>
     set((state) => ({
-      colleges: state.colleges.map((college) => (college.id === updatedCollege.id ? updatedCollege : college)),
+      colleges: state.colleges.map((college) =>
+        college.collegeId === updatedCollege.collegeId ? updatedCollege : college
+      ),
     })),
   removeCollege: (collegeId) =>
     set((state) => ({
-      colleges: state.colleges.filter((college) => college.id !== collegeId),
+      colleges: state.colleges.filter((college) => college.collegeId !== collegeId),
     })),
 }));
 

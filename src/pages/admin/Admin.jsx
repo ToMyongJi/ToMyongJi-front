@@ -19,7 +19,7 @@ const Admin = () => {
   const fetchClubData = async () => {
     try {
       const clubData = await fetchAllClubs();
-      const club = clubData.find((club) => club.id === parseInt(clubId));
+      const club = clubData.find((club) => club.studentClubId === parseInt(clubId));
       if (club) {
         setStudentClubName(club.studentClubName);
         setPresident(club.presidentInfo);
@@ -86,7 +86,7 @@ const Admin = () => {
   const handleDeleteMember = async (memberId) => {
     try {
       await deleteMember(memberId);
-      setMembers(members.filter((member) => member.id !== memberId));
+      setMembers(members.filter((member) => member.memberId !== memberId));
       alert('부원이 삭제되었습니다.');
     } catch (error) {
       console.error('부원 삭제 실패:', error);
@@ -174,7 +174,7 @@ const Admin = () => {
           </form>
           <div className="space-y-2">
             {members.map((member) => (
-              <div key={member.id} className="flex items-center space-x-2">
+              <div key={member.memberId} className="flex items-center space-x-2">
                 <input
                   type="text"
                   value={member.studentNum}
@@ -188,7 +188,7 @@ const Admin = () => {
                   className="flex-1 p-1 bg-gray-100 border rounded-lg sm:p-2"
                 />
                 <button
-                  onClick={() => handleDeleteMember(member.id)}
+                  onClick={() => handleDeleteMember(member.memberId)}
                   className="px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#FF7B9B] hover:shadow-[0_0_20px_#FF4D7D] hover:bg-[#FFF0F5] border-none cursor-pointer transition duration-300"
                 >
                   <span className="hidden sm:inline">삭제</span>

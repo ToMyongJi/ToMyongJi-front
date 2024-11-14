@@ -17,19 +17,18 @@ const useStudentClubStore = create((set, get) => ({
     }
   },
   getClubNameById: (clubId) => {
-    const club = get().clubs.find((club) => club.id === clubId);
+    const club = get().clubs.find((club) => club.studentClubId === clubId);
     return club ? club.studentClubName : '알 수 없는 동아리';
   },
   setCurrentClub: (clubId) => {
-    const club = get().clubs.find((club) => club.id === clubId);
+    const club = get().clubs.find((club) => club.studentClubId === clubId);
     if (club) {
       set({ currentClub: club });
     } else {
-      // 클럽을 찾지 못한 경우 클럽 정보를 다시 가져옵니다.
       get()
         .fetchClubs()
         .then(() => {
-          const updatedClub = get().clubs.find((club) => club.id === clubId);
+          const updatedClub = get().clubs.find((club) => club.studentClubId === clubId);
           if (updatedClub) {
             set({ currentClub: updatedClub });
           }
@@ -53,7 +52,8 @@ const useStudentClubStore = create((set, get) => ({
   addMember: async (userId, memberData) => {
     set({ isLoading: true });
     try {
-      const newMember = await addClubMember(userId, memberData);
+      const response = await addClubMember(userId, memberData);
+      const newMember = response.data;
       set((state) => ({
         currentClub: {
           ...state.currentClub,
@@ -87,11 +87,11 @@ const useStudentClubStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       // console.log(clubId);
-      let club = get().clubs.find((club) => club.id === clubId);
+      let club = get().clubs.find((club) => club.studentClubId === clubId);
       // console.log(club);
       if (!club) {
         await get().fetchClubs();
-        club = get().clubs.find((club) => club.id === clubId);
+        club = get().clubs.find((club) => club.studentClubId === clubId);
       }
 
       if (!club) {

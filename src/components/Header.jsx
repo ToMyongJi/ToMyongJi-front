@@ -4,7 +4,6 @@ import useUserStore from '../store/userStore';
 import useAuthStore from '../store/authStore';
 import useCollegeStore from '../store/collegeStore';
 import { fetchAllColleges } from '../utils/receiptApi';
-
 import logo from '../assets/images/logo.png';
 import buttonBackground from '../assets/images/buttonBackground.png';
 
@@ -103,15 +102,15 @@ const Header = () => {
               <ul className="w-1/2">
                 {colleges.map((college) => (
                   <li
-                    key={college.id}
+                    key={college.collegeId}
                     className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
-                      selectedCollege === college.id
+                      selectedCollege === college.collegeId
                         ? 'bg-[#CED3FF] font-GmarketMedium'
                         : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedCollege(college.id);
+                      setSelectedCollege(college.collegeId);
                       setShowSubMenu(true);
                     }}
                   >
@@ -123,17 +122,19 @@ const Header = () => {
               {showSubMenu && selectedCollege && (
                 <ul className="w-1/2">
                   {colleges
-                    .find((c) => c.id === selectedCollege)
-                    .studentClubs.map((club) => (
+                    .find((c) => c.collegeId === selectedCollege)
+                    .clubs.map((club) => (
                       <li
-                        key={club.id}
+                        key={club.studentClubId}
                         className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 hover:bg-[#CED3FF] hover:font-GmarketMedium`}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (user && user.role === 'ADMIN') {
-                            navigate(`/admin/${club.id}`);
+                            navigate(`/admin/${club.studentClubId}`);
                           } else {
-                            navigate(`/receipts-list/${club.id}`, { state: { clubName: club.studentClubName } });
+                            navigate(`/receipts-list/${club.studentClubId}`, {
+                              state: { clubName: club.studentClubName },
+                            });
                           }
                           setShowDropdown(false);
                           setShowSubMenu(false);
