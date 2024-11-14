@@ -299,7 +299,7 @@ const CreateReceipt = () => {
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .map((item, index) => (
                   <div key={`${item.id || ''}-${item.date}-${index}`} className="flex items-center justify-between">
-                    <span className="w-1/5">{new Date(item.date).toLocaleDateString()}</span>
+                    <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>{' '}
                     <span className="w-1/5">{item.content}</span>
                     <span className="w-1/5 text-right text-blue-500">
                       {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}

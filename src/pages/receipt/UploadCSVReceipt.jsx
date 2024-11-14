@@ -1,45 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { uploadCsvFile } from '../../utils/receiptApi';
 import useAuthStore from '../../store/authStore';
-import useStudentClubStore from '../../store/studentClubStore';
-import { createUserReceipt } from '../../utils/receiptApi';
 
 const UploadCsvReceipt = () => {
   const navigate = useNavigate();
   const { authData } = useAuthStore();
-  const { getClubNameById } = useStudentClubStore();
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  // 사용자 인증 및 데이터 로드
+  useEffect(() => {
+    if (authData?.accessToken) {
+      try {
+        const decodedToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        console.log('decodedToken:', decodedToken);
+        setUserId(decodedToken.id);
+      } catch (error) {
+        console.error('액세스 토큰 디코딩 중 오류 발생:', error);
+      }
+    }
+  }, [authData]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target.result;
-        const rows = text.split('\n');
-
-        // 빈 줄 제거 및 각 행의 공백 제거
-        const cleanRows = rows.filter((row) => row.trim() !== '');
-
-        // 모든 행을 데이터로 처리
-        const previewData = cleanRows.slice(0, 5).map((row) => {
-          const values = row.split(',').map((val) => val.trim());
-          return {
-            date: values[0] || '',
-            content: values[1] || '',
-            deposit: values[2] || '0',
-            withdrawal: values[3] || '0',
-          };
-        });
-
-        setPreview(previewData);
-      };
-      reader.readAsText(file, 'UTF-8');
     }
   };
 
@@ -51,35 +40,21 @@ const UploadCsvReceipt = () => {
 
     setIsLoading(true);
     try {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target.result;
-        const rows = text.split('\n');
-        const headers = rows[0].split(',').map((h) => h.trim());
+      console.log('userId:', userId);
+      if (!userId) {
+        alert('사용자 ID를 찾을 수 없습니다.');
+        return;
+      }
 
-        // CSV 데이터 처리
-        const data = rows.slice(1).map((row) => {
-          const values = row.split(',');
-          return {
-            date: values[0]?.trim(),
-            content: values[1]?.trim(),
-            deposit: Number(values[2]) || 0,
-            withdrawal: Number(values[3]) || 0,
-            clubId: JSON.parse(atob(authData.accessToken.split('.')[1])).studentClubId,
-          };
-        });
+      const response = await uploadCsvFile(userId, file);
 
-        // 서버로 데이터 전송
-        for (const item of data) {
-          if (item.date && item.content) {
-            await createUserReceipt(JSON.parse(atob(authData.accessToken.split('.')[1])).id, item);
-          }
-        }
-
-        alert('CSV 파일 업로드가 완료되었습니다.');
-        navigate('/receipt');
-      };
-      reader.readAsText(file);
+      if (response.statusCode === 200) {
+        const receipts = response.data;
+        console.log('Receipts:', receipts);
+        alert('CSV 파일이 성공적으로 업로드되었습니다.');
+      } else {
+        alert('CSV 파일 업로드에 실패했습니다.');
+      }
     } catch (error) {
       console.error('CSV 업로드 중 오류 발생:', error);
       alert('CSV 파일 업로드 중 오류가 발생했습니다.');
@@ -141,7 +116,7 @@ const UploadCsvReceipt = () => {
             </div>
             {file && <p className="text-center text-[#061E5B] text-[12px] sm:text-[14px]">선택된 파일: {file.name}</p>}
 
-            {/* 미리보기 */}
+            {/* 미리보기 주석 처리 */}
             {/* {preview.length > 0 && (
               <div className="mt-4">
                 <h3 className="font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72] mb-4">미리보기</h3>
