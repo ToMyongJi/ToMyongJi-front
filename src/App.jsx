@@ -50,14 +50,7 @@ const App = () => {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/not-login" element={<NotLogin />} />
 
-        <Route
-          path="/receipts-list/:clubId"
-          element={
-            <ProtectedRoute>
-              <ReceiptsList />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/receipts-list/:clubId" element={<ReceiptsList />} />
         <Route
           path="/create-receipt"
           element={
