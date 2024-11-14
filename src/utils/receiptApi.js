@@ -76,3 +76,22 @@ export const fetchClubById = async (clubId) => {
     throw error;
   }
 };
+
+// CSV 파일 업로드
+export const uploadCsvFile = async (userId, file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post(`${API_BASE_URL}/api/csv/upload/${userId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('CSV 파일 업로드에 실패했습니다:', error);
+    throw error;
+  }
+};
