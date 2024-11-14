@@ -57,15 +57,9 @@ const Login = () => {
       const { accessToken, refreshToken } = data;
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 
-      // console.log('Access Token:', accessToken);
-      // console.log('Refresh Token:', refreshToken);
-
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
-      // console.log('Decoded Token:', decodedToken);
-
       const { id, auth: role, sub: userIdFromToken } = decodedToken;
       const userInfo = await fetchMyInfo(id);
-      // console.log('User Info:', userInfo);
 
       const userData = {
         id,
@@ -77,7 +71,6 @@ const Login = () => {
         studentClubId: userInfo.studentClubId,
       };
 
-      // console.log('User Data:', userData);
       setUser(userData);
 
       if (rememberMe) {
@@ -85,6 +78,18 @@ const Login = () => {
       } else {
         localStorage.removeItem('rememberedUserId');
       }
+
+      // 이스터에그 메시지 출력
+      console.log(`
+        ███╗   ███╗     ██╗██╗   ██╗
+        ████╗ ████║     ██║██║   ██║
+        ██╔████╔██║     ██║██║   ██║
+        ██║╚██╔╝██║██   ██║██║   ██║
+        ██║ ╚═╝ ██║╚█████╔╝╚██████╔╝
+        ╚═╝     ╚═╝ ╚════╝  ╚═════╝ 
+        Frontend: JunKyu Lee
+        Backend: SeoHyun Lee, JinHyeong Park
+      `);
 
       if (role === 'ADMIN') {
         navigate('/home-admin');

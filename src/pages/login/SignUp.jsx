@@ -31,6 +31,7 @@ const SignUp = () => {
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
   const [isClubVerified, setIsClubVerified] = useState(false);
   const [isIdDuplicateChecked, setIsIdDuplicateChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -40,6 +41,8 @@ const SignUp = () => {
         setColleges(collegeData);
       } catch (error) {
         console.error('대학 정보를 불러오는 데 실패했습니다:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     if (colleges.length === 0) {
@@ -306,8 +309,9 @@ const SignUp = () => {
                   value={selectedCollegeId}
                   onChange={handleCollegeChange}
                   className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  disabled={isLoading}
                 >
-                  <option value="">대학을 선택해주세요.</option>
+                  <option value="">{isLoading ? '로딩중.. 새로고침 해주세요!' : '대학을 선택해주세요.'}</option>
                   {collegeApiData.map((collegeItem) => (
                     <option key={collegeItem.collegeId} value={collegeItem.collegeId}>
                       {collegeItem.collegeName}
