@@ -8,7 +8,7 @@ import {
   verifyEmailCode,
   verifyClubMembership,
 } from '../../utils/authApi';
-import { fetchAllColleges, fetchCollegeClubs } from '../../utils/receiptApi';
+import { fetchAllColleges } from '../../utils/receiptApi';
 import useCollegeStore from '../../store/collegeStore';
 
 const SignUp = () => {
@@ -36,7 +36,6 @@ const SignUp = () => {
     const loadColleges = async () => {
       try {
         const collegeData = await fetchAllColleges();
-        console.log(collegeData);
         setCollegeApiData(collegeData);
         setColleges(collegeData);
       } catch (error) {
@@ -136,7 +135,6 @@ const SignUp = () => {
         studentClubId: selectedClub,
       };
       const response = await signUpUser(userData);
-      console.log('회원가입 성공:', response);
       alert('회원가입이 완료되었습니다.');
       navigate('/login');
     } catch (error) {
@@ -145,7 +143,7 @@ const SignUp = () => {
     }
   };
 
-  const handleCollegeChange = async (e) => {
+  const handleCollegeChange = (e) => {
     const selectedId = e.target.value;
     setSelectedCollegeId(selectedId);
 
@@ -153,13 +151,7 @@ const SignUp = () => {
 
     if (selectedCollege) {
       setCollege(selectedCollege.collegeName);
-      try {
-        const clubsData = await fetchCollegeClubs(selectedId);
-        setClubs(clubsData);
-      } catch (error) {
-        console.error('학생회 정보를 불러오는 데 실패했습니다:', error);
-        setClubs([]);
-      }
+      setClubs(selectedCollege.clubs || []);
     } else {
       setCollege('');
       setClubs([]);
