@@ -30,12 +30,10 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        // console.log('액세스 토큰:', authData.accessToken);
-        // console.log('디코딩된 액세스 토큰:', decodedAccessToken);
-
+        console.log('Decoded Access Token:', decodedAccessToken);
         if (authData.refreshToken) {
           const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
-          // console.log('디코딩된 리프레시 토큰:', decodedRefreshToken);
+          console.log('Decoded Refresh Token:', decodedRefreshToken);
         }
       } catch (error) {
         console.error('토큰 디코딩 실패:', error);
@@ -53,23 +51,22 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // 로그인 전에 기존 사용자 정보 초기화
       clearUser();
 
       const { data } = await loginUser(userId, password);
       const { accessToken, refreshToken } = data;
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 
-      // accessToken 디코딩
+      console.log('Access Token:', accessToken);
+      console.log('Refresh Token:', refreshToken);
+
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+      console.log('Decoded Token:', decodedToken);
 
-      // 토큰에서 정보 추출
       const { id, auth: role, sub: userIdFromToken } = decodedToken;
-
-      // 내정보 조회 API 호출
       const userInfo = await fetchMyInfo(id);
+      console.log('User Info:', userInfo);
 
-      // 사용자 정보 구성
       const userData = {
         id,
         role,
@@ -80,7 +77,7 @@ const Login = () => {
         studentClubId: userInfo.studentClubId,
       };
 
-      // userStore에 사용자 정보 저장
+      console.log('User Data:', userData);
       setUser(userData);
 
       if (rememberMe) {

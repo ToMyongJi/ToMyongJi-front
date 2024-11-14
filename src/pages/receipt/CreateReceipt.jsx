@@ -72,7 +72,6 @@ const CreateReceipt = () => {
     if (!userData?.data?.studentClubId) return;
     try {
       const response = await fetchClubReceipts(userData.data.studentClubId);
-      console.log(response.data);
       setReceiptData(response.data || []);
       setFilteredData(response.data || []);
     } catch (error) {
