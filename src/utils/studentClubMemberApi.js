@@ -2,9 +2,9 @@ import api, { API_BASE_URL } from './api';
 
 // 소속 부원 조회 API 함수
 export const fetchClubMembers = async (userId) => {
-  // 로그인 한 유저의 id
   try {
     const response = await api.get(`${API_BASE_URL}/api/my/members/${userId}`);
+    console.log('fetchClubMembers return 값:', response.data);
     return response.data;
   } catch (error) {
     console.error('소속 부원 조회 중 오류 발생:', error);
@@ -14,12 +14,14 @@ export const fetchClubMembers = async (userId) => {
 
 // 소속 부원 추가 API 함수
 export const addClubMember = async (userId, memberData) => {
-  // 로그인 한 유저의 id
   try {
     const response = await api.post(`${API_BASE_URL}/api/my/members/${userId}`, memberData);
     return response.data;
   } catch (error) {
     console.error('소속 부원 추가 중 오류 발생:', error);
+    if (error.response?.status === 400) {
+      throw new Error('이미 등록된 학번이거나 잘못된 정보입니다.');
+    }
     throw error;
   }
 };

@@ -21,12 +21,15 @@ const ReceiptsList = () => {
     const loadReceipts = async () => {
       try {
         setLoading(true);
-        const data = await fetchClubReceipts(clubId);
-        setReceipts(data);
-        setFilteredData(data);
+        const response = await fetchClubReceipts(clubId);
+        const receiptsData = Array.isArray(response.data) ? response.data : [];
+        setReceipts(receiptsData);
+        setFilteredData(receiptsData);
         setError(null);
       } catch (err) {
         setError('영수증을 불러오는 데 실패했습니다.');
+        setReceipts([]);
+        setFilteredData([]);
       } finally {
         setLoading(false);
       }
@@ -36,10 +39,25 @@ const ReceiptsList = () => {
   }, [clubId]);
 
   const filterDataByDateRange = () => {
+    if (!Array.isArray(receipts)) return;
+
     const filtered = receipts.filter((item) => {
+      if (!item || !item.date) return false;
+
       const itemDate = new Date(item.date);
-      return (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate));
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+
+      if (start && end) {
+        return itemDate >= start && itemDate <= end;
+      } else if (start) {
+        return itemDate >= start;
+      } else if (end) {
+        return itemDate <= end;
+      }
+      return true;
     });
+
     setFilteredData(filtered);
   };
 
@@ -86,20 +104,24 @@ const ReceiptsList = () => {
             <span className="w-1/4 text-right">출금</span>
           </div>
           <div className="flex flex-col space-y-7">
-            {filteredData
-              .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((item) => (
-                <div key={item.id} className="flex items-center justify-between">
-                  <span className="w-1/4">{item.date}</span>
-                  <span className="w-1/4">{item.content}</span>
-                  <span className="w-1/4 text-right text-blue-500">
-                    {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
-                  </span>
-                  <span className="w-1/4 text-right text-red-500">
-                    {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
-                  </span>
-                </div>
-              ))}
+            {Array.isArray(filteredData) && filteredData.length > 0 ? (
+              [...filteredData]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .map((item, index) => (
+                  <div key={`${item.id}-${item.date}-${index}`} className="flex items-center justify-between">
+                    <span className="w-1/4">{new Date(item.date).toLocaleDateString()}</span>
+                    <span className="w-1/4">{item.content}</span>
+                    <span className="w-1/4 text-right text-blue-500">
+                      {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
+                    </span>
+                    <span className="w-1/4 text-right text-red-500">
+                      {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
+                    </span>
+                  </div>
+                ))
+            ) : (
+              <p>표시할 데이터가 없습니다.</p>
+            )}
           </div>
         </div>
       </div>

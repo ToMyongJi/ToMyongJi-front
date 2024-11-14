@@ -149,7 +149,7 @@ const SignUp = () => {
     const selectedId = e.target.value;
     setSelectedCollegeId(selectedId);
 
-    const selectedCollege = collegeApiData.find((college) => college.id === parseInt(selectedId));
+    const selectedCollege = collegeApiData.find((college) => college.collegeId === parseInt(selectedId));
 
     if (selectedCollege) {
       setCollege(selectedCollege.collegeName);
@@ -317,7 +317,7 @@ const SignUp = () => {
                 >
                   <option value="">대학을 선택해주세요.</option>
                   {collegeApiData.map((collegeItem) => (
-                    <option key={collegeItem.id} value={collegeItem.id}>
+                    <option key={collegeItem.collegeId} value={collegeItem.collegeId}>
                       {collegeItem.collegeName}
                     </option>
                   ))}
@@ -348,7 +348,7 @@ const SignUp = () => {
                 >
                   <option value="">소속을 선택해주세요.</option>
                   {clubs.map((club) => (
-                    <option key={club.id} value={club.id}>
+                    <option key={club.studentClubId} value={club.studentClubId}>
                       {club.studentClubName}
                     </option>
                   ))}

@@ -6,21 +6,27 @@ import useCollegeStore from '../store/collegeStore';
 import useAuthStore from '../store/authStore';
 import { fetchMyInfo } from '../utils/authApi';
 import { fetchAllColleges, fetchClubById, fetchAllClubs } from '../utils/receiptApi';
-import { deleteClubMember } from '../utils/studentClubMemberApi';
+import { deleteClubMember, addClubMember } from '../utils/studentClubMemberApi';
 
 const MyPage = () => {
   const { authData } = useAuthStore();
   const [role, setRole] = useState('');
   const [loginUserId, setLoginUserId] = useState('');
-  const { getClubNameById, currentClub, setCurrentClub, fetchClubMembers, addMember, deleteMember, fetchClubs } =
-    useStudentClubStore();
+  const { getClubNameById, currentClub, setCurrentClub, fetchClubMembers, fetchClubs } = useStudentClubStore();
   const { colleges, setColleges } = useCollegeStore();
   const [userCollege, setUserCollege] = useState('');
-  const [userInfo, setUserInfo] = useState({});
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    studentNum: '',
+    college: '',
+    studentClubId: '',
+  });
   const [clubName, setClubName] = useState('');
   const [decodedToken, setDecodedToken] = useState({});
   const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
   const [currentUserClub, setCurrentUserClub] = useState(null);
+  const [clubMembers, setClubMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (authData && authData.accessToken) {
@@ -35,46 +41,59 @@ const MyPage = () => {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      // console.log('디코딩된 토큰:', decodedToken);
       if (authData && authData.accessToken) {
         try {
           const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
-          // console.log('새로 디코딩된 토큰:', decoded);
           if (decoded && decoded.id) {
             setRole(decoded.auth || '');
             setLoginUserId(decoded.id);
-            try {
-              const info = await fetchMyInfo(decoded.id);
-              setUserCollege(info.college);
-              setUserInfo({
-                name: info.name,
-                studentNum: info.studentNum,
-                college: info.collegeName,
-                studentClubId: info.studentClubId,
-              });
-              if (info.studentClubId) {
+
+            const info = await fetchMyInfo(decoded.id);
+            if (info) {
+              setUserCollege(info.data.college || '');
+              const newUserInfo = {
+                name: info.data.name || '',
+                studentNum: info.data.studentNum || '',
+                college: info.data.college || '',
+                studentClubId: info.data.studentClubId || '',
+              };
+              setUserInfo(newUserInfo);
+
+              if (info.data.studentClubId) {
                 await fetchClubs();
-                const name = getClubNameById(info.studentClubId) || '';
-                setClubName(name);
-                setCurrentClub(info.studentClubId);
-                fetchClubMembers(decoded.id);
+                const name = getClubNameById(info.data.studentClubId);
+                setClubName(name || '');
+                setCurrentClub(info.data.studentClubId);
+
+                try {
+                  setIsLoading(true);
+                  const membersResponse = await fetchClubMembers(decoded.id);
+                  if (membersResponse?.statusCode === 200 && Array.isArray(membersResponse.data)) {
+                    const newClubMembers = membersResponse.data.map((member) => ({
+                      memberId: member.memberId || '',
+                      studentNum: member.studentNum || '',
+                      name: member.name || '',
+                    }));
+                    setClubMembers(newClubMembers);
+                  }
+                } catch (error) {
+                  console.error('소속 부원 조회 실패:', error);
+                  setClubMembers([]);
+                } finally {
+                  setIsLoading(false);
+                }
               }
-            } catch (error) {
-              console.error('사용자 정보 조회 실패:', error);
             }
-          } else {
-            console.error('디코딩된 토큰에 유효한 사용자 ID가 없습니다.');
           }
         } catch (error) {
-          console.error('토큰 디코딩 실패:', error);
+          console.error('사용자 정보 조회 실패:', error);
+          setIsLoading(false);
         }
-      } else {
-        console.error('유효한 액세스 토큰이 없습니다.');
       }
     };
 
     fetchUserInfo();
-  }, [authData, getClubNameById, setCurrentClub, fetchClubMembers, fetchClubs]);
+  }, [authData]);
 
   useEffect(() => {
     if (currentClub) {
@@ -104,18 +123,11 @@ const MyPage = () => {
   }, [colleges.length, setColleges]);
 
   useEffect(() => {
-    if (authData && authData.id && authData.studentClubId) {
-      setCurrentClub(authData.studentClubId);
-      fetchClubMembers(authData.id);
-    }
-  }, [authData, setCurrentClub, fetchClubMembers]);
-
-  useEffect(() => {
     const fetchClubData = async () => {
       if (userInfo && userInfo.studentClubId) {
         try {
           const clubData = await fetchAllClubs();
-          const matchingClub = clubData.find((club) => club.id === userInfo.studentClubId);
+          const matchingClub = clubData.find((club) => club.studentClubId === userInfo.studentClubId);
           if (matchingClub) {
             setCurrentUserClub(matchingClub);
           } else {
@@ -130,6 +142,39 @@ const MyPage = () => {
     fetchClubData();
   }, [userInfo]);
 
+  useEffect(() => {
+    const loadMembers = async () => {
+      if (authData && authData.accessToken) {
+        try {
+          const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
+          console.log('Decoded id:', decoded.id);
+
+          const responseData = await fetchClubMembers(decoded.id);
+          console.log('fetchClubMembers response:', responseData);
+
+          if (responseData && Array.isArray(responseData)) {
+            const newMembers = responseData.map((member) => ({
+              memberId: member.memberId || '',
+              studentNum: member.studentNum || '',
+              name: member.name || '',
+            }));
+            setClubMembers(newMembers);
+          } else {
+            console.error('Invalid response structure:', responseData);
+            setClubMembers([]);
+          }
+        } catch (error) {
+          console.error('소속 부원 조회 실패:', error);
+          setClubMembers([]);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadMembers();
+  }, [authData]);
+
   const getKoreanRole = (role) => {
     const roleMap = {
       STU: '소속원',
@@ -141,52 +186,60 @@ const MyPage = () => {
 
   const handleAddMember = async (e) => {
     e.preventDefault();
-    if (loginUserId && newMember.studentNum && newMember.name) {
-      try {
-        await addMember(loginUserId, newMember);
+    if (!loginUserId || !newMember.studentNum || !newMember.name) {
+      alert('모든 필드를 입력해주세요.');
+      return;
+    }
+
+    try {
+      const requestData = {
+        studentNum: newMember.studentNum,
+        name: newMember.name,
+      };
+
+      const response = await addClubMember(loginUserId, requestData);
+      if (response.statusCode === 201) {
         setNewMember({ studentNum: '', name: '' });
         await fetchClubMembers(loginUserId);
-        const updatedClubData = await fetchClubById(userInfo.studentClubId);
-        setCurrentUserClub(updatedClubData[0]);
-        alert('정상적으로 소속원이 추가되었습니다.');
 
-        const allClubsData = await fetchAllClubs();
-        const updatedCurrentClub = allClubsData.find((club) => club.id === userInfo.studentClubId);
-        if (updatedCurrentClub) {
-          setCurrentUserClub(updatedCurrentClub);
+        if (userInfo?.studentClubId) {
+          const updatedClubData = await fetchClubById(userInfo.studentClubId);
+          if (updatedClubData && updatedClubData.length > 0) {
+            setCurrentUserClub(updatedClubData[0]);
+          }
+
+          const allClubsData = await fetchAllClubs();
+          const updatedCurrentClub = allClubsData.find((club) => club.studentClubId === userInfo.studentClubId);
+          if (updatedCurrentClub) {
+            setCurrentUserClub(updatedCurrentClub);
+          }
         }
-      } catch (error) {
-        console.error('멤버 추가 중 오류 발생:', error);
-        alert('소속원 추가 중 오류가 발생했습니다.');
+
+        alert('정상적으로 소속원이 추가되었습니다.');
+      } else {
+        throw new Error(response.statusMessage || '소속원 추가에 실패했습니다.');
       }
-    } else {
-      console.error('사용자 정보 또는 새 멤버 정보가 없습니다.');
-      alert('사용자 정보 또는 새 멤버 정보가 없습니다.');
+    } catch (error) {
+      console.error('멤버 추가 중 오류 발생:', error);
+      alert(error.response?.data?.message || '소속원 추가 중 오류가 발생했습니다.');
     }
   };
 
   const handleDeleteMember = async (studentNum) => {
-    if (currentUserClub && currentUserClub.memberInfos) {
-      const memberToDelete = currentUserClub.memberInfos.find((member) => member.studentNum === studentNum);
-      if (memberToDelete) {
-        try {
-          await deleteClubMember(memberToDelete.id);
+    if (!window.confirm('정말로 삭제하시겠습니까?')) return;
 
-          const allClubsData = await fetchAllClubs();
-          const updatedCurrentClub = allClubsData.find((club) => club.id === userInfo.studentClubId);
-          if (updatedCurrentClub) {
-            setCurrentUserClub(updatedCurrentClub);
-          }
+    try {
+      const memberToDelete = clubMembers.find((member) => member.studentNum === studentNum);
+      if (!memberToDelete) return;
 
-          alert('정상적으로 소속원이 삭제되었습니다.');
-        } catch (error) {
-          console.error('멤버 삭제 중 오류 발생:', error);
-          alert('회원가입된 소속원은 삭제할 수 없습니다.');
-        }
-      } else {
-        console.error('삭제할 멤버를 찾을 수 없습니다.');
-        alert('삭제할 멤버를 찾을 수 없습니다.');
+      await deleteClubMember(memberToDelete.memberId);
+      const response = await fetchClubMembers(loginUserId);
+
+      if (response?.statusCode === 200 && Array.isArray(response.data)) {
+        setClubMembers(response.data);
       }
+    } catch (error) {
+      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -202,7 +255,7 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
               <input
                 role="text"
-                value={userInfo.name || ''}
+                value={userInfo.name ?? ''}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -211,7 +264,7 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학번</label>
               <input
                 role="text"
-                value={userInfo.studentNum || ''}
+                value={userInfo.studentNum ?? ''}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -220,7 +273,7 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">대학</label>
               <input
                 role="text"
-                value={userCollege}
+                value={userCollege ?? ''}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -230,7 +283,7 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
               <input
                 role="text"
-                value={clubName || ''}
+                value={clubName ?? ''}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -255,7 +308,7 @@ const MyPage = () => {
               <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
               <input
                 role="text"
-                value={currentUserClub.studentClubName || ''}
+                value={currentUserClub?.studentClubName ?? ''}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -265,14 +318,14 @@ const MyPage = () => {
                 <input
                   role="text"
                   placeholder="학번"
-                  value={newMember.studentNum}
+                  value={newMember.studentNum ?? ''}
                   onChange={(e) => setNewMember({ ...newMember, studentNum: e.target.value })}
                   className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <input
                   role="text"
                   placeholder="이름"
-                  value={newMember.name}
+                  value={newMember.name ?? ''}
                   onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
                   className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
@@ -285,18 +338,20 @@ const MyPage = () => {
               </div>
             </form>
             <div className="space-y-2">
-              {currentUserClub.memberInfos &&
-                currentUserClub.memberInfos.map((member) => (
-                  <div key={member.id} className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+              {isLoading ? (
+                <p className="text-center">로딩 중...</p>
+              ) : clubMembers.length > 0 ? (
+                clubMembers.map((member) => (
+                  <div key={member.memberId} className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                     <input
                       role="text"
-                      value={member.studentNum}
+                      value={member.studentNum ?? ''}
                       readOnly
                       className="w-full p-2 bg-gray-100 border rounded-lg sm:flex-1"
                     />
                     <input
                       role="text"
-                      value={member.name}
+                      value={member.name ?? ''}
                       readOnly
                       className="w-full p-2 bg-gray-100 border rounded-lg sm:flex-1"
                     />
@@ -307,7 +362,10 @@ const MyPage = () => {
                       <span className="inline sm:inline">삭제</span>
                     </button>
                   </div>
-                ))}
+                ))
+              ) : (
+                <p className="text-center text-gray-500">소속 부원이 없습니다.</p>
+              )}
             </div>
           </div>
         )}

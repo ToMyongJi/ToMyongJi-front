@@ -4,7 +4,7 @@ import api, { API_BASE_URL } from './api';
 export const fetchClubReceipts = async (clubId) => {
   try {
     const response = await api.get(`${API_BASE_URL}/api/receipt/club/${clubId}`);
-    return response.data;
+    return response.data || { data: [] };
   } catch (error) {
     console.error('학생회 영수증 정보를 가져오는 데 실패했습니다:', error);
     throw error;
@@ -36,8 +36,8 @@ export const deleteUserReceipt = async (receiptId) => {
 // 모든 대학 조회
 export const fetchAllColleges = async () => {
   try {
-    const response = await api.get(`${API_BASE_URL}/api/college`);
-    return response.data;
+    const response = await api.get(`${API_BASE_URL}/api/collegesAndClubs`);
+    return response.data.data;
   } catch (error) {
     console.error('모든 대학 정보를 가져오는 데 실패했습니다:', error);
     throw error;
@@ -48,7 +48,7 @@ export const fetchAllColleges = async () => {
 export const fetchAllClubs = async () => {
   try {
     const response = await api.get(`${API_BASE_URL}/api/club`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error('모든 학생회 정보를 가져오는 데 실패했습니다:', error);
     throw error;
