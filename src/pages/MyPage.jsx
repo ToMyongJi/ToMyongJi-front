@@ -6,13 +6,13 @@ import useCollegeStore from '../store/collegeStore';
 import useAuthStore from '../store/authStore';
 import { fetchMyInfo } from '../utils/authApi';
 import { fetchAllColleges, fetchClubById, fetchAllClubs } from '../utils/receiptApi';
-import { deleteClubMember, addClubMember } from '../utils/studentClubMemberApi';
+import { deleteClubMember, addClubMember, fetchClubMembers } from '../utils/studentClubMemberApi';
 
 const MyPage = () => {
   const { authData } = useAuthStore();
   const [role, setRole] = useState('');
   const [loginUserId, setLoginUserId] = useState('');
-  const { getClubNameById, currentClub, setCurrentClub, fetchClubMembers, fetchClubs } = useStudentClubStore();
+  const { getClubNameById, currentClub, setCurrentClub, fetchClubs } = useStudentClubStore();
   const { colleges, setColleges } = useCollegeStore();
   const [userCollege, setUserCollege] = useState('');
   const [userInfo, setUserInfo] = useState({
@@ -33,11 +33,42 @@ const MyPage = () => {
       try {
         const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
         setDecodedToken(decoded);
+        setLoginUserId(decoded.id);
       } catch (error) {
         console.error('토큰 디코딩 실패:', error);
       }
     }
   }, [authData]);
+
+  useEffect(() => {
+    const loadMembers = async () => {
+      if (loginUserId) {
+        try {
+          setIsLoading(true);
+          const responseData = await fetchClubMembers(loginUserId);
+
+          if (responseData && Array.isArray(responseData.data)) {
+            const newMembers = responseData.data.map((member) => ({
+              memberId: member.memberId || '',
+              studentNum: member.studentNum || '',
+              name: member.name || '',
+            }));
+            setClubMembers(newMembers);
+          } else {
+            console.error('Invalid response structure:', responseData);
+            setClubMembers([]);
+          }
+        } catch (error) {
+          console.error('소속 부원 조회 실패:', error);
+          setClubMembers([]);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadMembers();
+  }, [loginUserId]);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -142,39 +173,6 @@ const MyPage = () => {
     fetchClubData();
   }, [userInfo]);
 
-  useEffect(() => {
-    const loadMembers = async () => {
-      if (authData && authData.accessToken) {
-        try {
-          const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
-          console.log('Decoded id:', decoded.id);
-
-          const responseData = await fetchClubMembers(decoded.id);
-          console.log('fetchClubMembers response:', responseData);
-
-          if (responseData && Array.isArray(responseData)) {
-            const newMembers = responseData.map((member) => ({
-              memberId: member.memberId || '',
-              studentNum: member.studentNum || '',
-              name: member.name || '',
-            }));
-            setClubMembers(newMembers);
-          } else {
-            console.error('Invalid response structure:', responseData);
-            setClubMembers([]);
-          }
-        } catch (error) {
-          console.error('소속 부원 조회 실패:', error);
-          setClubMembers([]);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadMembers();
-  }, [authData]);
-
   const getKoreanRole = (role) => {
     const roleMap = {
       STU: '소속원',
@@ -214,7 +212,11 @@ const MyPage = () => {
             setCurrentUserClub(updatedCurrentClub);
           }
         }
+        const response = await fetchClubMembers(loginUserId);
 
+        if (response?.statusCode === 200 && Array.isArray(response.data)) {
+          setClubMembers(response.data);
+        }
         alert('정상적으로 소속원이 추가되었습니다.');
       } else {
         throw new Error(response.statusMessage || '소속원 추가에 실패했습니다.');

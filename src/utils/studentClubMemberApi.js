@@ -4,7 +4,6 @@ import api, { API_BASE_URL } from './api';
 export const fetchClubMembers = async (userId) => {
   try {
     const response = await api.get(`${API_BASE_URL}/api/my/members/${userId}`);
-    console.log('fetchClubMembers return 값:', response.data);
     return response.data;
   } catch (error) {
     console.error('소속 부원 조회 중 오류 발생:', error);
