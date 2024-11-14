@@ -30,10 +30,10 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        console.log('Decoded Access Token:', decodedAccessToken);
+        // console.log('Decoded Access Token:', decodedAccessToken);
         if (authData.refreshToken) {
           const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
-          console.log('Decoded Refresh Token:', decodedRefreshToken);
+          // console.log('Decoded Refresh Token:', decodedRefreshToken);
         }
       } catch (error) {
         console.error('토큰 디코딩 실패:', error);
@@ -57,15 +57,15 @@ const Login = () => {
       const { accessToken, refreshToken } = data;
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
 
-      console.log('Access Token:', accessToken);
-      console.log('Refresh Token:', refreshToken);
+      // console.log('Access Token:', accessToken);
+      // console.log('Refresh Token:', refreshToken);
 
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
-      console.log('Decoded Token:', decodedToken);
+      // console.log('Decoded Token:', decodedToken);
 
       const { id, auth: role, sub: userIdFromToken } = decodedToken;
       const userInfo = await fetchMyInfo(id);
-      console.log('User Info:', userInfo);
+      // console.log('User Info:', userInfo);
 
       const userData = {
         id,
@@ -77,7 +77,7 @@ const Login = () => {
         studentClubId: userInfo.studentClubId,
       };
 
-      console.log('User Data:', userData);
+      // console.log('User Data:', userData);
       setUser(userData);
 
       if (rememberMe) {
