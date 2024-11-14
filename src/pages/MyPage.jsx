@@ -239,6 +239,7 @@ const MyPage = () => {
 
       if (response?.statusCode === 200 && Array.isArray(response.data)) {
         setClubMembers(response.data);
+        alert('정상적으로 소속원이 삭제되었습니다.');
       }
     } catch (error) {
       alert('삭제 중 오류가 발생했습니다.');
