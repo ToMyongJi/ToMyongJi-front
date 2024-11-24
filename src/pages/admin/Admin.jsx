@@ -2,18 +2,23 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { updatePresident, createMember, deleteMember } from '../../utils/adminApi';
 import { fetchAllClubs } from '../../utils/receiptApi';
+import {
+  fetchPresident,
+  savePresident,
+  updatePresident,
+  fetchMembers,
+  addMember,
+  deleteMember,
+} from '../../utils/adminApi';
 import useStudentClubStore from '../../store/studentClubStore';
 
 const Admin = () => {
   const { clubId } = useParams();
   const [studentClubName, setStudentClubName] = useState('');
-  const [president, setPresident] = useState({ studentNum: '', name: '' });
-  const [newPresident, setNewPresident] = useState({ studentNum: '', name: '' });
-  const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
+  const [president, setPresident] = useState({ clubId: clubId, studentNum: '', name: '' });
+  const [newMember, setNewMember] = useState({ clubId: clubId, studentNum: '', name: '' });
   const [members, setMembers] = useState([]);
-
   const { setCurrentClub, currentClub } = useStudentClubStore();
 
   const fetchClubData = async () => {
@@ -22,8 +27,10 @@ const Admin = () => {
       const club = clubData.find((club) => club.studentClubId === parseInt(clubId));
       if (club) {
         setStudentClubName(club.studentClubName);
-        setPresident(club.presidentInfo);
-        setMembers(club.memberInfos);
+        const presidentData = await fetchPresident(clubId);
+        setPresident(presidentData);
+        const membersData = await fetchMembers(clubId);
+        setMembers(membersData);
       } else {
         throw new Error('해당 클럽 정보를 찾을 수 없습니다.');
       }
@@ -38,60 +45,26 @@ const Admin = () => {
     fetchClubData();
   }, [clubId, setCurrentClub]);
 
-  const handleNewPresidentChange = (e) => {
-    setNewPresident({ ...newPresident, [e.target.name]: e.target.value });
-  };
-
-  const handleSavePresident = async (e) => {
+  const handlePresidentSubmit = async (e) => {
     e.preventDefault();
-    if (newPresident.studentNum && newPresident.name) {
-      try {
-        // 새로운 회장 정보 업데이트
-        await updatePresident(clubId, newPresident);
-
-        // 기존 회장이 있었다면 삭제
-        // if (president.id) {
-        //   await handleDeleteMember(president.id);
-        // }
-        setNewPresident({ studentNum: '', name: '' });
-        await fetchClubData();
-
-        alert('새로운 회장 정보가 저장되었고, 기존 회장은 소속원 목록으로 내려갔습니다.');
-      } catch (error) {
-        console.error('회장 정보 업데이트 실패:', error);
-        alert('회장 정보 업데이트에 실패했습니다.');
-      }
-    } else {
-      alert('학번과 이름을 모두 입력해주세요.');
-    }
+    console.log('입력한 president', president);
+    const updatedPresident = await updatePresident(president);
+    console.log('업데이트된 president', updatedPresident);
+    setPresident(updatedPresident);
   };
 
   const handleAddMember = async (e) => {
     e.preventDefault();
-    if (newMember.studentNum && newMember.name) {
-      try {
-        const createdMember = await createMember(clubId, newMember);
-        setMembers([...members, createdMember]);
-        setNewMember({ studentNum: '', name: '' });
-        alert('새 부원이 추가되었습니다.');
-      } catch (error) {
-        console.error('부원 추가 실패:', error);
-        alert('부원 추가에 실패했습니다.');
-      }
-    } else {
-      alert('학번과 이름을 모두 입력해주세요.');
-    }
+    const addedMember = await addMember(newMember);
+    setMembers([...members, addedMember]);
+    setNewMember({ clubId: clubId, studentNum: '', name: '' });
+    alert('새 부원이 추가되었습니다.');
   };
 
   const handleDeleteMember = async (memberId) => {
-    try {
-      await deleteMember(memberId);
-      setMembers(members.filter((member) => member.memberId !== memberId));
-      alert('부원이 삭제되었습니다.');
-    } catch (error) {
-      console.error('부원 삭제 실패:', error);
-      alert('회원가입된 부원은 삭제할 수 없습니다.');
-    }
+    const deletedMember = await deleteMember(memberId);
+    setMembers(members.filter((member) => member.memberId !== memberId));
+    alert('부원이 삭제되었습니다.');
   };
 
   return (
@@ -105,33 +78,22 @@ const Admin = () => {
         {/* 회장 관리 박스 */}
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
           <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">회장 관리</h2>
-          <div className="mb-4">
-            <div className="flex items-center mb-2 space-x-2">
-              <input
-                type="text"
-                value={president.studentNum}
-                readOnly
-                className="flex-1 p-2 bg-gray-100 border rounded-lg"
-              />
-              <input type="text" value={president.name} readOnly className="flex-1 p-2 bg-gray-100 border rounded-lg" />
-            </div>
-          </div>
-          <form onSubmit={handleSavePresident} className="space-y-4">
+          <form onSubmit={handlePresidentSubmit} className="space-y-4">
             <div className="flex space-x-2">
               <input
                 type="text"
                 name="studentNum"
                 placeholder="학번"
-                value={newPresident.studentNum}
-                onChange={handleNewPresidentChange}
+                value={president.studentNum}
+                onChange={(e) => setPresident({ ...president, studentNum: e.target.value })}
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
               <input
                 type="text"
                 name="name"
                 placeholder="이름"
-                value={newPresident.name}
-                onChange={handleNewPresidentChange}
+                value={president.name}
+                onChange={(e) => setPresident({ ...president, name: e.target.value })}
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
@@ -139,7 +101,7 @@ const Admin = () => {
               type="submit"
               className="w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
             >
-              변경
+              {president.studentNum ? '변경' : '저장'}
             </button>
           </form>
         </div>

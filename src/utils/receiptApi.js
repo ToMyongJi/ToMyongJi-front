@@ -1,4 +1,5 @@
-import api, { API_BASE_URL } from './api';
+import api from './api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 특정 학생회 영수증 조회
 export const fetchClubReceipts = async (clubId) => {
@@ -12,9 +13,9 @@ export const fetchClubReceipts = async (clubId) => {
 };
 
 // 특정 사용자의 영수증 생성
-export const createUserReceipt = async (userId, receiptData) => {
+export const createUserReceipt = async (receiptData) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/receipt/${userId}`, receiptData);
+    const response = await api.post(`${API_BASE_URL}/api/receipt`, receiptData);
     return response.data;
   } catch (error) {
     console.error('사용자 영수증 생성에 실패했습니다:', error);
@@ -66,17 +67,6 @@ export const fetchCollegeClubs = async (collegeId) => {
   }
 };
 
-// 특정 학생회 조회
-export const fetchClubById = async (clubId) => {
-  try {
-    const response = await api.get(`${API_BASE_URL}/api/club/${clubId}`);
-    return response.data;
-  } catch (error) {
-    console.error('특정 학생회 정보를 가져오는 데 실패했습니다:', error);
-    throw error;
-  }
-};
-
 // CSV 파일 업로드
 export const uploadCsvFile = async (userId, file) => {
   try {
@@ -88,7 +78,6 @@ export const uploadCsvFile = async (userId, file) => {
         'Content-Type': 'multipart/form-data',
       },
     });
-
     return response.data;
   } catch (error) {
     console.error('CSV 파일 업로드에 실패했습니다:', error);

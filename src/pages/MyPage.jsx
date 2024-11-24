@@ -5,7 +5,7 @@ import useStudentClubStore from '../store/studentClubStore';
 import useCollegeStore from '../store/collegeStore';
 import useAuthStore from '../store/authStore';
 import { fetchMyInfo } from '../utils/authApi';
-import { fetchAllColleges, fetchClubById, fetchAllClubs } from '../utils/receiptApi';
+import { fetchAllColleges, fetchAllClubs } from '../utils/receiptApi';
 import { deleteClubMember, addClubMember, fetchClubMembers } from '../utils/studentClubMemberApi';
 
 const MyPage = () => {
@@ -23,7 +23,7 @@ const MyPage = () => {
   });
   const [clubName, setClubName] = useState('');
   const [decodedToken, setDecodedToken] = useState({});
-  const [newMember, setNewMember] = useState({ studentNum: '', name: '' });
+  const [newMember, setNewMember] = useState({ presidentUserId: loginUserId, studentNum: '', name: '' });
   const [currentUserClub, setCurrentUserClub] = useState(null);
   const [clubMembers, setClubMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,12 +46,11 @@ const MyPage = () => {
         try {
           setIsLoading(true);
           const responseData = await fetchClubMembers(loginUserId);
-
-          if (responseData && Array.isArray(responseData.data)) {
-            const newMembers = responseData.data.map((member) => ({
+          if (responseData && Array.isArray(responseData)) {
+            const newMembers = responseData.map((member) => ({
               memberId: member.memberId || '',
-              studentNum: member.studentNum || '',
               name: member.name || '',
+              studentNum: member.studentNum || '',
             }));
             setClubMembers(newMembers);
           } else {
@@ -191,32 +190,26 @@ const MyPage = () => {
 
     try {
       const requestData = {
+        presidentUserId: loginUserId,
         studentNum: newMember.studentNum,
         name: newMember.name,
       };
 
-      const response = await addClubMember(loginUserId, requestData);
+      const response = await addClubMember(requestData);
       if (response.statusCode === 201) {
         setNewMember({ studentNum: '', name: '' });
-        await fetchClubMembers(loginUserId);
 
-        if (userInfo?.studentClubId) {
-          const updatedClubData = await fetchClubById(userInfo.studentClubId);
-          if (updatedClubData && updatedClubData.length > 0) {
-            setCurrentUserClub(updatedClubData[0]);
-          }
-
-          const allClubsData = await fetchAllClubs();
-          const updatedCurrentClub = allClubsData.find((club) => club.studentClubId === userInfo.studentClubId);
-          if (updatedCurrentClub) {
-            setCurrentUserClub(updatedCurrentClub);
-          }
+        // 소속원 목록 새로고침
+        const membersResponse = await fetchClubMembers(loginUserId);
+        if (membersResponse && Array.isArray(membersResponse)) {
+          const newMembers = membersResponse.map((member) => ({
+            memberId: member.memberId || '',
+            name: member.name || '',
+            studentNum: member.studentNum || '',
+          }));
+          setClubMembers(newMembers);
         }
-        const response = await fetchClubMembers(loginUserId);
 
-        if (response?.statusCode === 200 && Array.isArray(response.data)) {
-          setClubMembers(response.data);
-        }
         alert('정상적으로 소속원이 추가되었습니다.');
       } else {
         throw new Error(response.statusMessage || '소속원 추가에 실패했습니다.');
@@ -229,18 +222,24 @@ const MyPage = () => {
 
   const handleDeleteMember = async (studentNum) => {
     if (!window.confirm('정말로 삭제하시겠습니까?')) return;
-
     try {
       const memberToDelete = clubMembers.find((member) => member.studentNum === studentNum);
       if (!memberToDelete) return;
 
       await deleteClubMember(memberToDelete.memberId);
-      const response = await fetchClubMembers(loginUserId);
 
-      if (response?.statusCode === 200 && Array.isArray(response.data)) {
-        setClubMembers(response.data);
-        alert('정상적으로 소속원이 삭제되었습니다.');
+      // 소속원 목록 새로고침
+      const membersResponse = await fetchClubMembers(loginUserId);
+      if (membersResponse && Array.isArray(membersResponse)) {
+        const newMembers = membersResponse.map((member) => ({
+          memberId: member.memberId || '',
+          name: member.name || '',
+          studentNum: member.studentNum || '',
+        }));
+        setClubMembers(newMembers);
       }
+
+      alert('정상적으로 소속원이 삭제되었습니다.');
     } catch (error) {
       alert('삭제 중 오류가 발생했습니다.');
     }
