@@ -1,16 +1,14 @@
-import api, { API_BASE_URL } from './api';
+import api from './api';
 import useAuthStore from '../store/authStore';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 로그인
 export const loginUser = async (userId, password) => {
   try {
     const response = await api.post(`${API_BASE_URL}/api/users/login`, { userId, password });
-    // console.log(response.data);
-
     const { grantType, accessToken, refreshToken } = response.data.data;
-
     useAuthStore.getState().setAuthData(grantType, accessToken, refreshToken);
-
     return response.data;
   } catch (error) {
     if (
@@ -84,7 +82,7 @@ export const fetchUserInfo = async (userId) => {
 export const findUserId = async (email) => {
   try {
     const response = await api.post(`${API_BASE_URL}/api/users/find-id`, { email });
-    return response.data; // 서버에서 반환된 아이디 문자
+    return response.data;
   } catch (error) {
     console.error('아이디 찾기 요청 실패:', error);
     if (error.response) {

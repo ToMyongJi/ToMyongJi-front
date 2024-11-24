@@ -28,6 +28,7 @@ const Login = () => {
 
     // 토큰 정보 출력
     if (authData && authData.accessToken) {
+      console.log(authData.accessToken);
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
         // console.log('Decoded Access Token:', decodedAccessToken);

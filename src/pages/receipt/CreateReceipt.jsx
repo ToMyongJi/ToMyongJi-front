@@ -95,14 +95,15 @@ const CreateReceipt = () => {
 
     try {
       const requestData = {
+        userId: userId,
         date: new Date(date).toISOString(),
         content: content,
         deposit: Number(deposit) || 0,
         withdrawal: Number(withdrawal) || 0,
       };
 
-      const response = await createUserReceipt(userId, requestData);
-      if (response.statusCode === 200) {
+      const response = await createUserReceipt(requestData);
+      if (response.statusCode === 201) {
         resetForm();
         await fetchReceipts();
         setFilteredData([]);
@@ -197,7 +198,7 @@ const CreateReceipt = () => {
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
         <div className="flex items-center justify-between w-full mb-4">
-          <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">
+          <h2 className="font-GmarketLight text-[#000000] text-[14px] sm:text-[16px]">
             {getClubNameById(userData?.data.studentClubId)}
           </h2>
           <div className="flex items-center space-x-2">
