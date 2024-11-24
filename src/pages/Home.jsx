@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Header from '../components/Header';
 import IntroduceCard from '../components/IntroduceCard';
 import Footer from '../components/Footer';
@@ -9,6 +10,19 @@ import createReceipt from '../assets/images/create-receipt.png';
 import myPage from '../assets/images/my-page.png';
 
 const Home = () => {
+  useEffect(() => {
+    console.log(`
+        ███╗   ███╗     ██╗██╗   ██╗
+        ████╗ ████║     ██║██║   ██║
+        ██╔████╔██║     ██║██║   ██║
+        ██║╚██╔╝██║██   ██║██║   ██║
+        ██║ ╚═╝ ██║╚█████╔╝╚██████╔╝
+        ╚═╝     ╚═╝ ╚════╝  ╚═════╝ 
+        Frontend: JunKyu Lee
+        Backend: SeoHyun Lee, JinHyeong Park
+    `);
+  }, []);
+
   return (
     <div className="max-w-[600px] min-h-screen ml-auto mr-auto bg-white">
       <Header />
