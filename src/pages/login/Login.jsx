@@ -28,13 +28,10 @@ const Login = () => {
 
     // 토큰 정보 출력
     if (authData && authData.accessToken) {
-      console.log(authData.accessToken);
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
-        // console.log('Decoded Access Token:', decodedAccessToken);
         if (authData.refreshToken) {
           const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
-          // console.log('Decoded Refresh Token:', decodedRefreshToken);
         }
       } catch (error) {
         console.error('토큰 디코딩 실패:', error);
@@ -79,18 +76,6 @@ const Login = () => {
       } else {
         localStorage.removeItem('rememberedUserId');
       }
-
-      // 이스터에그 메시지 출력
-      console.log(`
-        ███╗   ███╗     ██╗██╗   ██╗
-        ████╗ ████║     ██║██║   ██║
-        ██╔████╔██║     ██║██║   ██║
-        ██║╚██╔╝██║██   ██║██║   ██║
-        ██║ ╚═╝ ██║╚█████╔╝╚██████╔╝
-        ╚═╝     ╚═╝ ╚════╝  ╚═════╝ 
-        Frontend: JunKyu Lee
-        Backend: SeoHyun Lee, JinHyeong Park
-      `);
 
       if (role === 'ADMIN') {
         navigate('/home-admin');
