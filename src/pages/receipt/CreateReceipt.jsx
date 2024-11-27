@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { fetchClubReceipts, createUserReceipt, deleteUserReceipt } from '../../utils/receiptApi';
+import { fetchClubReceipts, createUserReceipt, deleteUserReceipt, createOcrReceipt } from '../../utils/receiptApi';
 import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
 import useStudentClubStore from '../../store/studentClubStore';
@@ -137,7 +137,38 @@ const CreateReceipt = () => {
       return;
     }
 
-    // OCR API 연동 부분은 나중에 구현
+    try {
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // OCR API 호출
+      const response = await createOcrReceipt(userId, formData);
+
+      if (response.statusCode === 200) {
+        const { date, content, withdrawal } = response.data;
+
+        // 날짜 형식 변환 (ISO -> YYYY-MM-DD)
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+
+        // 폼 데이터 업데이트
+        setDate(formattedDate);
+        setContent(content);
+        setWithdrawal(withdrawal.toString());
+
+        alert('영수증 인식이 완료되었습니다. 내용을 확인하고 저장해주세요.');
+      } else {
+        throw new Error(response.statusMessage || 'OCR 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('OCR 처리 실패:', error);
+      alert('영수증 인식에 실패했습니다. 직접 입력해주세요.');
+    } finally {
+      // 파일 입력 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   const handleDelete = async (receiptId) => {
@@ -164,7 +195,6 @@ const CreateReceipt = () => {
     }
   };
 
-  // 유틸리티 함수
   const filterDataByDateRange = () => {
     if (!receiptData) return;
 
