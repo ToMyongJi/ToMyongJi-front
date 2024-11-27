@@ -228,7 +228,6 @@ const MyPage = () => {
 
       await deleteClubMember(memberToDelete.memberId);
 
-      // 소속원 목록 새로고침
       const membersResponse = await fetchClubMembers(loginUserId);
       if (membersResponse && Array.isArray(membersResponse)) {
         const newMembers = membersResponse.map((member) => ({

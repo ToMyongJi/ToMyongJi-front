@@ -16,7 +16,8 @@ import useStudentClubStore from '../../store/studentClubStore';
 const Admin = () => {
   const { clubId } = useParams();
   const [studentClubName, setStudentClubName] = useState('');
-  const [president, setPresident] = useState({ clubId: clubId, studentNum: '', name: '' });
+  const [president, setPresident] = useState({ studentNum: '', name: '' });
+  const [newPresident, setNewPresident] = useState({ clubId: clubId, studentNum: '', name: '' });
   const [newMember, setNewMember] = useState({ clubId: clubId, studentNum: '', name: '' });
   const [members, setMembers] = useState([]);
   const { setCurrentClub, currentClub } = useStudentClubStore();
@@ -36,7 +37,6 @@ const Admin = () => {
       }
     } catch (error) {
       console.error('데이터 로드 실패:', error);
-      alert('데이터를 불러오는데 실패했습니다.');
     }
   };
 
@@ -47,18 +47,53 @@ const Admin = () => {
 
   const handlePresidentSubmit = async (e) => {
     e.preventDefault();
-    console.log('입력한 president', president);
-    const updatedPresident = await updatePresident(president);
-    console.log('업데이트된 president', updatedPresident);
-    setPresident(updatedPresident);
+    try {
+      const presidentData = {
+        clubId: parseInt(clubId),
+        studentNum: newPresident.studentNum.trim(),
+        name: newPresident.name.trim(),
+      };
+
+      let result;
+      if (president.studentNum) {
+        result = await updatePresident(presidentData);
+      } else {
+        result = await savePresident(presidentData);
+      }
+
+      setPresident({
+        studentNum: result.data.studentNum,
+        name: result.data.name,
+      });
+      newPresident.studentNum = '';
+      newPresident.name = '';
+      alert(president.studentNum ? '회장 정보가 성공적으로 수정되었습니다.' : '새 회장이 등록되었습니다.');
+    } catch (error) {
+      console.error('회장 정보 처리 실패:', error);
+      alert(error.message || '회장 정보 처리에 실패했습니다.');
+    }
   };
 
   const handleAddMember = async (e) => {
     e.preventDefault();
-    const addedMember = await addMember(newMember);
-    setMembers([...members, addedMember]);
-    setNewMember({ clubId: clubId, studentNum: '', name: '' });
-    alert('새 부원이 추가되었습니다.');
+    try {
+      const response = await addMember(newMember);
+
+      if (response.statusCode === 201) {
+        // 멤버 추가 성공 후 멤버 목록을 다시 불러옴
+        const membersData = await fetchMembers(clubId);
+        setMembers(membersData);
+
+        // 입력 폼 초기화
+        setNewMember({ clubId: clubId, studentNum: '', name: '' });
+        alert('새 부원이 추가되었습니다.');
+      } else {
+        throw new Error(response.statusMessage || '부원 추가에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('부원 추가 실패:', error);
+      alert(error.message || '부원 추가에 실패했습니다.');
+    }
   };
 
   const handleDeleteMember = async (memberId) => {
@@ -78,22 +113,50 @@ const Admin = () => {
         {/* 회장 관리 박스 */}
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
           <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">회장 관리</h2>
+
+          {/* 현재 회장 정보 표시 */}
+          {president.studentNum && (
+            <div className="mb-4">
+              <p className="text-[#002e72] mb-2 font-GmarketMedium">현재 회장</p>
+              <div className="flex space-x-2" key="president-info">
+                <input
+                  type="text"
+                  value={president.studentNum}
+                  readOnly
+                  className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  value={president.name}
+                  readOnly
+                  className="flex-1 p-2 bg-gray-100 border rounded-lg"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 회장 정보 변경 폼 */}
           <form onSubmit={handlePresidentSubmit} className="space-y-4">
+            <p className="text-[#002e72] mb-2 font-GmarketMedium">새 회장</p>
             <div className="flex space-x-2">
               <input
                 type="text"
                 name="studentNum"
                 placeholder="학번"
-                value={president.studentNum}
-                onChange={(e) => setPresident({ ...president, studentNum: e.target.value })}
+                value={newPresident.studentNum}
+                onChange={(e) => {
+                  setNewPresident({ ...newPresident, studentNum: e.target.value });
+                }}
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
               <input
                 type="text"
                 name="name"
                 placeholder="이름"
-                value={president.name}
-                onChange={(e) => setPresident({ ...president, name: e.target.value })}
+                value={newPresident.name}
+                onChange={(e) => {
+                  setNewPresident({ ...newPresident, name: e.target.value });
+                }}
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>

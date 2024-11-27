@@ -54,7 +54,6 @@ const Login = () => {
       const { data } = await loginUser(userId, password);
       const { accessToken, refreshToken } = data;
       setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
-
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
       const { id, auth: role, sub: userIdFromToken } = decodedToken;
       const userInfo = await fetchMyInfo(id);
