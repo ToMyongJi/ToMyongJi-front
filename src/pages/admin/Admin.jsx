@@ -70,7 +70,7 @@ const Admin = () => {
       alert(president.studentNum ? '회장 정보가 성공적으로 수정되었습니다.' : '새 회장이 등록되었습니다.');
     } catch (error) {
       console.error('회장 정보 처리 실패:', error);
-      alert(error.message || '회장 정보 처리에 실패했습니다.');
+      alert(error.message || '회장을 변경하기 위해서 먼저 등록된 회장 회원가입이 필요합니다.');
     }
   };
 
@@ -80,11 +80,9 @@ const Admin = () => {
       const response = await addMember(newMember);
 
       if (response.statusCode === 201) {
-        // 멤버 추가 성공 후 멤버 목록을 다시 불러옴
         const membersData = await fetchMembers(clubId);
         setMembers(membersData);
 
-        // 입력 폼 초기화
         setNewMember({ clubId: clubId, studentNum: '', name: '' });
         alert('새 부원이 추가되었습니다.');
       } else {
@@ -99,7 +97,7 @@ const Admin = () => {
   const handleDeleteMember = async (memberId) => {
     const deletedMember = await deleteMember(memberId);
     setMembers(members.filter((member) => member.memberId !== memberId));
-    alert('부원이 삭제되었습니다.');
+    alert('회원가입된 부원은 삭제할 수 없으니 관리자에게 문의해주세요.');
   };
 
   return (
