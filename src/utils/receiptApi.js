@@ -4,7 +4,14 @@ import api from './api';
 export const fetchClubReceipts = async (clubId) => {
   try {
     const response = await api.get(`/api/receipt/club/${clubId}`);
-    return response.data || { data: [] };
+    return (
+      response.data || {
+        data: {
+          receiptList: [],
+          balance: 0,
+        },
+      }
+    );
   } catch (error) {
     console.error('학생회 영수증 정보를 가져오는 데 실패했습니다:', error);
     throw error;

@@ -12,6 +12,7 @@ const ReceiptsList = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+  const [balance, setBalance] = useState(0);
 
   const { clubId } = useParams();
   const location = useLocation();
@@ -22,14 +23,17 @@ const ReceiptsList = () => {
       try {
         setLoading(true);
         const response = await fetchClubReceipts(clubId);
-        const receiptsData = Array.isArray(response.data) ? response.data : [];
+        const receiptsData = response.data?.receiptList || [];
+        const balanceData = response.data?.balance || 0;
         setReceipts(receiptsData);
+        setBalance(balanceData);
         setFilteredData(receiptsData);
         setError(null);
       } catch (err) {
         setError('영수증을 불러오는 데 실패했습니다.');
         setReceipts([]);
         setFilteredData([]);
+        setBalance(0);
       } finally {
         setLoading(false);
       }
@@ -68,7 +72,12 @@ const ReceiptsList = () => {
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
-        <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px] mb-4 self-start">{clubName}</h2>
+        <div className="flex items-center justify-between w-full mb-4">
+          <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">{clubName}</h2>
+          <div className="font-GmarketMedium text-[14px] sm:text-[16px] text-[#061E5B]">
+            잔액: {balance.toLocaleString()}원
+          </div>
+        </div>
 
         {/* 기간별 조회 기능 */}
         <div className="w-full mb-10">

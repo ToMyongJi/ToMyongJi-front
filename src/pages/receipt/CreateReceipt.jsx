@@ -30,6 +30,9 @@ const CreateReceipt = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  // balance state 추가
+  const [balance, setBalance] = useState(0);
+
   // 사용자 인증 및 데이터 로드
   useEffect(() => {
     if (authData?.accessToken) {
@@ -72,12 +75,14 @@ const CreateReceipt = () => {
     if (!userData?.data?.studentClubId) return;
     try {
       const response = await fetchClubReceipts(userData.data.studentClubId);
-      setReceiptData(response.data || []);
-      setFilteredData(response.data || []);
+      setReceiptData(response.data.receiptList || []);
+      setFilteredData(response.data.receiptList || []);
+      setBalance(response.data.balance || 0);
     } catch (error) {
       console.error('영수증 데이터를 가져오는데 실패했습니다:', error);
       setReceiptData([]);
       setFilteredData([]);
+      setBalance(0);
     }
   };
 
@@ -227,33 +232,38 @@ const CreateReceipt = () => {
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
-        <div className="flex items-center justify-between w-full mb-4">
-          <h2 className="font-GmarketLight text-[#000000] text-[14px] sm:text-[16px]">
-            {getClubNameById(userData?.data.studentClubId)}
-          </h2>
-          <div className="flex items-center space-x-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/jpeg,image/png,image/jpg"
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => navigate('/receipt/upload-csv')}
-              className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
-            >
-              기존 데이터 추가
-            </button>
-            <button
-              type="button"
-              onClick={handleImageUpload}
-              className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
-            >
-              영수증 첨부
-            </button>
+        <div className="flex items-center justify-between w-full mb-6">
+          <div className="flex items-center justify-between w-full">
+            <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">
+              {getClubNameById(userData?.data.studentClubId)}
+            </h2>
+            <div className="font-GmarketMedium text-[14px] sm:text-[16px] text-[#061E5B]">
+              잔액: {balance.toLocaleString()}원
+            </div>
           </div>
+        </div>
+        <div className="flex items-center justify-end w-full mb-4 space-x-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/jpeg,image/png,image/jpg"
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => navigate('/receipt/upload-csv')}
+            className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+          >
+            기존 데이터 추가
+          </button>
+          <button
+            type="button"
+            onClick={handleImageUpload}
+            className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+          >
+            영수증 첨부
+          </button>
         </div>
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
