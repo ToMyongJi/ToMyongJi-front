@@ -30,8 +30,11 @@ const Login = () => {
     if (authData && authData.accessToken) {
       try {
         const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        // console.log('authData', authData);
+        // console.log('decodedAccessToken', decodedAccessToken);
         if (authData.refreshToken) {
           const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
+          // console.log('decodedRefreshToken', decodedRefreshToken);
         }
       } catch (error) {
         console.error('토큰 디코딩 실패:', error);
