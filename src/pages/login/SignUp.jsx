@@ -20,7 +20,7 @@ const SignUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [studentNum, setStudentNum] = useState('');
-  const [college, setCollege] = useState('');
+  const [collegeName, setCollegeName] = useState('');
   const [role, setRole] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -122,7 +122,7 @@ const SignUp = () => {
       alert('비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상씩 포함된 8자 ~ 20자여야 합니다.');
       return;
     }
-    if (!college) {
+    if (!collegeName) {
       alert('대학을 선택해주세요.');
       return;
     }
@@ -133,11 +133,11 @@ const SignUp = () => {
         name,
         email,
         studentNum,
-        college,
+        collegeName,
+        studentClubId: parseInt(selectedClub),
         role,
-        studentClubId: selectedClub,
       };
-      const response = await signUpUser(userData);
+      await signUpUser(userData);
       alert('회원가입이 완료되었습니다.');
       navigate('/login');
     } catch (error) {
@@ -153,10 +153,10 @@ const SignUp = () => {
     const selectedCollege = collegeApiData.find((college) => college.collegeId === parseInt(selectedId));
 
     if (selectedCollege) {
-      setCollege(selectedCollege.collegeName);
+      setCollegeName(selectedCollege.collegeName);
       setClubs(selectedCollege.clubs || []);
     } else {
-      setCollege('');
+      setCollegeName('');
       setClubs([]);
     }
     setSelectedClub('');
