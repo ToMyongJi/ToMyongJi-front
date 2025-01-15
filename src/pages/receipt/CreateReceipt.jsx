@@ -15,6 +15,7 @@ const CreateReceipt = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
+  const [userLoginId, setUserLoginId] = useState(null);
   const [userId, setUserId] = useState(null);
   const [userData, setUserData] = useState(null);
   const [receiptData, setReceiptData] = useState([]);
@@ -39,6 +40,7 @@ const CreateReceipt = () => {
       try {
         const decodedToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
         setUserId(decodedToken.id);
+        setUserLoginId(decodedToken.sub);
       } catch (error) {
         console.error('액세스 토큰 디코딩 중 오류 발생:', error);
       }
@@ -100,7 +102,7 @@ const CreateReceipt = () => {
 
     try {
       const requestData = {
-        userId: userId,
+        userId: userLoginId,
         date: new Date(date).toISOString(),
         content: content,
         deposit: Number(deposit) || 0,
