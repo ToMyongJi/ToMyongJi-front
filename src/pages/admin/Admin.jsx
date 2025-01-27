@@ -72,7 +72,7 @@ const Admin = () => {
       alert(president.studentNum ? '회장 정보가 성공적으로 수정되었습니다.' : '새 회장이 등록되었습니다.');
     } catch (error) {
       console.error('회장 정보 처리 실패:', error);
-      alert(error.message || '회장을 변경하기 위해서 먼저 등록된 회장 회원가입이 필요합니다.');
+      alert('회장을 변경하기 위해서 먼저 등록된 회장 회원가입이 필요합니다.');
     }
   };
 
