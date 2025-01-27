@@ -190,7 +190,7 @@ const MyPage = () => {
 
     try {
       const requestData = {
-        presidentUserId: loginUserId,
+        id: parseInt(loginUserId),
         studentNum: newMember.studentNum,
         name: newMember.name,
       };
@@ -226,7 +226,7 @@ const MyPage = () => {
       const memberToDelete = clubMembers.find((member) => member.studentNum === studentNum);
       if (!memberToDelete) return;
 
-      await deleteClubMember(memberToDelete.memberId);
+      await deleteClubMember(memberToDelete.studentNum);
 
       const membersResponse = await fetchClubMembers(loginUserId);
       if (membersResponse && Array.isArray(membersResponse)) {
@@ -240,7 +240,7 @@ const MyPage = () => {
 
       alert('정상적으로 소속원이 삭제되었습니다.');
     } catch (error) {
-      alert('회원가입된 부원은 삭제할 수 없으니 관리자에게 문의해주세요.');
+      alert('소속원 삭제 중 오류가 발생했습니다.');
     }
   };
 
