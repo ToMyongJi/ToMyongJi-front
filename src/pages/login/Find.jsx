@@ -11,10 +11,14 @@ const Find = () => {
     try {
       setError('');
       setFoundUserId('');
-      const userId = await findUserId(email);
-      setFoundUserId(userId);
+      const response = await findUserId(email);
+      if (response && response.data) {
+        setFoundUserId(response.data.userId || response.data);
+      } else {
+        throw new Error('아이디를 찾을 수 없습니다.');
+      }
     } catch (error) {
-      setError(error.message);
+      setError(error.message || '아이디 찾기에 실패했습니다.');
     }
   };
 
