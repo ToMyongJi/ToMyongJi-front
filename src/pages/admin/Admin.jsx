@@ -22,6 +22,7 @@ const Admin = () => {
   const [members, setMembers] = useState([]);
   const { setCurrentClub, currentClub } = useStudentClubStore();
 
+  // 클럽 정보 로드
   const fetchClubData = async () => {
     try {
       const clubData = await fetchAllClubs();
@@ -45,6 +46,7 @@ const Admin = () => {
     fetchClubData();
   }, [clubId, setCurrentClub]);
 
+  // 회장 정보 저장
   const handlePresidentSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -74,6 +76,7 @@ const Admin = () => {
     }
   };
 
+  // 소속 부원 추가
   const handleAddMember = async (e) => {
     e.preventDefault();
     try {
@@ -84,22 +87,32 @@ const Admin = () => {
         setMembers(membersData);
 
         setNewMember({ clubId: clubId, studentNum: '', name: '' });
-        alert('새 부원이 추가되었습니다.');
+        alert('정상적으로 소속원이 추가 되었습니다.');
       } else {
-        throw new Error(response.statusMessage || '부원 추가에 실패했습니다.');
+        throw new Error(response.statusMessage || '부원 추가 중 오류가 발생했습니다.');
       }
     } catch (error) {
-      console.error('부원 추가 실패:', error);
-      alert(error.message || '부원 추가에 실패했습니다.');
+      console.error('부원 추가 중 오류가 발생:', error);
+      alert(error.message || '부원 추가 중 오류가 발생했습니다.');
     }
   };
 
+  // 소속 부원 삭제
   const handleDeleteMember = async (memberId) => {
-    const deletedMember = await deleteMember(memberId);
-    setMembers(members.filter((member) => member.memberId !== memberId));
-    alert('회원가입된 부원은 삭제할 수 없으니 관리자에게 문의해주세요.');
+    if (!window.confirm('정말로 삭제하시겠습니까?')) return;
+
+    try {
+      await deleteMember(memberId);
+      const updatedMembers = await fetchMembers(clubId);
+      setMembers(updatedMembers);
+      alert('정상적으로 소속원이 삭제되었습니다.');
+    } catch (error) {
+      console.error('소속원 삭제 중 오류가 발생:', error);
+      alert('소속원 삭제 중 오류가 발생했습니다.');
+    }
   };
 
+  // 페이지 렌더링
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />

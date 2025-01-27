@@ -27,9 +27,9 @@ export const addClubMember = async (memberData) => {
 };
 
 // 소속 부원 삭제
-export const deleteClubMember = async (memberId) => {
+export const deleteClubMember = async (deletedStudentNum) => {
   try {
-    const response = await api.delete(`${API_BASE_URL}/api/my/members/${memberId}`);
+    const response = await api.delete(`${API_BASE_URL}/api/my/members/${deletedStudentNum}`);
     return response.data;
   } catch (error) {
     console.error('소속 부원 삭제 중 오류 발생:', error);
