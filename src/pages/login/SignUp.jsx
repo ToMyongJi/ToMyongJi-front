@@ -36,6 +36,7 @@ const SignUp = () => {
   useEffect(() => {
     const loadColleges = async () => {
       try {
+        setIsLoading(true);
         const collegeData = await fetchAllColleges();
         setCollegeApiData(collegeData);
         setColleges(collegeData);
@@ -45,10 +46,9 @@ const SignUp = () => {
         setIsLoading(false);
       }
     };
-    if (colleges.length === 0) {
-      loadColleges();
-    }
-  }, [colleges.length, setColleges]);
+
+    loadColleges();
+  }, [setColleges]);
 
   const validatePassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
@@ -330,6 +330,7 @@ const SignUp = () => {
                   <option value="">자격을 선택해주세요.</option>
                   <option value="STU">학생회 소속원</option>
                   <option value="PRESIDENT">학생회 회장</option>
+                  <option value="ADMIN">관리자</option>
                 </select>
               </div>
             </div>
