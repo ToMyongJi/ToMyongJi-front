@@ -5,19 +5,18 @@ const useAuthStore = create(
   persist(
     (set) => ({
       authData: null,
-      setAuthData: (data) => set({ authData: data }),
+      setAuthData: (grantType, accessToken, refreshToken) =>
+        set({
+          authData: {
+            grantType,
+            accessToken,
+            refreshToken,
+          },
+        }),
       clearAuthData: () => set({ authData: null }),
     }),
     {
       name: 'auth-storage',
-      storage: {
-        getItem: (name) => {
-          const str = localStorage.getItem(name);
-          return str ? JSON.parse(str) : null;
-        },
-        setItem: (name, value) => localStorage.setItem(name, JSON.stringify(value)),
-        removeItem: (name) => localStorage.removeItem(name),
-      },
     }
   )
 );

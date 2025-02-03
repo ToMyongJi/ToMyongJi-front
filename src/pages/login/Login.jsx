@@ -54,21 +54,33 @@ const Login = () => {
     try {
       clearUser();
 
-      const { data } = await loginUser(userId, password);
-      const { accessToken, refreshToken } = data;
-      setAuthData({ grantType: 'Bearer', accessToken, refreshToken });
+      const response = await loginUser(userId, password);
+      const { grantType, accessToken, refreshToken } = response.data;
+
+      // 토큰 설정
+      setAuthData(grantType, accessToken, refreshToken);
+
+      // 토큰이 저장될 때까지 잠시 대기
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
       const { id, auth: role, sub: userIdFromToken } = decodedToken;
-      const userInfo = await fetchMyInfo(id);
+
+      // 토큰을 직접 전달하여 API 호출
+      const userInfoResponse = await fetchMyInfo(id, accessToken);
+
+      if (!userInfoResponse.data) {
+        throw new Error('사용자 정보를 가져오는데 실패했습니다.');
+      }
 
       const userData = {
         id,
         role,
         userId: userIdFromToken,
-        name: userInfo.name,
-        studentNum: userInfo.studentNum,
-        college: userInfo.college,
-        studentClubId: userInfo.studentClubId,
+        name: userInfoResponse.data.name,
+        studentNum: userInfoResponse.data.studentNum,
+        college: userInfoResponse.data.college,
+        studentClubId: userInfoResponse.data.studentClubId,
       };
 
       setUser(userData);
@@ -86,6 +98,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error('로그인 실패:', error);
+      alert('로그인에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
