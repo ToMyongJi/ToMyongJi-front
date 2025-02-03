@@ -267,41 +267,54 @@ const CreateReceipt = () => {
             영수증 첨부
           </button>
         </div>
-        <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
-          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-            <div className="flex space-x-2">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full sm:w-1/5 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF] text-sm sm:text-base"
-                placeholder="날짜"
-              />
-              <input
-                type="text"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-2/5 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                placeholder="내용"
-              />
-              <input
-                type="text"
-                value={deposit}
-                onChange={(e) => setDeposit(e.target.value)}
-                className="w-1/5 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                placeholder="입금"
-              />
-              <input
-                type="text"
-                value={withdrawal}
-                onChange={(e) => setWithdrawal(e.target.value)}
-                className="w-1/5 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                placeholder="출금"
-              />
-            </div>
-          </form>
+        <div className="sticky top-0 z-40 w-full py-4 bg-white">
+          <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
+            <form onSubmit={handleSubmit} id="receipt-form" className="w-full">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full sm:w-1/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  placeholder="날짜"
+                />
+                <input
+                  type="text"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full sm:w-2/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  placeholder="내용"
+                />
+                <input
+                  type="text"
+                  value={deposit}
+                  onChange={(e) => setDeposit(e.target.value)}
+                  className="w-full sm:w-1/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  placeholder="입금"
+                />
+                <input
+                  type="text"
+                  value={withdrawal}
+                  onChange={(e) => setWithdrawal(e.target.value)}
+                  className="w-full sm:w-1/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  placeholder="출금"
+                />
+                <button
+                  type="submit"
+                  className="w-full sm:w-[50px] px-4 py-2 text-[#061E5B] rounded-lg shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300 flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
         <div className="w-full mt-8 mb-4">
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <div className="flex space-x-2 sm:w-2/3">
@@ -309,24 +322,23 @@ const CreateReceipt = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
+                className="w-1/2 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
+                className="w-1/2 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
             <button
               onClick={filterDataByDateRange}
-              className="w-full sm:w-1/3 px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
+              className="w-full sm:w-1/3 px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
             >
               조회
             </button>
           </div>
         </div>
-
         <div className="w-full mb-10 p-2 sm:p-4 rounded-md shadow-[0_0_10px_#CED3FF] mt-5">
           <div className="flex justify-center font-GmarketMedium my-1 pb-4 text-[12px] sm:text-[14px] text-[#002e72]">
             <div className="flex items-center w-4/5">
@@ -362,15 +374,6 @@ const CreateReceipt = () => {
               <p>표시할 데이터가 없습니다.</p>
             )}
           </div>
-        </div>
-
-        <div className="flex justify-center w-full mt-4 mb-10">
-          <button
-            onClick={handleSubmit}
-            className="w-1/4 px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
-          >
-            저장하기
-          </button>
         </div>
       </div>
       <Footer />
