@@ -112,9 +112,9 @@ export const fetchMyInfo = async (userId) => {
 };
 
 // 소속 인증
-export const verifyClubMembership = async (clubId, studentNum) => {
+export const verifyClubMembership = async (clubVerifyData) => {
   try {
-    const response = await api.get(`${API_BASE_URL}/api/users/clubVerify/${clubId}/${studentNum}`);
+    const response = await api.post(`${API_BASE_URL}/api/users/clubVerify`, clubVerifyData);
     return response.data;
   } catch (error) {
     console.error('소속 인증 실패:', error);
