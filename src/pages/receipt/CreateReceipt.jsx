@@ -266,6 +266,13 @@ const CreateReceipt = () => {
           >
             영수증 첨부
           </button>
+          <button
+            type="submit"
+            form="receipt-form"
+            className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+          >
+            저장
+          </button>
         </div>
         <div className="sticky top-0 z-40 w-full py-4 bg-white">
           <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
@@ -275,42 +282,30 @@ const CreateReceipt = () => {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full sm:w-1/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:w-1/5 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                   placeholder="날짜"
                 />
                 <input
                   type="text"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full sm:w-2/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:w-2/5 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                   placeholder="내용"
                 />
                 <input
                   type="text"
                   value={deposit}
                   onChange={(e) => setDeposit(e.target.value)}
-                  className="w-full sm:w-1/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:w-1/5 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                   placeholder="입금"
                 />
                 <input
                   type="text"
                   value={withdrawal}
                   onChange={(e) => setWithdrawal(e.target.value)}
-                  className="w-full sm:w-1/6 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                  className="w-full sm:w-1/5 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                   placeholder="출금"
                 />
-                <button
-                  type="submit"
-                  className="w-full sm:w-[50px] px-4 py-2 text-[#061E5B] rounded-lg shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300 flex items-center justify-center"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
               </div>
             </form>
           </div>
