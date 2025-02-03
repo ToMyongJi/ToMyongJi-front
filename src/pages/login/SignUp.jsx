@@ -32,6 +32,11 @@ const SignUp = () => {
   const [isClubVerified, setIsClubVerified] = useState(false);
   const [isIdDuplicateChecked, setIsIdDuplicateChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [clubVerifyData, setClubVerifyData] = useState({
+    clubId: 0,
+    studentNum: '',
+    role: '',
+  });
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -167,8 +172,15 @@ const SignUp = () => {
       alert('소속과 학번을 모두 입력해주세요.');
       return;
     }
+
     try {
-      const isVerified = await verifyClubMembership(selectedClub, studentNum);
+      const verifyData = {
+        clubId: parseInt(selectedClub),
+        studentNum,
+        role,
+      };
+
+      const isVerified = await verifyClubMembership(verifyData);
       if (isVerified) {
         setIsClubVerified(true);
         alert('소속 인증이 완료되었습니다.');
