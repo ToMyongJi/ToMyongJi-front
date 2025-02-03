@@ -78,7 +78,7 @@ const MyPage = () => {
             setRole(decoded.auth || '');
             setLoginUserId(decoded.id);
 
-            const info = await fetchMyInfo(decoded.id);
+            const info = await fetchMyInfo(decoded.id, authData.accessToken);
             if (info) {
               setUserCollege(info.data.college || '');
               const newUserInfo = {

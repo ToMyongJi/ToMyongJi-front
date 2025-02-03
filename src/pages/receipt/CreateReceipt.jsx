@@ -66,7 +66,7 @@ const CreateReceipt = () => {
   // API 호출 함수
   const fetchUserData = async (userId) => {
     try {
-      const response = await fetchMyInfo(userId);
+      const response = await fetchMyInfo(userId, authData.accessToken);
       setUserData(response);
     } catch (error) {
       console.error('사용자 정보를 가져오는데 실패했습니다:', error);

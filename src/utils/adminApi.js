@@ -1,10 +1,11 @@
 import api from './api';
+import useAuthStore from '../store/authStore';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 학생회장 조회
 export const fetchPresident = async (clubId) => {
   try {
-    const response = await api.get(`${API_BASE_URL}/api/admin/president/${clubId}`);
+    const response = await api.get(`/api/admin/president/${clubId}`);
     return response.data.data;
   } catch (error) {
     console.error('학생회장 정보를 가져오는 데 실패했습니다:', error);
@@ -15,7 +16,7 @@ export const fetchPresident = async (clubId) => {
 // 학생회장 저장
 export const savePresident = async (data) => {
   try {
-    const response = await api.post(`/api/admin/president`, data);
+    const response = await api.post('/api/admin/president', data);
     return response.data;
   } catch (error) {
     console.error('학생회장 저장 실패:', error);
@@ -29,11 +30,7 @@ export const updatePresident = async (data) => {
     const response = await api.patch('/api/admin/president', data);
     return response.data;
   } catch (error) {
-    console.error('학생회장 수정 실패:', {
-      message: error.response?.data?.message,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
+    console.error('학생회장 수정 실패:', error);
     throw error.response?.data || error;
   }
 };
@@ -52,7 +49,7 @@ export const fetchMembers = async (clubId) => {
 // 소속 부원 추가
 export const addMember = async (data) => {
   try {
-    const response = await api.post(`/api/admin/member`, data);
+    const response = await api.post('/api/admin/member', data);
     return response.data;
   } catch (error) {
     console.error('소속 부원 추가 실패:', error);

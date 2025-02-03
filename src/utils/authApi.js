@@ -1,25 +1,12 @@
 import api from './api';
-import useAuthStore from '../store/authStore';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 로그인
 export const loginUser = async (userId, password) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/users/login`, { userId, password });
-    const { grantType, accessToken, refreshToken } = response.data.data;
-    useAuthStore.getState().setAuthData(grantType, accessToken, refreshToken);
+    const response = await api.post('/api/users/login', { userId, password });
     return response.data;
   } catch (error) {
-    if (
-      error.response &&
-      error.response.status === 400 &&
-      error.response.data.message === '자격 증명에 실패하였습니다.'
-    ) {
-      alert('아이디 또는 비밀번호를 확인해주세요.');
-    } else {
-      console.error('로그인 요청 실패:', error);
-    }
+    console.error('로그인 요청 실패:', error);
     throw error;
   }
 };
@@ -27,7 +14,7 @@ export const loginUser = async (userId, password) => {
 // 회원가입
 export const signUpUser = async (userData) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/users/signup`, userData);
+    const response = await api.post('/api/users/signup', userData);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -42,7 +29,7 @@ export const signUpUser = async (userData) => {
 // 아이디 중복 확인
 export const checkUserIdDuplicate = async (userId) => {
   try {
-    const response = await api.get(`${API_BASE_URL}/api/users/${userId}`);
+    const response = await api.get(`/api/users/${userId}`);
     return response.data;
   } catch (error) {
     console.error('아이디 중복 확인 실패:', error);
@@ -53,7 +40,7 @@ export const checkUserIdDuplicate = async (userId) => {
 // 이메일 인증코드 발송
 export const sendEmailVerification = async (email) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/users/emailCheck`, { email });
+    const response = await api.post('/api/users/emailCheck', { email });
     return response.data;
   } catch (error) {
     console.error('이메일 인증코드 발송 실패:', error);
@@ -64,7 +51,7 @@ export const sendEmailVerification = async (email) => {
 // 인증코드 확인
 export const verifyEmailCode = async (email, code) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/users/verifyCode`, { email, code });
+    const response = await api.post('/api/users/verifyCode', { email, code });
     return response.data;
   } catch (error) {
     console.error('인증코드 확인 실패:', error);
@@ -74,14 +61,19 @@ export const verifyEmailCode = async (email, code) => {
 
 // 유저 정보
 export const fetchUserInfo = async (userId) => {
-  const response = await api.get(`api/users/${userId}`);
-  return response.data;
+  try {
+    const response = await api.get(`/api/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('유저 정보 조회 실패:', error);
+    throw error;
+  }
 };
 
 // 아이디 찾기
 export const findUserId = async (email) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/users/find-id`, { email });
+    const response = await api.post('/api/users/find-id', { email });
     return response.data;
   } catch (error) {
     console.error('아이디 찾기 요청 실패:', error);
@@ -101,10 +93,18 @@ export const findUserId = async (email) => {
 };
 
 // 내정보 조회
-export const fetchMyInfo = async (userId) => {
+export const fetchMyInfo = async (userId, accessToken) => {
   try {
-    const response = await api.get(`${API_BASE_URL}/api/my/${userId}`);
-    return response.data;
+    if (!accessToken) {
+      throw new Error('인증 토큰이 없습니다.');
+    }
+
+    const response = await api.get(`/api/my/${userId}`);
+
+    if (response.data) {
+      return response.data;
+    }
+    throw new Error('잘못된 응답 형식입니다.');
   } catch (error) {
     console.error('내정보 조회 실패:', error);
     throw error;
@@ -114,9 +114,10 @@ export const fetchMyInfo = async (userId) => {
 // 소속 인증
 export const verifyClubMembership = async (clubVerifyData) => {
   try {
-    const response = await api.post(`${API_BASE_URL}/api/users/clubVerify`, clubVerifyData);
+    const response = await api.post('/api/users/clubVerify', clubVerifyData);
     return response.data;
   } catch (error) {
     console.error('소속 인증 실패:', error);
+    throw error;
   }
 };
