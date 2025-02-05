@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useEffect, useCallback } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import useUserStore from './store/userStore';
 import useAuthStore from './store/authStore';
 
@@ -19,8 +19,38 @@ import HomeAdmin from './pages/admin/HomeAdmin';
 import UploadCSVReceipt from './pages/receipt/UploadCSVReceipt';
 
 const App = () => {
-  const { user, setUser } = useUserStore();
-  const { authData } = useAuthStore();
+  const { user, setUser, clearUser } = useUserStore();
+  const { authData, clearAuthData } = useAuthStore();
+  const navigate = useNavigate();
+
+  const checkTokenExpiration = useCallback(() => {
+    if (authData?.accessToken) {
+      try {
+        const decodedToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000); // 현재 시간을 초 단위로 변환
+
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+          // 토큰이 만료되었을 경우
+          clearUser();
+          clearAuthData();
+          navigate('/login');
+          alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        }
+      } catch (error) {
+        console.error('토큰 검증 실패:', error);
+      }
+    }
+  }, [authData, clearUser, clearAuthData, navigate]);
+
+  useEffect(() => {
+    // 최초 토큰 체크
+    checkTokenExpiration();
+
+    // 1분마다 토큰 만료 체크
+    const intervalId = setInterval(checkTokenExpiration, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [checkTokenExpiration]);
 
   useEffect(() => {
     if (authData && !user) {
