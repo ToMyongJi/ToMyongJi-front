@@ -242,18 +242,8 @@ const SignUp = () => {
 
             <hr className="border-t border-[#eeeffe]" />
 
-            {/* 이름/이메일/인증코드  */}
+            {/* 이메일/인증코드  */}
             <div className="py-3 space-y-7">
-              {/* 이름 */}
-              <div className="flex flex-wrap items-center">
-                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">이름</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                />
-              </div>
               {/* 이메일 */}
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">이메일</label>
@@ -302,8 +292,18 @@ const SignUp = () => {
 
             <hr className="border-t border-[#eeeffe]" />
 
-            {/* 학번/대학/학과/자격 파트 */}
+            {/* 이름/학번/대학/자격 파트 */}
             <div className="py-4 space-y-7">
+              {/* 이름 */}
+              <div className="flex flex-wrap items-center">
+                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">이름</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                />
+              </div>
               {/* 학번 */}
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">학번</label>
@@ -342,23 +342,22 @@ const SignUp = () => {
                   <option value="">자격을 선택해주세요.</option>
                   <option value="STU">학생회 소속원</option>
                   <option value="PRESIDENT">학생회 회장</option>
-                  <option value="ADMIN">관리자</option>
                 </select>
               </div>
             </div>
-            {/* 소속 이름 */}
-            <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
-              <div className="w-full sm:w-[calc(100%-65px)] flex flex-col sm:flex-row">
+            {/* 소속부원 관리 */}
+            <div className="flex flex-wrap items-center mb-4">
+              <label className="w-full sm:w-[120px] text-[#002e72] mb-2 sm:mb-0">소속부원 관리</label>
+              <div className="w-full sm:w-[calc(100%-120px)] flex flex-col sm:flex-row gap-2">
                 <select
                   value={selectedClub}
                   onChange={(e) => setSelectedClub(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-4 sm:mb-0 sm:mr-2"
+                  className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF] mb-2 sm:mb-0"
                 >
-                  <option value="">소속을 선택해주세요.</option>
+                  <option value="">선택하세요</option>
                   {clubs.map((club) => (
-                    <option key={club.studentClubId} value={club.studentClubId}>
-                      {club.studentClubName}
+                    <option key={club.id} value={club.id}>
+                      {club.name}
                     </option>
                   ))}
                 </select>
@@ -370,7 +369,6 @@ const SignUp = () => {
                   소속 인증하기
                 </button>
               </div>
-              {isClubVerified && <p className="text-[#4CAF50] text-[9px] sm:text-xs mt-1">소속 인증 완료</p>}
             </div>
 
             <hr className="sm:hidden border-t border-[#eeeffe]" />
