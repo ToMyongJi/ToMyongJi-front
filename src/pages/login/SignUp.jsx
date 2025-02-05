@@ -244,16 +244,6 @@ const SignUp = () => {
 
             {/* 이름/이메일/인증코드  */}
             <div className="py-3 space-y-7">
-              {/* 이름 */}
-              <div className="flex flex-wrap items-center">
-                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">이름</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                />
-              </div>
               {/* 이메일 */}
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">이메일</label>
@@ -304,6 +294,16 @@ const SignUp = () => {
 
             {/* 학번/대학/학과/자격 파트 */}
             <div className="py-4 space-y-7">
+              {/* 이름 */}
+              <div className="flex flex-wrap items-center">
+                <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">이름</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full sm:w-[calc(100%-65px)] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                />
+              </div>
               {/* 학번 */}
               <div className="flex flex-wrap items-center">
                 <label className="w-full sm:w-[65px] text-[#002e72] mb-2 sm:mb-0">학번</label>
@@ -342,7 +342,6 @@ const SignUp = () => {
                   <option value="">자격을 선택해주세요.</option>
                   <option value="STU">학생회 소속원</option>
                   <option value="PRESIDENT">학생회 회장</option>
-                  <option value="ADMIN">관리자</option>
                 </select>
               </div>
             </div>
