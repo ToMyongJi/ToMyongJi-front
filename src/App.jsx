@@ -89,7 +89,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        {/* <Route path="/create-receipt" element={<CreateReceipt />} /> */}
         <Route
           path="/my-page"
           element={

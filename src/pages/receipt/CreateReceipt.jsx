@@ -259,13 +259,14 @@ const CreateReceipt = () => {
           >
             기존 데이터 추가
           </button>
-          <button
+          {/* 영수증 첨부 버튼 주석 처리 */}
+          {/* <button
             type="button"
             onClick={handleImageUpload}
             className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
           >
             영수증 첨부
-          </button>
+          </button> */}
           <button
             type="submit"
             form="receipt-form"
