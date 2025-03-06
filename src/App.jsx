@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import useUserStore from './store/userStore';
 import useAuthStore from './store/authStore';
+import { Analytics } from '@vercel/analytics/react';
 
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -127,6 +128,7 @@ const App = () => {
         {/* <Route path="/receipt/upload-csv" element={<UploadCSVReceipt />} /> */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Analytics />
     </div>
   );
 };
