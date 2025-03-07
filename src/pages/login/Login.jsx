@@ -92,7 +92,8 @@ const Login = () => {
       }
 
       if (role === 'ADMIN') {
-        navigate('/home-admin');
+        // navigate('/home-admin');
+        navigate('/receipt/upload-csv');
       } else {
         navigate('/');
       }
