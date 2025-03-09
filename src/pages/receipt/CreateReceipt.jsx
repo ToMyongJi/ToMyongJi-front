@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import Pagination from '../../components/Pagination';
 import { fetchClubReceipts, createUserReceipt, deleteUserReceipt, createOcrReceipt } from '../../utils/receiptApi';
 import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
@@ -33,6 +34,10 @@ const CreateReceipt = () => {
 
   // balance state 추가
   const [balance, setBalance] = useState(0);
+
+  // 페이지네이션 상태 추가
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // 페이지당 표시할 항목 수
 
   // 사용자 인증 및 데이터 로드
   useEffect(() => {
@@ -230,6 +235,28 @@ const CreateReceipt = () => {
     setWithdrawal('');
   };
 
+  // 현재 페이지의 데이터만 반환하는 함수
+  const getCurrentPageData = () => {
+    const data = filteredData.length > 0 ? filteredData : receiptData;
+    const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedData.slice(startIndex, startIndex + itemsPerPage);
+  };
+
+  // 총 페이지 수 계산
+  const totalPages = Math.ceil((filteredData.length > 0 ? filteredData.length : receiptData.length) / itemsPerPage);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // 필터링 시 페이지 초기화
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredData]);
+
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
@@ -346,30 +373,31 @@ const CreateReceipt = () => {
           </div>
           <div className="flex flex-col space-y-7">
             {(filteredData.length > 0 ? filteredData : receiptData).length > 0 ? (
-              (filteredData.length > 0 ? filteredData : receiptData)
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .map((item, index) => (
-                  <div key={`${item.id || ''}-${item.date}-${index}`} className="flex items-center justify-between">
-                    <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>{' '}
-                    <span className="w-1/5">{item.content}</span>
-                    <span className="w-1/5 text-right text-blue-500">
-                      {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
-                    </span>
-                    <span className="w-1/5 text-right text-red-500">
-                      {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
-                    </span>
-                    <button
-                      onClick={() => handleDelete(item.receiptId)}
-                      className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
-                    >
-                      <img src={deleteButton} alt="삭제" className="w-2 h-2 sm:w-4 sm:h-4" />
-                    </button>
-                  </div>
-                ))
+              getCurrentPageData().map((item, index) => (
+                <div key={`${item.id || ''}-${item.date}-${index}`} className="flex items-center justify-between">
+                  <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>
+                  <span className="w-1/5">{item.content}</span>
+                  <span className="w-1/5 text-right text-blue-500">
+                    {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
+                  </span>
+                  <span className="w-1/5 text-right text-red-500">
+                    {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
+                  </span>
+                  <button
+                    onClick={() => handleDelete(item.receiptId)}
+                    className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
+                  >
+                    <img src={deleteButton} alt="삭제" className="w-2 h-2 sm:w-4 sm:h-4" />
+                  </button>
+                </div>
+              ))
             ) : (
               <p>표시할 데이터가 없습니다.</p>
             )}
           </div>
+          {(filteredData.length > 0 || receiptData.length > 0) && (
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+          )}
         </div>
       </div>
       <Footer />
