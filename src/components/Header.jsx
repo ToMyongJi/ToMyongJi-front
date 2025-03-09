@@ -9,7 +9,8 @@ import buttonBackground from '../assets/images/buttonBackground.png';
 
 const Header = () => {
   const navigate = useNavigate();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showQueryDropdown, setShowQueryDropdown] = useState(false);
+  const [showAdminDropdown, setShowAdminDropdown] = useState(false);
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [selectedCollege, setSelectedCollege] = useState(null);
 
@@ -67,7 +68,13 @@ const Header = () => {
   };
 
   const handleAdminQuery = () => {
-    setShowDropdown(!showDropdown);
+    setShowAdminDropdown(!showAdminDropdown);
+    setShowQueryDropdown(false);
+  };
+
+  const handleQueryClick = () => {
+    setShowQueryDropdown(!showQueryDropdown);
+    setShowAdminDropdown(false);
   };
 
   return (
@@ -93,11 +100,11 @@ const Header = () => {
         <div className="relative">
           <button
             className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
-            onClick={user && user.role === 'ADMIN' ? handleAdminQuery : () => setShowDropdown(!showDropdown)}
+            onClick={handleQueryClick}
           >
-            {user && user.role === 'ADMIN' ? '학생회 정보 관리' : '조회'}
+            조회
           </button>
-          {showDropdown && (
+          {showQueryDropdown && (
             <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute sm:left-[-63px] left-[-30px] mt-2 sm:w-[500px] w-[320px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
               <ul className="w-1/2">
                 {colleges?.map((college) => (
@@ -129,14 +136,10 @@ const Header = () => {
                         className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 hover:bg-[#CED3FF] hover:font-GmarketMedium`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (user && user.role === 'ADMIN') {
-                            navigate(`/admin/${club.studentClubId}`);
-                          } else {
-                            navigate(`/receipts-list/${club.studentClubId}`, {
-                              state: { clubName: club.studentClubName },
-                            });
-                          }
-                          setShowDropdown(false);
+                          navigate(`/receipts-list/${club.studentClubId}`, {
+                            state: { clubName: club.studentClubName },
+                          });
+                          setShowQueryDropdown(false);
                           setShowSubMenu(false);
                         }}
                       >
@@ -148,9 +151,61 @@ const Header = () => {
             </div>
           )}
         </div>
-        {user && user.role === 'ADMIN' ? (
-          <></>
-        ) : (
+        {user && user.role === 'ADMIN' && (
+          <div className="relative">
+            <button
+              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+              onClick={handleAdminQuery}
+            >
+              학생회 정보 관리
+            </button>
+            {showAdminDropdown && (
+              <div className="px-3 py-2 text-[7.5px] sm:text-[13px] absolute sm:left-[-63px] left-[-30px] mt-2 sm:w-[500px] w-[320px] bg-[#F5F8FF] rounded-md shadow-lg z-50 flex">
+                <ul className="w-1/2">
+                  {colleges?.map((college) => (
+                    <li
+                      key={college.collegeId}
+                      className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
+                        selectedCollege === college.collegeId
+                          ? 'bg-[#CED3FF] font-GmarketMedium'
+                          : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCollege(college.collegeId);
+                        setShowSubMenu(true);
+                      }}
+                    >
+                      {college.collegeName}
+                    </li>
+                  ))}
+                </ul>
+                <div className="w-px bg-[#A0B0FF] my-2"></div>
+                {showSubMenu && selectedCollege && (
+                  <ul className="w-1/2">
+                    {colleges
+                      .find((c) => c.collegeId === selectedCollege)
+                      .clubs.map((club) => (
+                        <li
+                          key={club.studentClubId}
+                          className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 hover:bg-[#CED3FF] hover:font-GmarketMedium`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/admin/${club.studentClubId}`);
+                            setShowAdminDropdown(false);
+                            setShowSubMenu(false);
+                          }}
+                        >
+                          {club.studentClubName}
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {user?.role !== 'ADMIN' && (
           <>
             <button
               className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
