@@ -99,7 +99,7 @@ const Header = () => {
       <div className="text-sm sm:text-[16px] text-[#002D72] flex items-center justify-evenly font-GmarketLight w-[100%] border-t border-[#4E67EC] border-b py-1 sm:py-3">
         <div className="relative">
           <button
-            className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+            className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
             onClick={handleQueryClick}
           >
             조회
@@ -154,7 +154,7 @@ const Header = () => {
         {user && user.role === 'ADMIN' && (
           <div className="relative">
             <button
-              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+              className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
               onClick={handleAdminQuery}
             >
               학생회 정보 관리
@@ -208,13 +208,13 @@ const Header = () => {
         {user?.role !== 'ADMIN' && (
           <>
             <button
-              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+              className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
               onClick={handleCreateReceipt}
             >
               작성
             </button>
             <button
-              className="px-3 py-2 rounded-md hover:text-[#CED3FF] transition duration-300"
+              className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
               onClick={handleMyPage}
             >
               마이
