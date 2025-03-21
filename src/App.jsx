@@ -18,6 +18,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Admin from './pages/admin/Admin';
 import HomeAdmin from './pages/admin/HomeAdmin';
 import UploadCSVReceipt from './pages/receipt/UploadCSVReceipt';
+import Maintenance from './pages/Maintenance';
 
 const App = () => {
   const { user, setUser, clearUser } = useUserStore();
@@ -71,62 +72,70 @@ const App = () => {
     }
   }, [authData, user, setUser]);
 
+  // 점검 기간 설정
+  const maintenanceStart = new Date('2025-03-21T10:00:00');
+  const maintenanceEnd = new Date('2025-03-22T09:00:00');
+  const now = new Date();
+  const isMaintenance = now >= maintenanceStart && now <= maintenanceEnd;
+
   return (
     <div className="w-[100vw] h-[auto] bg-gray-100">
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/find" element={<Find />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/not-login" element={<NotLogin />} />
+        {isMaintenance ? (
+          <Route path="*" element={<Maintenance />} />
+        ) : (
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/find" element={<Find />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/not-login" element={<NotLogin />} />
 
-        <Route path="/receipts-list/:clubId" element={<ReceiptsList />} />
-        <Route
-          path="/create-receipt"
-          element={
-            <ProtectedRoute>
-              <CreateReceipt />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/my-page"
-          element={
-            <ProtectedRoute>
-              <MyPage />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route path="/my-page" element={<MyPage />} /> */}
-        <Route
-          path="/admin/:clubId"
-          element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route path="/admin/:clubId" element={<Admin />} /> */}
-        <Route
-          path="/home-admin"
-          element={
-            <ProtectedRoute>
-              <HomeAdmin />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route path="/home-admin" element={<HomeAdmin />} /> */}
-        <Route
-          path="/receipt/upload-csv"
-          element={
-            <ProtectedRoute>
-              <UploadCSVReceipt />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route path="/receipt/upload-csv" element={<UploadCSVReceipt />} /> */}
-        <Route path="*" element={<NotFound />} />
+            <Route path="/receipts-list/:clubId" element={<ReceiptsList />} />
+            <Route
+              path="/create-receipt"
+              element={
+                <ProtectedRoute>
+                  <CreateReceipt />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-page"
+              element={
+                <ProtectedRoute>
+                  <MyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/:clubId"
+              element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/home-admin"
+              element={
+                <ProtectedRoute>
+                  <HomeAdmin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receipt/upload-csv"
+              element={
+                <ProtectedRoute>
+                  <UploadCSVReceipt />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </>
+        )}
       </Routes>
       <Analytics />
     </div>
