@@ -9,8 +9,7 @@ const ReceiptsList = () => {
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [balance, setBalance] = useState(0);
 
@@ -46,28 +45,24 @@ const ReceiptsList = () => {
     loadReceipts();
   }, [clubId]);
 
-  const filterDataByDateRange = () => {
+  const filterDataByMonth = () => {
     if (!Array.isArray(receipts)) return;
 
     const filtered = receipts.filter((item) => {
       if (!item || !item.date) return false;
+      if (!selectedMonth) return true;
 
       const itemDate = new Date(item.date);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
-
-      if (start && end) {
-        return itemDate >= start && itemDate <= end;
-      } else if (start) {
-        return itemDate >= start;
-      } else if (end) {
-        return itemDate <= end;
-      }
-      return true;
+      const itemMonth = `${itemDate.getFullYear()}-${String(itemDate.getMonth() + 1).padStart(2, '0')}`;
+      return itemMonth === selectedMonth;
     });
 
     setFilteredData(filtered);
   };
+
+  useEffect(() => {
+    filterDataByMonth();
+  }, [receipts, selectedMonth]);
 
   // 현재 페이지의 데이터만 반환하는 함수
   const getCurrentPageData = () => {
@@ -111,20 +106,14 @@ const ReceiptsList = () => {
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <div className="flex space-x-2 sm:w-2/3">
               <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
-              />
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-full px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
             <button
-              onClick={filterDataByDateRange}
+              onClick={filterDataByMonth}
               className="w-full sm:w-1/3 px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
             >
               조회
