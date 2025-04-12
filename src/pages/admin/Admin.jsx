@@ -20,31 +20,47 @@ const Admin = () => {
   const [newPresident, setNewPresident] = useState({ clubId: clubId, studentNum: '', name: '' });
   const [newMember, setNewMember] = useState({ clubId: clubId, studentNum: '', name: '' });
   const [members, setMembers] = useState([]);
-  const { setCurrentClub, currentClub } = useStudentClubStore();
+  const { setCurrentClub } = useStudentClubStore();
+
+  // clubId가 변경될 때마다 newPresident와 newMember의 clubId도 업데이트
+  useEffect(() => {
+    setNewPresident((prev) => ({ ...prev, clubId }));
+    setNewMember((prev) => ({ ...prev, clubId }));
+  }, [clubId]);
 
   // 클럽 정보 로드
   const fetchClubData = async () => {
     try {
+      setStudentClubName(''); // 데이터 로딩 전 초기화
+      setPresident({ studentNum: '', name: '' }); // 데이터 로딩 전 초기화
+      setMembers([]); // 데이터 로딩 전 초기화
+
       const clubData = await fetchAllClubs();
       const club = clubData.find((club) => club.studentClubId === parseInt(clubId));
+
       if (club) {
         setStudentClubName(club.studentClubName);
-        const presidentData = await fetchPresident(clubId);
+        const [presidentData, membersData] = await Promise.all([fetchPresident(clubId), fetchMembers(clubId)]);
         setPresident(presidentData);
-        const membersData = await fetchMembers(clubId);
         setMembers(membersData);
       } else {
         throw new Error('해당 클럽 정보를 찾을 수 없습니다.');
       }
     } catch (error) {
       console.error('데이터 로드 실패:', error);
+      // 에러 발생 시 상태 초기화
+      setStudentClubName('');
+      setPresident({ studentNum: '', name: '' });
+      setMembers([]);
     }
   };
 
   useEffect(() => {
-    setCurrentClub(parseInt(clubId));
-    fetchClubData();
-  }, [clubId, setCurrentClub]);
+    if (clubId) {
+      setCurrentClub(parseInt(clubId));
+      fetchClubData();
+    }
+  }, [clubId, setCurrentClub]); // clubId 변경을 감지하도록 수정
 
   // 회장 정보 저장
   const handlePresidentSubmit = async (e) => {
