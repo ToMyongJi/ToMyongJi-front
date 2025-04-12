@@ -88,8 +88,8 @@ const SignUp = () => {
     }
     try {
       setIsCodeSent(true);
-      await sendEmailVerification(email);
       alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
+      await sendEmailVerification(email);
     } catch (error) {
       alert('인증코드 발송에 실패했습니다. 다시 시도해주세요.');
     }
