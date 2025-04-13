@@ -1,17 +1,21 @@
 import api from './api';
 
-// 특정 학생회 영수증 조회
+// 특정 학생회 영수증 조회 (학생용)
 export const fetchClubReceipts = async (clubId) => {
   try {
-    const response = await api.get(`/api/receipt/club/${clubId}`);
-    return (
-      response.data || {
-        data: {
-          receiptList: [],
-          balance: 0,
-        },
-      }
-    );
+    const response = await api.get(`/api/receipt/club/${clubId}/student`);
+    return response.data || { data: [] };
+  } catch (error) {
+    console.error('학생회 영수증 정보를 가져오는 데 실패했습니다:', error);
+    throw error;
+  }
+};
+
+// 특정 학생회 영수증 조회 (학생회 전용)
+export const fetchClubReceiptsAdmin = async (userId) => {
+  try {
+    const response = await api.get(`/api/receipt/club/${userId}`);
+    return response.data || { data: { receiptList: [], balance: 0 } };
   } catch (error) {
     console.error('학생회 영수증 정보를 가져오는 데 실패했습니다:', error);
     throw error;

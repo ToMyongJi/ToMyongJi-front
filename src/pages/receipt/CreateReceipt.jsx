@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Pagination from '../../components/Pagination';
-import { fetchClubReceipts, createUserReceipt, deleteUserReceipt, createOcrReceipt } from '../../utils/receiptApi';
+import { fetchClubReceiptsAdmin, createUserReceipt, deleteUserReceipt, createOcrReceipt } from '../../utils/receiptApi';
 import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
 import useStudentClubStore from '../../store/studentClubStore';
@@ -80,7 +80,7 @@ const CreateReceipt = () => {
   const fetchReceipts = async () => {
     if (!userData?.data?.studentClubId) return;
     try {
-      const response = await fetchClubReceipts(userData.data.studentClubId);
+      const response = await fetchClubReceiptsAdmin(userId);
       setReceiptData(response.data.receiptList || []);
       setFilteredData(response.data.receiptList || []);
       setBalance(response.data.balance || 0);
