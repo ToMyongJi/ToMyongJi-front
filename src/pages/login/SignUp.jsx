@@ -32,11 +32,17 @@ const SignUp = () => {
   const [isClubVerified, setIsClubVerified] = useState(false);
   const [isIdDuplicateChecked, setIsIdDuplicateChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [isVerifyingClub, setIsVerifyingClub] = useState(false);
   const [clubVerifyData, setClubVerifyData] = useState({
     clubId: 0,
     studentNum: '',
     role: '',
   });
+  const [isSignUpSuccess, setIsSignUpSuccess] = useState(false);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -65,7 +71,10 @@ const SignUp = () => {
       alert('아이디를 입력해주세요.');
       return;
     }
+    if (isCheckingDuplicate) return;
+
     try {
+      setIsCheckingDuplicate(true);
       const result = await checkUserIdDuplicate(userId);
       if (result === true) {
         alert('이미 존재하는 아이디입니다.');
@@ -78,6 +87,8 @@ const SignUp = () => {
       console.error('아이디 중복 확인 실패:', error);
       alert('아이디 중복 확인에 실패했습니다. 다시 시도해주세요.');
       setIsIdDuplicateChecked(false);
+    } finally {
+      setIsCheckingDuplicate(false);
     }
   };
 
@@ -86,12 +97,18 @@ const SignUp = () => {
       alert('이메일을 입력해주세요.');
       return;
     }
+    if (isSendingCode) return;
+
     try {
+      setIsSendingCode(true);
       setIsCodeSent(true);
       alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
       await sendEmailVerification(email);
     } catch (error) {
       alert('인증코드 발송에 실패했습니다. 다시 시도해주세요.');
+      setIsCodeSent(false);
+    } finally {
+      setIsSendingCode(false);
     }
   };
 
@@ -100,17 +117,24 @@ const SignUp = () => {
       alert('이메일과 인증코드를 모두 입력해주세요.');
       return;
     }
+    if (isVerifyingCode) return;
+
     try {
+      setIsVerifyingCode(true);
       await verifyEmailCode(email, verificationCode);
       setIsEmailVerified(true);
       alert('이메일 인증이 성공적으로 인증되었습니다.');
     } catch (error) {
       alert('인증코드가 올바르지 않습니다. 다시 확인해주세요.');
+    } finally {
+      setIsVerifyingCode(false);
     }
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     if (!isIdDuplicateChecked) {
       alert('아이디 중복 확인을 완료해주세요.');
       return;
@@ -131,7 +155,9 @@ const SignUp = () => {
       alert('대학을 선택해주세요.');
       return;
     }
+
     try {
+      setIsSubmitting(true);
       const userData = {
         userId,
         password,
@@ -143,11 +169,13 @@ const SignUp = () => {
         role,
       };
       await signUpUser(userData);
+      setIsSignUpSuccess(true);
       alert('회원가입이 완료되었습니다.');
       navigate('/login');
     } catch (error) {
       console.error('회원가입 실패:', error);
       alert('입력하지 않거나, 잘못입력한 정보가 있는지 확인해주세요.');
+      setIsSubmitting(false);
     }
   };
 
@@ -172,8 +200,10 @@ const SignUp = () => {
       alert('소속과 학번을 모두 입력해주세요.');
       return;
     }
+    if (isVerifyingClub) return;
 
     try {
+      setIsVerifyingClub(true);
       const verifyData = {
         clubId: parseInt(selectedClub),
         studentNum,
@@ -192,6 +222,8 @@ const SignUp = () => {
       console.error('소속 인증 실패:', error);
       setIsClubVerified(false);
       alert('소속 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsVerifyingClub(false);
     }
   };
 
@@ -217,9 +249,12 @@ const SignUp = () => {
                   <button
                     type="button"
                     onClick={handleCheckDuplicate}
-                    className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
+                    disabled={isCheckingDuplicate}
+                    className={`w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap ${
+                      isCheckingDuplicate ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    중복확인
+                    {isCheckingDuplicate ? '확인중...' : '중복확인'}
                   </button>
                 </div>
               </div>
@@ -258,12 +293,15 @@ const SignUp = () => {
                     <button
                       type="button"
                       onClick={handleSendVerification}
-                      className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
+                      disabled={isSendingCode || isCodeSent}
+                      className={`w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap ${
+                        isSendingCode || isCodeSent ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
-                      인증코드 발송
+                      {isSendingCode ? '발송중...' : '인증코드 발송'}
                     </button>
                   </div>
-                  {isCodeSent && <p className="text-[#4CAF50] text-[9px] sm:text-xs mt-1">인증코드 전송 완료</p>}
+                  {isCodeSent && <p className="text-[#4CAF50] text-[9px] sm:text-xs mt-1">인증코드 발송 완료</p>}
                 </div>
               </div>
               {/* 인증코드 */}
@@ -280,9 +318,12 @@ const SignUp = () => {
                     <button
                       type="button"
                       onClick={handleVerifyCode}
-                      className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
+                      disabled={isEmailVerified}
+                      className={`w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap ${
+                        isEmailVerified ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
-                      인증하기
+                      {isVerifyingCode ? '인증중...' : '인증하기'}
                     </button>
                   </div>
                   {isEmailVerified && <p className="text-[#4CAF50] text-[9px] sm:text-xs mt-1">인증 완료</p>}
@@ -364,9 +405,12 @@ const SignUp = () => {
                 <button
                   type="button"
                   onClick={handleVerifyClub}
-                  className="w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
+                  disabled={isClubVerified}
+                  className={`w-full sm:w-auto px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap ${
+                    isClubVerified ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  소속 인증하기
+                  {isVerifyingClub ? '인증중...' : '소속 인증하기'}
                 </button>
               </div>
               {isClubVerified && <p className="text-[#4CAF50] text-[9px] sm:text-xs mt-1">소속 인증 완료</p>}
@@ -377,9 +421,12 @@ const SignUp = () => {
             {/* 가입하기 버튼 */}
             <button
               type="submit"
-              className="w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300"
+              disabled={isSignUpSuccess}
+              className={`w-full px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 ${
+                isSignUpSuccess ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              가입하기
+              {isSubmitting ? '처리중...' : '가입하기'}
             </button>
           </form>
         </div>
