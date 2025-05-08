@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Pagination from '../../components/Pagination';
-import { fetchClubReceiptsAdmin, createUserReceipt, deleteUserReceipt, createOcrReceipt } from '../../utils/receiptApi';
+import {
+  fetchClubReceiptsAdmin,
+  createUserReceipt,
+  deleteUserReceipt,
+  createOcrReceipt,
+  exportCsv,
+} from '../../utils/receiptApi';
 import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
 import useStudentClubStore from '../../store/studentClubStore';
@@ -29,6 +35,7 @@ const CreateReceipt = () => {
   const [withdrawal, setWithdrawal] = useState('');
 
   // 필터 데이터
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState('');
 
   // balance state 추가
@@ -62,10 +69,6 @@ const CreateReceipt = () => {
       fetchReceipts();
     }
   }, [userData]);
-
-  useEffect(() => {
-    filterDataByMonth();
-  }, [receiptData, selectedMonth]);
 
   // API 호출 함수
   const fetchUserData = async (userId) => {
@@ -192,7 +195,7 @@ const CreateReceipt = () => {
       if (response.statusCode === 200) {
         await fetchReceipts();
 
-        if (selectedMonth) {
+        if (selectedYear && selectedMonth) {
           filterDataByMonth();
         }
 
@@ -207,14 +210,16 @@ const CreateReceipt = () => {
   };
 
   const filterDataByMonth = () => {
-    if (!receiptData) return;
+    if (!Array.isArray(receiptData)) return;
 
     const filtered = receiptData.filter((item) => {
-      if (!selectedMonth) return true;
+      if (!item || !item.date) return false;
+      if (!selectedYear || !selectedMonth) return true;
 
       const itemDate = new Date(item.date);
-      const itemMonth = `${itemDate.getFullYear()}-${String(itemDate.getMonth() + 1).padStart(2, '0')}`;
-      return itemMonth === selectedMonth;
+      const itemYear = itemDate.getFullYear().toString();
+      const itemMonth = String(itemDate.getMonth() + 1).padStart(2, '0');
+      return itemYear === selectedYear && itemMonth === selectedMonth;
     });
 
     setFilteredData(filtered);
@@ -227,9 +232,13 @@ const CreateReceipt = () => {
     setWithdrawal('');
   };
 
+  useEffect(() => {
+    filterDataByMonth();
+  }, [receiptData, selectedYear, selectedMonth]);
+
   // 현재 페이지의 데이터만 반환하는 함수
   const getCurrentPageData = () => {
-    const data = filteredData.length > 0 ? filteredData : receiptData;
+    const data = selectedYear && selectedMonth ? filteredData : receiptData;
     const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -248,6 +257,41 @@ const CreateReceipt = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [filteredData]);
+
+  const handleExportCsv = async () => {
+    if (!selectedYear || !selectedMonth) {
+      alert('년도와 월을 선택해주세요.');
+      return;
+    }
+
+    try {
+      const csvData = {
+        userId: userLoginId,
+        year: parseInt(selectedYear),
+        month: parseInt(selectedMonth),
+      };
+
+      const blob = await exportCsv(csvData);
+
+      // 파일명 생성 (예: 2024-03-영수증.csv)
+      const fileName = `${selectedYear}-${selectedMonth}-영수증.csv`;
+
+      // Blob을 다운로드 링크로 변환
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+
+      // 메모리 정리
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('CSV 추출 중 오류 발생:', error);
+      alert('CSV 추출에 실패했습니다.');
+    }
+  };
 
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
@@ -333,18 +377,41 @@ const CreateReceipt = () => {
         <div className="w-full mt-8 mb-4">
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <div className="flex space-x-2 sm:w-2/3">
-              <input
-                type="month"
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-1/2 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              >
+                {Array.from({ length: 5 }, (_, i) => {
+                  const year = new Date().getFullYear() - 2 + i;
+                  return (
+                    <option key={year} value={year.toString()}>
+                      {year}년
+                    </option>
+                  );
+                })}
+              </select>
+              <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-              />
+                className="w-1/2 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              >
+                <option value="">전체</option>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const month = String(i + 1).padStart(2, '0');
+                  return (
+                    <option key={month} value={month}>
+                      {month}월
+                    </option>
+                  );
+                })}
+              </select>
             </div>
             <button
-              onClick={filterDataByMonth}
+              onClick={handleExportCsv}
               className="w-full sm:w-1/3 px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
             >
-              조회
+              영수증 추출
             </button>
           </div>
         </div>
@@ -358,7 +425,7 @@ const CreateReceipt = () => {
             </div>
           </div>
           <div className="flex flex-col space-y-7">
-            {(filteredData.length > 0 ? filteredData : receiptData).length > 0 ? (
+            {getCurrentPageData().length > 0 ? (
               getCurrentPageData().map((item, index) => (
                 <div key={`${item.id || ''}-${item.date}-${index}`} className="flex items-center justify-between">
                   <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>

@@ -44,6 +44,27 @@ export const deleteUserReceipt = async (receiptId) => {
   }
 };
 
+// 특정 영수증 수정
+
+// 영수증 내역 csv 추출
+export const exportCsv = async (csvData) => {
+  try {
+    const response = await api.post('/api/csv/export', csvData, { responseType: 'blob' }); // blob 옵션 추가
+    const arrayBuffer = await response.data.arrayBuffer();
+    const blob = new Blob(
+      [
+        new Uint8Array([0xef, 0xbb, 0xbf]), // UTF-8 BOM
+        arrayBuffer,
+      ],
+      { type: 'text/csv;charset=utf-8;' }
+    );
+    return blob;
+  } catch (error) {
+    console.error('영수증 내역 추출에 실패했습니다:', error);
+    throw error;
+  }
+};
+
 // 모든 대학 조회
 export const fetchAllColleges = async () => {
   try {
