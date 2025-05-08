@@ -9,6 +9,7 @@ const ReceiptsList = () => {
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState('');
   const [filteredData, setFilteredData] = useState([]);
 
@@ -46,11 +47,12 @@ const ReceiptsList = () => {
 
     const filtered = receipts.filter((item) => {
       if (!item || !item.date) return false;
-      if (!selectedMonth) return true;
+      if (!selectedYear || !selectedMonth) return true;
 
       const itemDate = new Date(item.date);
-      const itemMonth = `${itemDate.getFullYear()}-${String(itemDate.getMonth() + 1).padStart(2, '0')}`;
-      return itemMonth === selectedMonth;
+      const itemYear = itemDate.getFullYear().toString();
+      const itemMonth = String(itemDate.getMonth() + 1).padStart(2, '0');
+      return itemYear === selectedYear && itemMonth === selectedMonth;
     });
 
     setFilteredData(filtered);
@@ -58,7 +60,7 @@ const ReceiptsList = () => {
 
   useEffect(() => {
     filterDataByMonth();
-  }, [receipts, selectedMonth]);
+  }, [receipts, selectedYear, selectedMonth]);
 
   // 현재 페이지의 데이터만 반환하는 함수
   const getCurrentPageData = () => {
@@ -100,20 +102,37 @@ const ReceiptsList = () => {
         {/* 기간별 조회 기능 */}
         <div className="w-full mb-10">
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-            <div className="flex space-x-2 sm:w-2/3">
-              <input
-                type="month"
+            <div className="flex w-full space-x-2">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
+              >
+                {Array.from({ length: 5 }, (_, i) => {
+                  const year = new Date().getFullYear() - 2 + i;
+                  return (
+                    <option key={year} value={year.toString()}>
+                      {year}년
+                    </option>
+                  );
+                })}
+              </select>
+              <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
-              />
+                className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
+              >
+                <option value="">전체</option>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const month = String(i + 1).padStart(2, '0');
+                  return (
+                    <option key={month} value={month}>
+                      {month}월
+                    </option>
+                  );
+                })}
+              </select>
             </div>
-            <button
-              onClick={filterDataByMonth}
-              className="w-full sm:w-1/3 px-4 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] cursor-pointer transition duration-300 whitespace-nowrap"
-            >
-              조회
-            </button>
           </div>
         </div>
 
