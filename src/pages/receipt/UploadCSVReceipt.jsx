@@ -104,7 +104,7 @@ const UploadCsvReceipt = () => {
                 <li>컬럼 명은 date, content, deposit, withdrawal 이어야 합니다.</li>
                 <li>날짜는 YYYY-MM-DD 형식으로 입력해주세요.</li>
                 <li>내용은 최대 10자까지 입력해주세요.</li>
-                <li>입금과 출금은 숫자만 입력해주세요.</li>
+                <li>입금과 출금은 숫자만 입력해주세요.(예: 50000 (O), 50,000 (X))</li>
                 <li>입금이나 출금이 없는 경우 0으로 입력해주세요.</li>
               </ul>
             </div>
