@@ -9,6 +9,7 @@ import {
   deleteUserReceipt,
   createOcrReceipt,
   exportCsv,
+  updateUserReceipt,
 } from '../../utils/receiptApi';
 import { fetchMyInfo } from '../../utils/authApi';
 import useAuthStore from '../../store/authStore';
@@ -44,6 +45,8 @@ const CreateReceipt = () => {
   // 페이지네이션 상태 추가
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // 페이지당 표시할 항목 수
+
+  const [editingItem, setEditingItem] = useState(null);
 
   // 사용자 인증 및 데이터 로드
   useEffect(() => {
@@ -96,6 +99,51 @@ const CreateReceipt = () => {
   };
 
   // 이벤트 핸들러
+  const handleEdit = (item) => {
+    setEditingItem({
+      ...item,
+      date: new Date(item.date).toISOString().split('T')[0],
+      deposit: item.deposit.toString(),
+      withdrawal: item.withdrawal.toString(),
+    });
+  };
+
+  const handleSaveEdit = async (item) => {
+    try {
+      const requestData = {
+        receiptId: item.receiptId,
+        userId: userLoginId,
+        date: new Date(item.date).toISOString(),
+        content: item.content,
+        deposit: Number(item.deposit) || 0,
+        withdrawal: Number(item.withdrawal) || 0,
+      };
+
+      const response = await updateUserReceipt(requestData);
+      if (response.statusCode === 200) {
+        await fetchReceipts();
+        setEditingItem(null);
+        alert('내역이 성공적으로 수정되었습니다.');
+      } else {
+        alert('내역 수정에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('내역 수정에 실패했습니다:', error);
+      alert('내역 수정에 실패했습니다.');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItem(null);
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditingItem(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userData?.data?.studentClubId) {
@@ -116,18 +164,26 @@ const CreateReceipt = () => {
         withdrawal: Number(withdrawal) || 0,
       };
 
-      const response = await createUserReceipt(requestData);
-      if (response.statusCode === 201) {
+      let response;
+      if (editingItem) {
+        requestData.receiptId = editingItem.receiptId;
+        response = await updateUserReceipt(requestData);
+      } else {
+        response = await createUserReceipt(requestData);
+      }
+
+      if (response.statusCode === 201 || response.statusCode === 200) {
         resetForm();
         await fetchReceipts();
         setFilteredData([]);
-        alert('내역이 성공적으로 저장되었습니다.');
+        alert(editingItem ? '내역이 성공적으로 수정되었습니다.' : '내역이 성공적으로 저장되었습니다.');
+        setEditingItem(null);
       } else {
-        alert('내역 저장에 실패했습니다.');
+        alert(editingItem ? '내역 수정에 실패했습니다.' : '내역 저장에 실패했습니다.');
       }
     } catch (error) {
-      console.error('내역 생성에 실패했습니다:', error);
-      alert('내역 저장에 실패했습니다.');
+      console.error(editingItem ? '내역 수정에 실패했습니다:' : '내역 생성에 실패했습니다:', error);
+      alert(editingItem ? '내역 수정에 실패했습니다.' : '내역 저장에 실패했습니다.');
     }
   };
 
@@ -230,6 +286,7 @@ const CreateReceipt = () => {
     setContent('');
     setDeposit('');
     setWithdrawal('');
+    setEditingItem(null);
   };
 
   useEffect(() => {
@@ -322,14 +379,6 @@ const CreateReceipt = () => {
           >
             기존 데이터 추가
           </button>
-          {/* 영수증 첨부 버튼 주석 처리 */}
-          {/* <button
-            type="button"
-            onClick={handleImageUpload}
-            className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
-          >
-            영수증 첨부
-          </button> */}
           <button
             type="submit"
             form="receipt-form"
@@ -428,20 +477,75 @@ const CreateReceipt = () => {
             {getCurrentPageData().length > 0 ? (
               getCurrentPageData().map((item, index) => (
                 <div key={`${item.id || ''}-${item.date}-${index}`} className="flex items-center justify-between">
-                  <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>
-                  <span className="w-1/5">{item.content}</span>
-                  <span className="w-1/5 text-right text-blue-500">
-                    {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
-                  </span>
-                  <span className="w-1/5 text-right text-red-500">
-                    {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(item.receiptId)}
-                    className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
-                  >
-                    <img src={deleteButton} alt="삭제" className="w-2 h-2 sm:w-4 sm:h-4" />
-                  </button>
+                  {editingItem?.receiptId === item.receiptId ? (
+                    <>
+                      <input
+                        type="date"
+                        value={editingItem.date}
+                        onChange={(e) => handleInputChange('date', e.target.value)}
+                        className="w-1/4 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                      />
+                      <input
+                        type="text"
+                        value={editingItem.content}
+                        onChange={(e) => handleInputChange('content', e.target.value)}
+                        className="w-1/5 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                      />
+                      <input
+                        type="text"
+                        value={editingItem.deposit}
+                        onChange={(e) => handleInputChange('deposit', e.target.value)}
+                        className="w-1/5 p-1 border rounded text-right focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                      />
+                      <input
+                        type="text"
+                        value={editingItem.withdrawal}
+                        onChange={(e) => handleInputChange('withdrawal', e.target.value)}
+                        className="w-1/5 p-1 border rounded text-right focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                      />
+                      <div className="flex space-x-1 ml-2">
+                        <button
+                          onClick={() => handleSaveEdit(editingItem)}
+                          className="px-2 py-1 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+                        >
+                          O
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="px-2 py-1 text-[10px] sm:text-[12px] text-red-500 rounded-md shadow-[0_0_10px_#FFE4E4] hover:shadow-[0_0_15px_#FFB6B6] border border-[#FFE4E4] transition duration-300"
+                        >
+                          X
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>
+                      <span className="w-1/5">{item.content}</span>
+                      <span className="w-1/5 text-right text-blue-500">
+                        {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
+                      </span>
+                      <span className="w-1/5 text-right text-red-500">
+                        {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
+                      </span>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="p-1 rounded-lg hover:bg-[#F0F8FF] transition duration-300"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-2 h-2 sm:w-4 sm:h-4 text-[#061E5B]" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.receiptId)}
+                          className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
+                        >
+                          <img src={deleteButton} alt="삭제" className="w-2 h-2 sm:w-4 sm:h-4" />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))
             ) : (
