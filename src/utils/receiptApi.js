@@ -45,6 +45,15 @@ export const deleteUserReceipt = async (receiptId) => {
 };
 
 // 특정 영수증 수정
+export const updateUserReceipt = async (receiptData) => {
+  try {
+    const response = await api.put('/api/receipt', receiptData);
+    return response.data;
+  } catch (error) {
+    console.error('영수증 수정에 실패했습니다:', error);
+    throw error;
+  }
+};
 
 // 영수증 내역 csv 추출
 export const exportCsv = async (csvData) => {
