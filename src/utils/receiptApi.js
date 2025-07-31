@@ -131,6 +131,7 @@ export const uploadTossFile = async (userId, file) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("userId", userId);
     const response = await api.post("/api/breakdown/parse", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
