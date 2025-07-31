@@ -159,13 +159,21 @@ const CreateReceipt = () => {
       return;
     }
 
+    const depositAmount = Number(deposit) || 0;
+    const withdrawalAmount = Number(withdrawal) || 0;
+
+    if (depositAmount > 0 && withdrawalAmount > 0) {
+      alert("입금과 출금 중 하나만 입력해주세요.");
+      return;
+    }
+
     try {
       const requestData = {
         userId: userLoginId,
         date: new Date(date).toISOString(),
         content: content,
-        deposit: Number(deposit) || 0,
-        withdrawal: Number(withdrawal) || 0,
+        deposit: depositAmount,
+        withdrawal: withdrawalAmount,
       };
 
       let response;
