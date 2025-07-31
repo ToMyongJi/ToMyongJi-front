@@ -20,7 +20,7 @@ const UploadTossReceipt = () => {
         const decodedToken = JSON.parse(
           atob(authData.accessToken.split(".")[1])
         );
-        setUserId(decodedToken.id);
+        setUserId(decodedToken.sub);
       } catch (error) {
         console.error("액세스 토큰 디코딩 중 오류 발생:", error);
       }
@@ -49,7 +49,7 @@ const UploadTossReceipt = () => {
 
       const response = await uploadTossFile(userId, file);
 
-      if (response.statusCode === 201) {
+      if (response.statusCode === 200) {
         const receipts = response.data;
         alert("거래내역서가 성공적으로 업로드되었습니다.");
         navigate(`/create-receipt`);
