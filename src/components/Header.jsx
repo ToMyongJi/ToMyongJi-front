@@ -1,11 +1,11 @@
-import { useNavigate } from 'react-router-dom';
-import { useCallback, useState, useEffect } from 'react';
-import useUserStore from '../store/userStore';
-import useAuthStore from '../store/authStore';
-import useCollegeStore from '../store/collegeStore';
-import { fetchAllColleges } from '../utils/receiptApi';
-import logo from '../assets/images/logo.png';
-import buttonBackground from '../assets/images/buttonBackground.png';
+import { useNavigate } from "react-router-dom";
+import { useCallback, useState, useEffect } from "react";
+import useUserStore from "../store/userStore";
+import useAuthStore from "../store/authStore";
+import useCollegeStore from "../store/collegeStore";
+import { fetchAllColleges } from "../utils/receiptApi";
+import logo from "../assets/images/logo.png";
+import buttonBackground from "../assets/images/buttonBackground.png";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Header = () => {
         const collegesData = await fetchAllColleges();
         setColleges(collegesData);
       } catch (error) {
-        console.error('대학 정보를 불러오는데 실패했습니다:', error);
+        console.error("대학 정보를 불러오는데 실패했습니다:", error);
       }
     };
     loadColleges();
@@ -34,8 +34,8 @@ const Header = () => {
   const handleOnClick = useCallback(
     (path) => {
       return () => {
-        if (user && user.role === 'ADMIN' && path === '/') {
-          navigate('/home-admin');
+        if (user && user.role === "ADMIN" && path === "/") {
+          navigate("/home-admin");
         } else {
           navigate(path);
         }
@@ -47,23 +47,23 @@ const Header = () => {
   const handleLogout = () => {
     clearUser();
     clearAuthData();
-    navigate('/login');
-    alert('로그아웃 되었습니다');
+    navigate("/login");
+    alert("로그아웃 되었습니다");
   };
 
   const handleCreateReceipt = () => {
     if (user) {
-      navigate('/create-receipt');
+      navigate("/create-receipt");
     } else {
-      navigate('/not-login');
+      navigate("/not-login");
     }
   };
 
   const handleMyPage = () => {
     if (user) {
-      navigate('/my-page');
+      navigate("/my-page");
     } else {
-      navigate('/not-login');
+      navigate("/not-login");
     }
   };
 
@@ -80,18 +80,18 @@ const Header = () => {
   return (
     <div className="flex flex-col items-center justify-center p-[10px]">
       {/* 로고 */}
-      <button className="w-60 sm:w-80" onClick={handleOnClick('/')}>
+      <button className="w-60 sm:w-80" onClick={handleOnClick("/")}>
         <img src={logo} alt="투명지 로고 이미지" />
       </button>
       {/* 로그인/로그아웃 버튼 */}
-      <div className="w-[100%] flex justify-end items-center p-[10px] mb-4">
+      <div className="w-[100%] flex justify-end items-center py-[10px] mb-4">
         <button
           className="w-[104px] sm:w-[110px] h-[35px] sm:h-[40px] bg-no-repeat bg-cover flex items-center justify-center relative"
           style={{ backgroundImage: `url(${buttonBackground})` }}
-          onClick={user ? handleLogout : handleOnClick('/login')}
+          onClick={user ? handleLogout : handleOnClick("/login")}
         >
           <span className="hover:text-[#CED3FF] transition duration-300 z-10 text-[#002e72] font-GmarketLight text-[11px] sm:text-xs">
-            {user ? '로그아웃' : '로그인'}
+            {user ? "로그아웃" : "로그인"}
           </span>
         </button>
       </div>
@@ -112,8 +112,8 @@ const Header = () => {
                     key={college.collegeId}
                     className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
                       selectedCollege === college.collegeId
-                        ? 'bg-[#CED3FF] font-GmarketMedium'
-                        : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
+                        ? "bg-[#CED3FF] font-GmarketMedium"
+                        : "hover:bg-[#CED3FF] hover:font-GmarketMedium"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -151,7 +151,7 @@ const Header = () => {
             </div>
           )}
         </div>
-        {user && user.role === 'ADMIN' && (
+        {user && user.role === "ADMIN" && (
           <div className="relative">
             <button
               className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
@@ -167,8 +167,8 @@ const Header = () => {
                       key={college.collegeId}
                       className={`px-4 py-2 cursor-pointer text-[#002D72] font-GmarketLight transition duration-300 ${
                         selectedCollege === college.collegeId
-                          ? 'bg-[#CED3FF] font-GmarketMedium'
-                          : 'hover:bg-[#CED3FF] hover:font-GmarketMedium'
+                          ? "bg-[#CED3FF] font-GmarketMedium"
+                          : "hover:bg-[#CED3FF] hover:font-GmarketMedium"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -205,7 +205,7 @@ const Header = () => {
             )}
           </div>
         )}
-        {user?.role !== 'ADMIN' && (
+        {user?.role !== "ADMIN" && (
           <>
             <button
               className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"

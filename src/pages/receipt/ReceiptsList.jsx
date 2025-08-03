@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import { fetchClubReceipts } from '../../utils/receiptApi';
-import Pagination from '../../components/Pagination';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { fetchClubReceipts } from "../../utils/receiptApi";
+import Pagination from "../../components/Pagination";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import tossCheck from "../../assets/images/tossCheck.png";
+import tooltip from "../../assets/images/tooltip.png";
 
 const ReceiptsList = () => {
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState(
+    new Date().getFullYear().toString()
+  );
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
   // 페이지네이션 상태 추가
@@ -19,7 +23,7 @@ const ReceiptsList = () => {
 
   const { clubId } = useParams();
   const location = useLocation();
-  const clubName = location.state?.clubName || '동아리 이름';
+  const clubName = location.state?.clubName || "동아리 이름";
 
   useEffect(() => {
     const loadReceipts = async () => {
@@ -31,7 +35,7 @@ const ReceiptsList = () => {
         setFilteredData(receiptsData);
         setError(null);
       } catch (err) {
-        setError('영수증을 불러오는 데 실패했습니다.');
+        setError("영수증을 불러오는 데 실패했습니다.");
         setReceipts([]);
         setFilteredData([]);
       } finally {
@@ -51,7 +55,7 @@ const ReceiptsList = () => {
 
       const itemDate = new Date(item.date);
       const itemYear = itemDate.getFullYear().toString();
-      const itemMonth = String(itemDate.getMonth() + 1).padStart(2, '0');
+      const itemMonth = String(itemDate.getMonth() + 1).padStart(2, "0");
       return itemYear === selectedYear && itemMonth === selectedMonth;
     });
 
@@ -64,16 +68,19 @@ const ReceiptsList = () => {
 
   // 현재 페이지의 데이터만 반환하는 함수
   const getCurrentPageData = () => {
-    const sortedData = [...(filteredData.length > 0 ? filteredData : receipts)].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
-    );
+    const sortedData = [
+      ...(filteredData.length > 0 ? filteredData : receipts),
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedData.slice(startIndex, startIndex + itemsPerPage);
   };
 
   // 총 페이지 수 계산
-  const totalPages = Math.ceil((filteredData.length > 0 ? filteredData.length : receipts.length) / itemsPerPage);
+  const totalPages = Math.ceil(
+    (filteredData.length > 0 ? filteredData.length : receipts.length) /
+      itemsPerPage
+  );
 
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber) => {
@@ -92,11 +99,40 @@ const ReceiptsList = () => {
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
-        <div className="flex items-center justify-between w-full mb-4">
-          <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">{clubName}</h2>
-          {/* <div className="font-GmarketMedium text-[14px] sm:text-[16px] text-[#061E5B]">
-            잔액: {balance.toLocaleString()}원
-          </div> */}
+        <div className="relative flex items-center w-full mb-4 group">
+          <h2 className="font-GmarketMedium text-[#002E72] text-[15px] sm:text-[18px]">
+            {clubName}
+          </h2>
+          <img
+            src={tossCheck}
+            alt="거래내역서 인증 이미지"
+            className="w-63 h-5 ml-2 mb-1"
+          />
+          <div className="relative ml-auto">
+            <img
+              src={tooltip}
+              alt="인증 안내 이미지"
+              className="w-3 h-3.4 cursor-pointer"
+            />
+            <div className="absolute mt-2 right-0 w-[304px] p-3 bg-[#F0F2FF] rounded-lg shadow-[0_0_15px_#4E67EC80] shadow-opacity-50 opacity-0 pointer-events-none transition-opacity duration-300 group-hover:opacity-100">
+              <div className="flex items-center mb-2">
+                <span className="font-GmarketMedium text-[#002E72]">
+                  거래내역서 인증 마크 안내
+                </span>
+                <img
+                  src={tossCheck}
+                  alt="거래내역서 인증 이미지"
+                  className="w-16 h-3.5 ml-1 mb-1"
+                />
+              </div>
+              <p className="font-GmarketSansLight text-[11px] text-[#000000]">
+                전체 결제 금액 내역의 30% 이상이 토스뱅크 거래내역서로
+                <br />
+                인증되면, 해당 학생회의 영수증 페이지 조회 시<br />
+                거래내역서 인증 마크가 추가됩니다.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* 기간별 조회 기능 */}
@@ -124,7 +160,7 @@ const ReceiptsList = () => {
               >
                 <option value="">전체</option>
                 {Array.from({ length: 12 }, (_, i) => {
-                  const month = String(i + 1).padStart(2, '0');
+                  const month = String(i + 1).padStart(2, "0");
                   return (
                     <option key={month} value={month}>
                       {month}월
@@ -146,14 +182,23 @@ const ReceiptsList = () => {
           <div className="flex flex-col space-y-7">
             {Array.isArray(filteredData) && filteredData.length > 0 ? (
               getCurrentPageData().map((item, index) => (
-                <div key={`${item.id}-${item.date}-${index}`} className="flex items-center justify-between">
-                  <span className="w-1/4">{new Date(item.date).toISOString().split('T')[0]}</span>
+                <div
+                  key={`${item.id}-${item.date}-${index}`}
+                  className="flex items-center justify-between"
+                >
+                  <span className="w-1/4">
+                    {new Date(item.date).toISOString().split("T")[0]}
+                  </span>
                   <span className="w-1/4">{item.content}</span>
                   <span className="w-1/4 text-right text-blue-500">
-                    {item.deposit > 0 ? `+${item.deposit.toLocaleString()}` : ''}
+                    {item.deposit > 0
+                      ? `+${item.deposit.toLocaleString()}`
+                      : ""}
                   </span>
                   <span className="w-1/4 text-right text-red-500">
-                    {item.withdrawal > 0 ? `-${item.withdrawal.toLocaleString()}` : ''}
+                    {item.withdrawal > 0
+                      ? `-${item.withdrawal.toLocaleString()}`
+                      : ""}
                   </span>
                 </div>
               ))
@@ -162,7 +207,11 @@ const ReceiptsList = () => {
             )}
           </div>
           {(filteredData.length > 0 || receipts.length > 0) && (
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       </div>
