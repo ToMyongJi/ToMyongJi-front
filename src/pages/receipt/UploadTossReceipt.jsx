@@ -73,17 +73,18 @@ const UploadTossReceipt = () => {
             토스뱅크 거래내역서 인증
           </h2>
         </div>
-
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-4">
-          <h3 className="flex font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72] mb-3">
-            거래내역서 인증 마크 안내
+          <div className="flex items-center mb-3">
+            <div className="pt-0.5 font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72]">
+              거래내역서 인증 마크 안내
+            </div>
             <img
               src={tossCheck}
               alt="거래내역서 인증 이미지"
               className="w-63 h-5 ml-2"
             />
-          </h3>
-          <div className="space-y-3 text-[10px] sm:text-[12px] text-[#061E5B]">
+          </div>
+          <div className="space-y-2 text-[10px] sm:text-[12px] text-[#061E5B]">
             <p className="mb-2 text-black">
               전체 입출금 내역의 30% 이상이 토스뱅크 거래내역서로 인증되면
             </p>
@@ -96,7 +97,7 @@ const UploadTossReceipt = () => {
             <h3 className="flex font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72] mb-3">
               엑셀 파일을 CSV로 변환하는 방법:
             </h3>
-            <ol className="ml-2 space-y-1 list-decimal list-inside">
+            <ol className="ml-2 space-y-2 list-decimal list-inside">
               <li>통장 탭 → 통장관리를 선택합니다.</li>
               <li>문서관리 카테고리에서 거래내역서를 선택합니다.</li>
               <li>발급방법을 'PDF로 저장하기'로 선택합니다.</li>
