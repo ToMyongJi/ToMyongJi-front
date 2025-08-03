@@ -15,6 +15,8 @@ import { fetchMyInfo } from "../../utils/authApi";
 import useAuthStore from "../../store/authStore";
 import useStudentClubStore from "../../store/studentClubStore";
 import deleteButton from "../../assets/images/delete.png";
+import tossLogo from "../../assets/images/tossLogo.png";
+import excelLogo from "../../assets/images/excel.png";
 
 const CreateReceipt = () => {
   // State 관리
@@ -384,16 +386,13 @@ const CreateReceipt = () => {
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
-        <div className="flex w-full mb-11">
-          <div className="flex flex-col w-full">
-            <div className="font-GmarketMedium text-[#002E72] text-[15px] sm:text-[18px] ">
+        <div className="flex items-center justify-between w-full mb-6">
+          <div className="flex items-center justify-between w-full">
+            <h2 className="font-GmarketLight text-[#000000] text-[15px] sm:text-[18px]">
               {getClubNameById(userData?.data.studentClubId)}
-            </div>
-            <div className="mt-4 font-GmarketMedium text-[14px] sm:text-[16px] text-[#002E72] rounded-lg shadow-[0_0_10px_#CED3FF] w-full py-3 pl-3.5">
-              <span className="text-[#96A1DC] font-GmarketLight pr-2">
-                잔액{" "}
-              </span>
-              {balance.toLocaleString()}원
+            </h2>
+            <div className="font-GmarketMedium text-[14px] sm:text-[16px] text-[#061E5B]">
+              잔액: {balance.toLocaleString()}원
             </div>
           </div>
         </div>
@@ -408,16 +407,26 @@ const CreateReceipt = () => {
           <button
             type="button"
             onClick={() => navigate("/receipt/upload-toss")}
-            className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#002E72] rounded-lg bg-[#F0F2FF] shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+            className="flex items-center px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#002E72] rounded-lg bg-[#FFFFFF] shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#0050FF] border-opacity-50 transition duration-300"
           >
-            토스뱅크 거래내역서 인증
+            <img
+              src={tossLogo}
+              alt="토스로고이미지"
+              className="w-16 h-4 mr-1 mb-0.5"
+            />
+            거래내역서 추가
           </button>
           <button
             type="button"
             onClick={() => navigate("/receipt/upload-csv")}
-            className="px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#002E72] rounded-lg bg-[#F0F2FF] shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+            className="flex items-center px-3 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-[12px] text-[#002E72] rounded-lg bg-[#FFFFFF] shadow-[0_0_10px_#2074464D] hover:shadow-[0_0_15px_#20744680] border border-[#207446] border-opacity-50 transition duration-300"
           >
-            기존 데이터 추가
+            <img
+              src={excelLogo}
+              alt="엑셀로고이미지"
+              className="w-4 h-4 sm:w-3 sm:h-3 mr-1 mb-0.5"
+            />
+            EXCEL 데이터 추가
           </button>
         </div>
         <div className="sticky top-0 z-40 w-full py-4 bg-white">
@@ -461,7 +470,7 @@ const CreateReceipt = () => {
             </div>
           </form>
         </div>
-        <div className="w-full mt-8 mb-2">
+        <div className="w-full mt-6 mb-2">
           <div className="flex flex-col w-full space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <div className="flex space-x-2 sm:w-2/3">
               <select
