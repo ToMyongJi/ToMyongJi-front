@@ -95,7 +95,7 @@ const UploadTossReceipt = () => {
           </div>
           <div className="mt-5">
             <h3 className="flex font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72] mb-3">
-              엑셀 파일을 CSV로 변환하는 방법:
+              토스뱅크에서 거래내역서를 발급받는 방법:
             </h3>
             <ol className="ml-2 space-y-2 list-decimal list-inside">
               <li>통장 탭 → 통장관리를 선택합니다.</li>
