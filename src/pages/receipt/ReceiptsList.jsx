@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { fetchClubReceipts } from "../../utils/receiptApi";
+import useStudentClubStore from "../../store/studentClubStore";
 import Pagination from "../../components/Pagination";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -8,6 +9,12 @@ import tossCheck from "../../assets/images/tossCheck.png";
 import tooltip from "../../assets/images/tooltip.png";
 
 const ReceiptsList = () => {
+  const clubs = useStudentClubStore((state) => state.clubs);
+  const { clubId } = useParams();
+  const currentClub = clubs.find(
+    (club) => club.studentClubId === Number(clubId)
+  );
+
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,7 +28,6 @@ const ReceiptsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // 페이지당 표시할 항목 수
 
-  const { clubId } = useParams();
   const location = useLocation();
   const clubName = location.state?.clubName || "동아리 이름";
 
@@ -101,13 +107,15 @@ const ReceiptsList = () => {
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
         <div className="relative flex items-center w-full mb-4 group">
           <h2 className="font-GmarketMedium text-[#002E72] text-[15px] sm:text-[18px]">
-            {clubName}
+            {currentClub?.studentClubName || "동아리 이름"}
           </h2>
-          <img
-            src={tossCheck}
-            alt="거래내역서 인증 이미지"
-            className="w-63 h-5 ml-2 mb-1"
-          />
+          {currentClub?.verification && (
+            <img
+              src={tossCheck}
+              alt="거래내역서 인증 이미지"
+              className="w-63 h-5 ml-2 mb-1"
+            />
+          )}
           <div className="relative ml-auto">
             <img
               src={tooltip}
