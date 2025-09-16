@@ -1,41 +1,51 @@
-import { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import useStudentClubStore from '../store/studentClubStore';
-import useCollegeStore from '../store/collegeStore';
-import useAuthStore from '../store/authStore';
-import { fetchMyInfo } from '../utils/authApi';
-import { fetchAllColleges, fetchAllClubs } from '../utils/receiptApi';
-import { deleteClubMember, addClubMember, fetchClubMembers } from '../utils/studentClubMemberApi';
+import { useState, useEffect } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import useStudentClubStore from "../store/studentClubStore";
+import useCollegeStore from "../store/collegeStore";
+import useAuthStore from "../store/authStore";
+import { fetchMyInfo } from "../utils/authApi";
+import { fetchAllColleges, fetchAllClubs } from "../utils/receiptApi";
+import {
+  deleteClubMember,
+  addClubMember,
+  fetchClubMembers,
+} from "../utils/studentClubMemberApi";
 
 const MyPage = () => {
   const { authData } = useAuthStore();
-  const [role, setRole] = useState('');
-  const [loginUserId, setLoginUserId] = useState('');
-  const { getClubNameById, currentClub, setCurrentClub, fetchClubs } = useStudentClubStore();
+  const [role, setRole] = useState("");
+  const [loginUserId, setLoginUserId] = useState("");
+  const { getClubNameById, currentClub, setCurrentClub, fetchClubs } =
+    useStudentClubStore();
   const { colleges, setColleges } = useCollegeStore();
-  const [userCollege, setUserCollege] = useState('');
+  const [userCollege, setUserCollege] = useState("");
   const [userInfo, setUserInfo] = useState({
-    name: '',
-    studentNum: '',
-    college: '',
-    studentClubId: '',
+    name: "",
+    studentNum: "",
+    college: "",
+    studentClubId: "",
   });
-  const [clubName, setClubName] = useState('');
+  const [clubName, setClubName] = useState("");
   const [decodedToken, setDecodedToken] = useState({});
-  const [newMember, setNewMember] = useState({ presidentUserId: loginUserId, studentNum: '', name: '' });
+  const [newMember, setNewMember] = useState({
+    presidentUserId: loginUserId,
+    studentNum: "",
+    name: "",
+  });
   const [currentUserClub, setCurrentUserClub] = useState(null);
   const [clubMembers, setClubMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     if (authData && authData.accessToken) {
       try {
-        const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        const decoded = JSON.parse(atob(authData.accessToken.split(".")[1]));
         setDecodedToken(decoded);
         setLoginUserId(decoded.id);
       } catch (error) {
-        console.error('토큰 디코딩 실패:', error);
+        console.error("토큰 디코딩 실패:", error);
       }
     }
   }, [authData]);
@@ -48,17 +58,17 @@ const MyPage = () => {
           const responseData = await fetchClubMembers(loginUserId);
           if (responseData && Array.isArray(responseData)) {
             const newMembers = responseData.map((member) => ({
-              memberId: member.memberId || '',
-              name: member.name || '',
-              studentNum: member.studentNum || '',
+              memberId: member.memberId || "",
+              name: member.name || "",
+              studentNum: member.studentNum || "",
             }));
             setClubMembers(newMembers);
           } else {
-            console.error('Invalid response structure:', responseData);
+            console.error("Invalid response structure:", responseData);
             setClubMembers([]);
           }
         } catch (error) {
-          console.error('소속 부원 조회 실패:', error);
+          console.error("소속 부원 조회 실패:", error);
           setClubMembers([]);
         } finally {
           setIsLoading(false);
@@ -73,41 +83,46 @@ const MyPage = () => {
     const fetchUserInfo = async () => {
       if (authData && authData.accessToken) {
         try {
-          const decoded = JSON.parse(atob(authData.accessToken.split('.')[1]));
+          const decoded = JSON.parse(atob(authData.accessToken.split(".")[1]));
           if (decoded && decoded.id) {
-            setRole(decoded.auth || '');
+            setRole(decoded.auth || "");
             setLoginUserId(decoded.id);
 
             const info = await fetchMyInfo(decoded.id, authData.accessToken);
             if (info) {
-              setUserCollege(info.data.college || '');
+              setUserCollege(info.data.college || "");
               const newUserInfo = {
-                name: info.data.name || '',
-                studentNum: info.data.studentNum || '',
-                college: info.data.college || '',
-                studentClubId: info.data.studentClubId || '',
+                name: info.data.name || "",
+                studentNum: info.data.studentNum || "",
+                college: info.data.college || "",
+                studentClubId: info.data.studentClubId || "",
               };
               setUserInfo(newUserInfo);
 
               if (info.data.studentClubId) {
                 await fetchClubs();
                 const name = getClubNameById(info.data.studentClubId);
-                setClubName(name || '');
+                setClubName(name || "");
                 setCurrentClub(info.data.studentClubId);
 
                 try {
                   setIsLoading(true);
                   const membersResponse = await fetchClubMembers(decoded.id);
-                  if (membersResponse?.statusCode === 200 && Array.isArray(membersResponse.data)) {
-                    const newClubMembers = membersResponse.data.map((member) => ({
-                      memberId: member.memberId || '',
-                      studentNum: member.studentNum || '',
-                      name: member.name || '',
-                    }));
+                  if (
+                    membersResponse?.statusCode === 200 &&
+                    Array.isArray(membersResponse.data)
+                  ) {
+                    const newClubMembers = membersResponse.data.map(
+                      (member) => ({
+                        memberId: member.memberId || "",
+                        studentNum: member.studentNum || "",
+                        name: member.name || "",
+                      })
+                    );
                     setClubMembers(newClubMembers);
                   }
                 } catch (error) {
-                  console.error('소속 부원 조회 실패:', error);
+                  console.error("소속 부원 조회 실패:", error);
                   setClubMembers([]);
                 } finally {
                   setIsLoading(false);
@@ -116,7 +131,7 @@ const MyPage = () => {
             }
           }
         } catch (error) {
-          console.error('사용자 정보 조회 실패:', error);
+          console.error("사용자 정보 조회 실패:", error);
           setIsLoading(false);
         }
       }
@@ -127,13 +142,13 @@ const MyPage = () => {
 
   useEffect(() => {
     if (currentClub) {
-      setClubName(currentClub.studentClubName || '');
+      setClubName(currentClub.studentClubName || "");
     }
   }, [currentClub]);
 
   useEffect(() => {
     if (userInfo && userInfo.studentClubId) {
-      const name = getClubNameById(userInfo.studentClubId) || '';
+      const name = getClubNameById(userInfo.studentClubId) || "";
       setClubName(name);
     }
   }, [userInfo, getClubNameById]);
@@ -144,7 +159,7 @@ const MyPage = () => {
         const collegeData = await fetchAllColleges();
         setColleges(collegeData);
       } catch (error) {
-        console.error('대학 정보를 불러오는 데 실패했습니다:', error);
+        console.error("대학 정보를 불러오는 데 실패했습니다:", error);
       }
     };
     if (colleges.length === 0) {
@@ -157,14 +172,16 @@ const MyPage = () => {
       if (userInfo && userInfo.studentClubId) {
         try {
           const clubData = await fetchAllClubs();
-          const matchingClub = clubData.find((club) => club.studentClubId === userInfo.studentClubId);
+          const matchingClub = clubData.find(
+            (club) => club.studentClubId === userInfo.studentClubId
+          );
           if (matchingClub) {
             setCurrentUserClub(matchingClub);
           } else {
-            console.error('일치하는 학생회를 찾을 수 없습니다.');
+            console.error("일치하는 학생회를 찾을 수 없습니다.");
           }
         } catch (error) {
-          console.error('학생회 정보 조회 실패:', error);
+          console.error("학생회 정보 조회 실패:", error);
         }
       }
     };
@@ -174,8 +191,8 @@ const MyPage = () => {
 
   const getKoreanRole = (role) => {
     const roleMap = {
-      STU: '소속원',
-      PRESIDENT: '회장',
+      STU: "소속원",
+      PRESIDENT: "회장",
     };
 
     return roleMap[role] || role;
@@ -183,11 +200,15 @@ const MyPage = () => {
 
   const handleAddMember = async (e) => {
     e.preventDefault();
+
+    if (isAdding) return;
+
     if (!loginUserId || !newMember.studentNum || !newMember.name) {
-      alert('모든 필드를 입력해주세요.');
+      alert("모든 필드를 입력해주세요.");
       return;
     }
 
+    setIsAdding(true);
     try {
       const requestData = {
         id: parseInt(loginUserId),
@@ -197,33 +218,41 @@ const MyPage = () => {
 
       const response = await addClubMember(requestData);
       if (response.statusCode === 201) {
-        setNewMember({ studentNum: '', name: '' });
+        setNewMember({ studentNum: "", name: "" });
 
         // 소속원 목록 새로고침
         const membersResponse = await fetchClubMembers(loginUserId);
         if (membersResponse && Array.isArray(membersResponse)) {
           const newMembers = membersResponse.map((member) => ({
-            memberId: member.memberId || '',
-            name: member.name || '',
-            studentNum: member.studentNum || '',
+            memberId: member.memberId || "",
+            name: member.name || "",
+            studentNum: member.studentNum || "",
           }));
           setClubMembers(newMembers);
         }
 
-        alert('정상적으로 소속원이 추가되었습니다.');
+        alert("정상적으로 소속원이 추가되었습니다.");
       } else {
-        throw new Error(response.statusMessage || '소속원 추가에 실패했습니다.');
+        throw new Error(
+          response.statusMessage || "소속원 추가에 실패했습니다."
+        );
       }
     } catch (error) {
-      console.error('멤버 추가 중 오류 발생:', error);
-      alert(error.response?.data?.message || '소속원 추가 중 오류가 발생했습니다.');
+      console.error("멤버 추가 중 오류 발생:", error);
+      alert(
+        error.response?.data?.message || "소속원 추가 중 오류가 발생했습니다."
+      );
+    } finally {
+      setIsAdding(false);
     }
   };
 
   const handleDeleteMember = async (studentNum) => {
-    if (!window.confirm('정말로 삭제하시겠습니까?')) return;
+    if (!window.confirm("정말로 삭제하시겠습니까?")) return;
     try {
-      const memberToDelete = clubMembers.find((member) => member.studentNum === studentNum);
+      const memberToDelete = clubMembers.find(
+        (member) => member.studentNum === studentNum
+      );
       if (!memberToDelete) return;
 
       await deleteClubMember(memberToDelete.studentNum);
@@ -231,16 +260,16 @@ const MyPage = () => {
       const membersResponse = await fetchClubMembers(loginUserId);
       if (membersResponse && Array.isArray(membersResponse)) {
         const newMembers = membersResponse.map((member) => ({
-          memberId: member.memberId || '',
-          name: member.name || '',
-          studentNum: member.studentNum || '',
+          memberId: member.memberId || "",
+          name: member.name || "",
+          studentNum: member.studentNum || "",
         }));
         setClubMembers(newMembers);
       }
 
-      alert('정상적으로 소속원이 삭제되었습니다.');
+      alert("정상적으로 소속원이 삭제되었습니다.");
     } catch (error) {
-      alert('소속원 삭제 중 오류가 발생했습니다.');
+      alert("소속원 삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -250,50 +279,62 @@ const MyPage = () => {
       <div className="flex flex-col items-center justify-center px-4 sm:px-20 py-10 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
         {/* 내 정보 관리  */}
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
-          <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">내 정보</h2>
+          <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">
+            내 정보
+          </h2>
           <form className="space-y-5">
             <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">이름</label>
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+                이름
+              </label>
               <input
                 role="text"
-                value={userInfo.name ?? ''}
+                value={userInfo.name ?? ""}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
             <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">학번</label>
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+                학번
+              </label>
               <input
                 role="text"
-                value={userInfo.studentNum ?? ''}
+                value={userInfo.studentNum ?? ""}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
             <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">대학</label>
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+                대학
+              </label>
               <input
                 role="text"
-                value={userCollege ?? ''}
+                value={userCollege ?? ""}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
 
             <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+                소속 이름
+              </label>
               <input
                 role="text"
-                value={clubName ?? ''}
+                value={clubName ?? ""}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
             <div className="flex flex-wrap items-center">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">자격</label>
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+                자격
+              </label>
               <input
                 role="text"
-                value={decodedToken ? getKoreanRole(role) : ''}
+                value={decodedToken ? getKoreanRole(role) : ""}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -302,14 +343,18 @@ const MyPage = () => {
         </div>
 
         {/* 소속 관리 박스(회장만 보임) */}
-        {getKoreanRole(role) === '회장' && currentUserClub && (
+        {getKoreanRole(role) === "회장" && currentUserClub && (
           <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
-            <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">소속 관리</h2>
+            <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">
+              소속 관리
+            </h2>
             <div className="flex flex-wrap items-center mb-4">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">소속 이름</label>
+              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+                소속 이름
+              </label>
               <input
                 role="text"
-                value={currentUserClub?.studentClubName ?? ''}
+                value={currentUserClub?.studentClubName ?? ""}
                 readOnly
                 className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
               />
@@ -319,22 +364,29 @@ const MyPage = () => {
                 <input
                   role="text"
                   placeholder="학번"
-                  value={newMember.studentNum ?? ''}
-                  onChange={(e) => setNewMember({ ...newMember, studentNum: e.target.value })}
+                  value={newMember.studentNum ?? ""}
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, studentNum: e.target.value })
+                  }
                   className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <input
                   role="text"
                   placeholder="이름"
-                  value={newMember.name ?? ''}
-                  onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                  value={newMember.name ?? ""}
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, name: e.target.value })
+                  }
                   className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
                 <button
                   role="submit"
+                  disabled={isAdding}
                   className="w-full sm:w-auto px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
                 >
-                  <span className="inline sm:inline">추가</span>
+                  <span className="inline sm:inline">
+                    {isAdding ? "처리중..." : "추가"}
+                  </span>
                 </button>
               </div>
             </form>
@@ -343,16 +395,19 @@ const MyPage = () => {
                 <p className="text-center">로딩 중...</p>
               ) : clubMembers.length > 0 ? (
                 clubMembers.map((member) => (
-                  <div key={member.memberId} className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                  <div
+                    key={member.memberId}
+                    className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2"
+                  >
                     <input
                       role="text"
-                      value={member.studentNum ?? ''}
+                      value={member.studentNum ?? ""}
                       readOnly
                       className="w-full p-2 bg-gray-100 border rounded-lg sm:flex-1"
                     />
                     <input
                       role="text"
-                      value={member.name ?? ''}
+                      value={member.name ?? ""}
                       readOnly
                       className="w-full p-2 bg-gray-100 border rounded-lg sm:flex-1"
                     />
@@ -365,7 +420,9 @@ const MyPage = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-500">소속 부원이 없습니다.</p>
+                <p className="text-center text-gray-500">
+                  소속 부원이 없습니다.
+                </p>
               )}
             </div>
           </div>

@@ -105,7 +105,7 @@ const ReceiptsList = () => {
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
       <div className="flex-grow flex flex-col items-start justify-start px-4 sm:px-20 py-3 mt-3 my-[100px] font-GmarketLight text-[10px] sm:text-[12px]">
-        <div className="relative flex items-center w-full mb-4 group">
+        <div className="relative flex items-center w-full mb-4">
           <h2 className="font-GmarketMedium text-[#002E72] text-[15px] sm:text-[18px]">
             {currentClub?.studentClubName || "동아리 이름"}
           </h2>
@@ -116,7 +116,7 @@ const ReceiptsList = () => {
               className="w-63 h-5 ml-2 mb-1"
             />
           )}
-          <div className="relative ml-auto">
+          <div className="relative ml-auto group">
             <img
               src={tooltip}
               alt="인증 안내 이미지"
