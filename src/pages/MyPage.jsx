@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import useStudentClubStore from "../store/studentClubStore";
 import useCollegeStore from "../store/collegeStore";
 import useAuthStore from "../store/authStore";
-import { fetchMyInfo } from "../utils/authApi";
+import useUserStore from "../store/userStore";
+import { fetchMyInfo, deleteAccount } from "../utils/authApi";
 import { fetchAllColleges, fetchAllClubs } from "../utils/receiptApi";
 import {
   deleteClubMember,
@@ -13,7 +15,12 @@ import {
 } from "../utils/studentClubMemberApi";
 
 const MyPage = () => {
+  const navigate = useNavigate();
+
   const { authData } = useAuthStore();
+  const clearAuthData = useAuthStore((s) => s.clearAuthData);
+  const clearUser = useUserStore((state) => state.clearUser);
+
   const [role, setRole] = useState("");
   const [loginUserId, setLoginUserId] = useState("");
   const { getClubNameById, currentClub, setCurrentClub, fetchClubs } =
@@ -37,6 +44,7 @@ const MyPage = () => {
   const [clubMembers, setClubMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (authData && authData.accessToken) {
@@ -273,6 +281,52 @@ const MyPage = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (isDeleting) return;
+
+    const ok = window.confirm(
+      "작성하신 장부 내역은 보존되며, 모든 회원 정보가 삭제됩니다.\n정말 탈퇴하시겠어요?"
+    );
+    if (!ok) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await deleteAccount();
+
+      // 성공 기준은 서버 응답 형태에 따라 조정 가능
+      const success =
+        res?.statusCode === 200 || res?.statusCode === 0 || res?.status === 200;
+
+      if (!success) {
+        throw new Error(res?.statusMessage || "회원탈퇴에 실패했습니다.");
+      }
+
+      // 1) 로컬 스토리지 정리 (persist 키들)
+      try {
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("user-storage");
+      } catch (_) {}
+
+      // 2) zustand 스토어 정리
+      clearAuthData();
+      clearUser();
+
+      alert("회원탈퇴가 완료되었습니다.");
+
+      // 3) 홈으로 이동
+      navigate("/", { replace: true });
+    } catch (e) {
+      console.error("회원탈퇴 실패:", e);
+      alert(
+        e?.response?.data?.message ||
+          e?.message ||
+          "회원탈퇴 중 오류가 발생했습니다."
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
@@ -427,6 +481,13 @@ const MyPage = () => {
             </div>
           </div>
         )}
+        <button
+          onClick={handleDeleteAccount}
+          disabled={isDeleting}
+          className="mt-2 px-6 py-2 rounded-lg bg-[#FFDFDD] border border-[#FFAEA5] shadow-[0_4px_10px_#FFDFDD,4px_0_10px_#FFDFDD,0_-4px_10px_#FFDFDD,-4px_0_10px_#FFDFDD] font-GmarketMedium text-[#F44336] ${isDeleting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}"
+        >
+          {isDeleting ? "처리중…" : "회원탈퇴"}
+        </button>
       </div>
       <Footer />
     </div>
