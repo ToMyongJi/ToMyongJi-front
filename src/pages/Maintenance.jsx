@@ -1,14 +1,16 @@
-import React from 'react';
+import React from "react";
 
 const Maintenance = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F5F8FF] px-4">
       <div className="text-center">
-        <h1 className="text-[#002D72] text-2xl sm:text-3xl font-GmarketBold mb-4">서버 점검 안내</h1>
+        <h1 className="text-[#002D72] text-2xl sm:text-3xl font-GmarketBold mb-4">
+          서버 점검 안내
+        </h1>
         <div className="max-w-md p-6 bg-white rounded-lg shadow-lg sm:p-8">
           <div className="space-y-2 text-[#002D72] font-GmarketMedium">
-            <p>점검 기간: 4월 13일 15:00 ~ 4월 14일 00:00</p>
-            <p>점검 내용: 시스템 성능 개선</p>
+            <p>점검 기간: 9월 27일 00:00 ~ 9월 27일 04:00</p>
+            <p>점검 내용: 서버 점검</p>
           </div>
           <div className="space-y-2 mt-6 font-GmarketLight text-[#002D72]">
             <p className="text-sm">
