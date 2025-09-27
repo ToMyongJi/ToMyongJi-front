@@ -77,7 +77,7 @@ const App = () => {
 
   // 점검 기간 설정
   const maintenanceStart = new Date("2025-09-27T00:00:00");
-  const maintenanceEnd = new Date("2025-09-27T23:59:59");
+  const maintenanceEnd = new Date("2025-09-27T15:00:00");
   const now = new Date();
   const isMaintenance = now >= maintenanceStart && now <= maintenanceEnd;
 
