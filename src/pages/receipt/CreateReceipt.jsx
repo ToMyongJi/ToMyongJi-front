@@ -10,6 +10,7 @@ import {
   createOcrReceipt,
   exportCsv,
   updateUserReceipt,
+  searchReceipts,
 } from "../../utils/receiptApi";
 import { fetchMyInfo } from "../../utils/authApi";
 import useAuthStore from "../../store/authStore";
@@ -17,6 +18,7 @@ import useStudentClubStore from "../../store/studentClubStore";
 import deleteButton from "../../assets/images/delete.png";
 import tossLogo from "../../assets/images/tossLogo.png";
 import excelLogo from "../../assets/images/excel.png";
+import searchIcon from "../../assets/images/search.png";
 
 const CreateReceipt = () => {
   // State 관리
@@ -51,6 +53,13 @@ const CreateReceipt = () => {
   const itemsPerPage = 10; // 페이지당 표시할 항목 수
 
   const [editingItem, setEditingItem] = useState(null);
+
+  // 검색
+  const [term, setTerm] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const debounceRef = useRef(null);
 
   // 사용자 인증 및 데이터 로드
   useEffect(() => {
@@ -332,10 +341,10 @@ const CreateReceipt = () => {
   };
 
   // 총 페이지 수 계산
-  const totalPages = Math.ceil(
-    (filteredData.length > 0 ? filteredData.length : receiptData.length) /
-      itemsPerPage
-  );
+  // const totalPages = Math.ceil(
+  //   (filteredData.length > 0 ? filteredData.length : receiptData.length) /
+  //     itemsPerPage
+  // );
 
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber) => {
@@ -381,6 +390,76 @@ const CreateReceipt = () => {
       alert("CSV 추출에 실패했습니다.");
     }
   };
+
+  // 검색 함수
+  const handleSearch = async (keyword) => {
+    if (!keyword || keyword.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await searchReceipts({ keyword, page: 1, size: 1000 });
+      const payload = res?.data ?? res;
+      const list = Array.isArray(payload) ? payload : payload?.data ?? [];
+      setResults(list);
+      setCurrentPage(1);
+    } catch (err) {
+      console.error(err);
+      setError("검색 중 오류가 발생했습니다.");
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 입력 디바운스: 입력이 멈춘 후 300ms 뒤 검색
+  useEffect(() => {
+    // 2글자 이하이면 검색하지 않음(결과 초기화만)
+    if (term.trim().length < 2) {
+      clearTimeout(debounceRef.current);
+      setResults([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      handleSearch(term.trim());
+    }, 300);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [term]);
+
+  // Enter 키로 즉시 검색
+  const onKeyDown = (e) => {
+    if (e.key === "Enter") {
+      clearTimeout(debounceRef.current);
+      handleSearch(term.trim());
+    }
+  };
+
+  // displayList 결정: 검색 중이면 results, 아니면 현재 페이지 데이터
+  const isSearching = term.trim().length >= 2;
+
+  const totalItems = isSearching
+    ? results.length
+    : filteredData.length > 0
+    ? filteredData.length
+    : receiptData.length;
+
+  // totalPages 재계산 (항상 totalItems 기반)
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+  const displayList = isSearching
+    ? results.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : getCurrentPageData();
 
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
@@ -512,7 +591,29 @@ const CreateReceipt = () => {
           </div>
         </div>
         <div className="w-full mb-10 p-2 sm:p-4 rounded-md shadow-[0_0_10px_#CED3FF] mt-5">
-          <div className="flex justify-center font-GmarketMedium my-1 pb-4 text-[12px] sm:text-[14px] text-[#002e72]">
+          <div className="flex justify-center">
+            <div className="w-[280px] border-b-[1px] border-[#CFD7F1] pb-1 flex items-center">
+              <input
+                type="text"
+                placeholder="검색어 2글자 이상 입력"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                onKeyDown={onKeyDown}
+                className="flex-1 ml-1 text-[#97A0C2] outline-none"
+              />
+              <img
+                src={searchIcon}
+                alt="검색 아이콘 이미지"
+                className="w-4 h-4 mx-1 cursor-pointer"
+                onClick={() => {
+                  clearTimeout(debounceRef.current);
+                  handleSearch(term.trim());
+                }}
+              />
+            </div>
+          </div>
+          <hr className="mt-5 mb-3" />
+          <div className="flex justify-center font-GmarketMedium text-[12px] sm:text-[14px] text-[#002e72]">
             <div className="flex items-center w-4/5">
               <span className="w-1/4">날짜</span>
               <span className="w-1/4">내용</span>
@@ -520,112 +621,152 @@ const CreateReceipt = () => {
               <span className="w-1/4 text-right">출금</span>
             </div>
           </div>
+          {/* 결과 영역 */}
           <div className="flex flex-col space-y-7">
-            {getCurrentPageData().length > 0 ? (
-              getCurrentPageData().map((item, index) => (
-                <div
-                  key={`${item.id || ""}-${item.date}-${index}`}
-                  className="flex items-center justify-between"
-                >
-                  {editingItem?.receiptId === item.receiptId ? (
-                    <>
-                      <input
-                        type="date"
-                        value={editingItem.date}
-                        onChange={(e) =>
-                          handleInputChange("date", e.target.value)
-                        }
-                        className="w-1/4 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                      />
-                      <input
-                        type="text"
-                        value={editingItem.content}
-                        onChange={(e) =>
-                          handleInputChange("content", e.target.value)
-                        }
-                        className="w-1/5 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                      />
-                      <input
-                        type="text"
-                        value={editingItem.deposit}
-                        onChange={(e) =>
-                          handleInputChange("deposit", e.target.value)
-                        }
-                        className="w-1/5 p-1 border rounded text-right focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                      />
-                      <input
-                        type="text"
-                        value={editingItem.withdrawal}
-                        onChange={(e) =>
-                          handleInputChange("withdrawal", e.target.value)
-                        }
-                        className="w-1/5 p-1 border rounded text-right focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                      />
-                      <div className="flex space-x-1 ml-2">
-                        <button
-                          onClick={() => handleSaveEdit(editingItem)}
-                          className="px-2 py-1 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
-                        >
-                          O
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="px-2 py-1 text-[10px] sm:text-[12px] text-red-500 rounded-md shadow-[0_0_10px_#FFE4E4] hover:shadow-[0_0_15px_#FFB6B6] border border-[#FFE4E4] transition duration-300"
-                        >
-                          X
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="w-1/4">
-                        {new Date(item.date).toISOString().split("T")[0]}
-                      </span>
-                      <span className="w-1/5">{item.content}</span>
-                      <span className="w-1/5 text-right text-blue-500">
-                        {item.deposit > 0
-                          ? `+${item.deposit.toLocaleString()}`
-                          : ""}
-                      </span>
-                      <span className="w-1/5 text-right text-red-500">
-                        {item.withdrawal > 0
-                          ? `-${item.withdrawal.toLocaleString()}`
-                          : ""}
-                      </span>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="p-1 rounded-lg hover:bg-[#F0F8FF] transition duration-300"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-2 h-2 sm:w-4 sm:h-4 text-[#061E5B]"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.receiptId)}
-                          className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
-                        >
-                          <img
-                            src={deleteButton}
-                            alt="삭제"
-                            className="w-2 h-2 sm:w-4 sm:h-4"
+            <div className="flex justify-center">
+              <div className="w-4/5">
+                {loading && (
+                  <div className="text-center text-sm text-[#666] mt-5">
+                    로딩 중...
+                  </div>
+                )}
+                {error && (
+                  <div className="text-center text-sm text-red-500">
+                    {error}
+                  </div>
+                )}
+
+                {isSearching && !loading && !error && results.length === 0 && (
+                  <div className="text-center text-sm text-[#666] mt-5">
+                    검색 결과가 없습니다.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {!loading && !error && displayList.length > 0
+              ? displayList.map((item, index) => {
+                  const keyId = item.receiptId ?? item.id ?? index;
+                  const dateStr =
+                    typeof item.date === "string" && item.date.length >= 10
+                      ? item.date.slice(0, 10)
+                      : item.date
+                      ? new Date(item.date).toISOString().split("T")[0]
+                      : "";
+
+                  return (
+                    <div
+                      key={`${keyId}-${index}`}
+                      className="flex items-center justify-between"
+                    >
+                      {editingItem?.receiptId === item.receiptId ? (
+                        <>
+                          <input
+                            type="date"
+                            value={editingItem.date}
+                            onChange={(e) =>
+                              handleInputChange("date", e.target.value)
+                            }
+                            className="w-1/4 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                           />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p>표시할 데이터가 없습니다.</p>
-            )}
+                          <input
+                            type="text"
+                            value={editingItem.content}
+                            onChange={(e) =>
+                              handleInputChange("content", e.target.value)
+                            }
+                            className="w-1/5 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                          />
+                          <input
+                            type="text"
+                            value={editingItem.deposit}
+                            onChange={(e) =>
+                              handleInputChange("deposit", e.target.value)
+                            }
+                            className="w-1/5 p-1 border rounded text-right focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                          />
+                          <input
+                            type="text"
+                            value={editingItem.withdrawal}
+                            onChange={(e) =>
+                              handleInputChange("withdrawal", e.target.value)
+                            }
+                            className="w-1/5 p-1 border rounded text-right focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+                          />
+                          <div className="flex space-x-1 ml-2">
+                            <button
+                              onClick={() => handleSaveEdit(editingItem)}
+                              className="px-2 py-1 text-[10px] sm:text-[12px] text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
+                            >
+                              O
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2 py-1 text-[10px] sm:text-[12px] text-red-500 rounded-md shadow-[0_0_10px_#FFE4E4] hover:shadow-[0_0_15px_#FFB6B6] border border-[#FFE4E4] transition duration-300"
+                            >
+                              X
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-1/4">{dateStr}</span>
+                          <span className="w-1/5">{item.content}</span>
+                          <span className="w-1/5 text-right text-blue-500">
+                            {item.deposit > 0
+                              ? `+${Number(item.deposit).toLocaleString()}`
+                              : ""}
+                          </span>
+                          <span className="w-1/5 text-right text-red-500">
+                            {item.withdrawal > 0
+                              ? `-${Number(item.withdrawal).toLocaleString()}`
+                              : ""}
+                          </span>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="p-1 rounded-lg hover:bg-[#F0F8FF] transition duration-300"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-2 h-2 sm:w-4 sm:h-4 text-[#061E5B]"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleDelete(item.receiptId ?? item.id)
+                              }
+                              className="p-1 rounded-lg hover:bg-[#FFF0F5] transition duration-300"
+                            >
+                              <img
+                                src={deleteButton}
+                                alt="삭제"
+                                className="w-2 h-2 sm:w-4 sm:h-4"
+                              />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
+              : !isSearching &&
+                !loading &&
+                !error && (
+                  <p className="text-center text-sm text-[#666]">
+                    표시할 데이터가 없습니다.
+                  </p>
+                )}
           </div>
-          {(filteredData.length > 0 || receiptData.length > 0) && (
+
+          {/* 페이징: 검색 중이면 results 길이에 맞춰 페이징 보여주기 */}
+          {((term.trim().length >= 2 && results.length > 0) ||
+            (term.trim().length < 2 &&
+              (filteredData.length > 0 || receiptData.length > 0))) && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
