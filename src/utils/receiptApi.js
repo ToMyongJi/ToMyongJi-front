@@ -158,3 +158,17 @@ export const createOcrReceipt = async (userId, formData) => {
     throw error;
   }
 };
+
+// 영수증 검색
+export const searchReceipts = async (searchParams = {}) => {
+  try {
+    const response = await api.get("/api/receipt/keyword", {
+      params: searchParams,
+      timeout: 8000,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("영수증 검색에 실패했습니다:", error);
+    throw error;
+  }
+};
