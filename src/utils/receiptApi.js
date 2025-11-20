@@ -127,11 +127,12 @@ export const uploadCsvFile = async (userId, file) => {
 };
 
 // 거래내역서 PDF 업로드
-export const uploadTossFile = async (userId, file) => {
+export const uploadTossFile = async (userId, file, keyword) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("userId", userId);
+    formData.append("keyword", keyword);
     const response = await api.post("/api/breakdown/parse", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
