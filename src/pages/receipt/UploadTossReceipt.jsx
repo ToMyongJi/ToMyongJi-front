@@ -12,7 +12,7 @@ const UploadTossReceipt = () => {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState(" ");
 
   // 사용자 인증 및 데이터 로드
   useEffect(() => {
