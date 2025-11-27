@@ -12,6 +12,7 @@ const UploadTossReceipt = () => {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [keyword, setKeyword] = useState(" ");
 
   // 사용자 인증 및 데이터 로드
   useEffect(() => {
@@ -47,7 +48,7 @@ const UploadTossReceipt = () => {
         return;
       }
 
-      const response = await uploadTossFile(userId, file);
+      const response = await uploadTossFile(userId, file, keyword);
 
       if (response.statusCode === 200) {
         const receipts = response.data;
@@ -111,7 +112,8 @@ const UploadTossReceipt = () => {
 
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF]">
           <div className="flex flex-col space-y-4">
-            <div className="flex justify-center w-full">
+            <div className="flex justify-center w-full gap-4">
+              <input value={keyword} onChange={e => setKeyword(e.target.value)} type="text" placeholder="내역에 등록할 키워드를 입력하세요" className="outline-none border border-[#D9D9D9] rounded-md w-full pl-4 placeholder:text-[#97A0C2]"/>
               <label className="w-1/4 px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300 text-center">
                 파일 선택
                 <input
