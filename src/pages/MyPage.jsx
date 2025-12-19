@@ -330,7 +330,8 @@ const MyPage = () => {
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header />
-      <div className="flex flex-col items-center justify-center px-4 sm:px-20 py-10 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
+      <div
+        className="flex flex-col items-center justify-center px-4 sm:px-20 py-10 mt-3 font-GmarketLight text-[10px] sm:text-[12px]">
         {/* 내 정보 관리  */}
         <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-6">
           <h2 className="font-GmarketMedium text-[#002e72] text-[15px] sm:text-[18px] mb-4">
@@ -420,7 +421,7 @@ const MyPage = () => {
                   placeholder="학번"
                   value={newMember.studentNum ?? ""}
                   onChange={(e) =>
-                    setNewMember({ ...newMember, studentNum: e.target.value })
+                    setNewMember({...newMember, studentNum: e.target.value})
                   }
                   className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
@@ -429,7 +430,7 @@ const MyPage = () => {
                   placeholder="이름"
                   value={newMember.name ?? ""}
                   onChange={(e) =>
-                    setNewMember({ ...newMember, name: e.target.value })
+                    setNewMember({...newMember, name: e.target.value})
                   }
                   className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
                 />
@@ -480,16 +481,26 @@ const MyPage = () => {
               )}
             </div>
           </div>
+
         )}
+        {getKoreanRole(role) === "회장" && (<button
+          role="submit"
+          onClick={() => navigate("/club-handover", {state: currentUserClub?.studentClubName ?? ""})}
+          className="w-full sm:w-auto px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
+        >
+                  <span className="inline sm:inline">
+                    학생회 이전
+                  </span>
+        </button>)}
         <button
           onClick={handleDeleteAccount}
           disabled={isDeleting}
-          className="mt-2 px-6 py-2 rounded-lg bg-[#FFDFDD] border border-[#FFAEA5] shadow-[0_4px_10px_#FFDFDD,4px_0_10px_#FFDFDD,0_-4px_10px_#FFDFDD,-4px_0_10px_#FFDFDD] font-GmarketMedium text-[#F44336] ${isDeleting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}"
+          className="mt-6 px-6 py-2 font-GmarketMedium text-[#F44336] ${isDeleting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}"
         >
           {isDeleting ? "처리중…" : "회원탈퇴"}
         </button>
       </div>
-      <Footer />
+      <Footer/>
     </div>
   );
 };
