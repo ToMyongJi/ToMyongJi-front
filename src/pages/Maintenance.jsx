@@ -9,7 +9,7 @@ const Maintenance = () => {
         </h1>
         <div className="max-w-md p-6 bg-white rounded-lg shadow-lg sm:p-8">
           <div className="space-y-2 text-[#002D72] font-GmarketMedium">
-            <p>점검 기간: 10월 3일 18:00 ~ 10월 3일 22:00</p>
+            <p>점검 기간: 12월 19일 18:30 ~ 12월 21일 24:00</p>
             <p>점검 내용: 서버 점검</p>
           </div>
           <div className="space-y-2 mt-6 font-GmarketLight text-[#002D72]">
