@@ -18,7 +18,7 @@ const ClubHandOver = () => {
           </h2>
         </div>
 
-        <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-4">
+        <div className="w-full p-2 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mb-4">
           <div className="space-y-3 text-[10px] sm:text-[12px] text-[#061E5B]">
             <div>
               <p className="mb-2 font-GmarketMedium">
@@ -37,44 +37,50 @@ const ClubHandOver = () => {
           </div>
         </div>
 
-        <div className="w-full p-4 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
-          <div className="flex flex-wrap items-center mb-4">
+        <div className="w-full p-6 sm:p-6 rounded-md shadow-[0_0_10px_#CED3FF] mt-5 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center mb-6">
             <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
               소속 이름
             </label>
+
             <input
-              role="text"
               readOnly
               value={state}
-              className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
+              className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100
+               focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
             />
-            <div className="flex items-center flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-              <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
-                차기 회장 정보
-              </label>
-              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                <input
-                  role="text"
-                  placeholder="학번"
-                  className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                />
-                <input
-                  role="text"
-                  placeholder="이름"
-                  className="w-full sm:flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
-                />
-              </div>
-            </div>
-
           </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center">
+            <label className="w-full sm:w-[100px] text-[#002e72] mb-2 sm:mb-0">
+              차기 회장 정보
+            </label>
+
+            <div className="w-full sm:w-[calc(100%-100px)] flex flex-col sm:flex-row gap-2">
+              <input
+                placeholder="학번"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#CED3FF]"
+              />
+              <input
+                placeholder="이름"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#CED3FF]"
+              />
+            </div>
+          </div>
+
         </div>
 
-        <div className="flex justify-center w-full mt-8 mb-10 space-x-4">
+        <div className="flex justify-center w-full mt-1 mb-10 space-x-4">
           <button
             onClick={() => navigate(-1)}
             className="w-1/4 px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border border-[#CED3FF] transition duration-300"
           >
             취소
+          </button>
+          <button
+            className={'w-1/4 px-3 py-2 rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none transition duration-300 bg-[#061E5B] text-white hover:bg-[#0A307D]'}
+          >
+            이전하기
           </button>
         </div>
       </div>
