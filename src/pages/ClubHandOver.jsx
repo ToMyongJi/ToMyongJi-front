@@ -1,12 +1,43 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import useUserStore from "../store/userStore.js";
+import useAuthStore from "../store/authStore.js";
 import receiptsExample from "../assets/images/receipts-example.png"
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+import {handOverClubs} from "../utils/receiptApi.js";
 
 const ClubHandOver = () => {
+  const navigate = useNavigate();
   const {state} = useLocation();
-  console.log("clubhandover", state);
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    studentNum: "",
+  })
+
+  const [isLoading, setIsLoading] = useState(false);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const clearAuthData = useAuthStore((state) => state.clearAuthData);
+
+  const handleHandOver = async () => {
+    try{
+      setIsLoading(true);
+      const response = await handOverClubs(state.clubId = 326, userInfo.studentNum.toString(), userInfo.name);
+      if(response.statusCode === 200) {
+        alert("학생회 이전이 성공적으로 진행되었습니다.");
+        clearUser();
+        clearAuthData();
+        navigate("/");
+      } else{
+        alert("학생회 이전에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error('학생회 이전 실패:', error);
+      alert('학생회 이전에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
   return (
     <div className="max-w-[600px] min-h-screen mx-auto bg-white flex flex-col">
       <Header/>
@@ -45,7 +76,7 @@ const ClubHandOver = () => {
 
             <input
               readOnly
-              value={state}
+              value={state.clubName}
               className="w-full sm:w-[calc(100%-100px)] p-2 border rounded-lg bg-gray-100
                focus:outline-none focus:ring-2 focus:ring-[#CED3FF]"
             />
@@ -59,10 +90,18 @@ const ClubHandOver = () => {
             <div className="w-full sm:w-[calc(100%-100px)] flex flex-col sm:flex-row gap-2">
               <input
                 placeholder="학번"
+                value={userInfo.studentNum ?? ""}
+                onChange={(e) => {
+                  setUserInfo({...userInfo, studentNum: e.target.value});
+                }}
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#CED3FF]"
               />
               <input
                 placeholder="이름"
+                value={userInfo.name ?? ""}
+                onChange={(e) => {
+                  setUserInfo({...userInfo, name: e.target.value});
+                }}
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#CED3FF]"
               />
             </div>
@@ -78,9 +117,15 @@ const ClubHandOver = () => {
             취소
           </button>
           <button
-            className={'w-1/4 px-3 py-2 rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none transition duration-300 bg-[#061E5B] text-white hover:bg-[#0A307D]'}
-          >
-            이전하기
+            disabled={isLoading}
+            onClick={handleHandOver}
+            className={`w-1/4 px-3 py-2 rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none transition duration-300 ${
+              isLoading
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "bg-[#061E5B] text-white hover:bg-[#0A307D]"
+            }`}
+           >
+            {isLoading ? "이전 중" : "이전하기"}
           </button>
         </div>
       </div>

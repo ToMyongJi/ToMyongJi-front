@@ -485,7 +485,7 @@ const MyPage = () => {
         )}
         {getKoreanRole(role) === "회장" && (<button
           role="submit"
-          onClick={() => navigate("/club-handover", {state: currentUserClub?.studentClubName ?? ""})}
+          onClick={() => navigate("/club-handover", {state: {clubName: currentUserClub?.studentClubName ?? "", clubId: userInfo.studentClubId ?? ""}})}
           className="w-full sm:w-auto px-3 py-2 text-[#061E5B] rounded-md shadow-[0_0_10px_#CED3FF] hover:shadow-[0_0_15px_#A0A9FF] border-none cursor-pointer transition duration-300"
         >
                   <span className="inline sm:inline">

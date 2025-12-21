@@ -87,6 +87,17 @@ export const fetchAllColleges = async () => {
   }
 };
 
+// 학생회 이전
+export const handOverClubs = async (clubId, studentNum, name) => {
+  try{
+    const response = await api.post('/api/club/transfer', {clubId, studentNum, name});
+    return response.data;
+  } catch (error){
+    console.error("학생회 이월을 실패했습니다:", error);
+    throw error;
+  }
+};
+
 // 모든 학생회 조회
 export const fetchAllClubs = async () => {
   try {
