@@ -11,6 +11,7 @@ import MyPage from "./pages/MyPage";
 import Find from "./pages/login/Find";
 import Login from "./pages/login/Login";
 import SignUp from "./pages/login/SignUp";
+import ClubHandOver from "./pages/ClubHandOver.jsx";
 import ReceiptsList from "./pages/receipt/ReceiptsList";
 import CreateReceipt from "./pages/receipt/CreateReceipt";
 import NotLogin from "./pages/NotLogin";
@@ -102,6 +103,14 @@ const App = () => {
                 <ProtectedRoute>
                   <CreateReceipt />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/club-handover"
+              element={
+              <ProtectedRoute>
+                <ClubHandOver/>
+              </ProtectedRoute>
               }
             />
             <Route
