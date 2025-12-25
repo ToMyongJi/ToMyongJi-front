@@ -1,6 +1,6 @@
 import api from "./api";
 
-// 특정 학생회 영수증 조회 (학생용)
+// 특정 학생회 영수증 조회 (학생용/삭세 예정)
 export const fetchClubReceipts = async (clubId) => {
   try {
     const response = await api.get(`/api/receipt/club/${clubId}/student`);
@@ -10,6 +10,17 @@ export const fetchClubReceipts = async (clubId) => {
     throw error;
   }
 };
+
+// 특정 학생회 영수중 조회 (학생용/페이징)
+export const fetchClubReceiptsWithPage = async (clubId, page, size, year, month) => {
+  try {
+    const response = await api.get(`/api/receipt/club/${clubId}/paging`,{params: {page, size, year, month}});
+    return response.data || { data: [] };
+  } catch (error) {
+    console.error("학생회 영수증 정보를 가져오는 데 실패했습니다:", error);
+    throw error;
+  }
+}
 
 // 특정 학생회 영수증 조회 (학생회 전용)
 export const fetchClubReceiptsAdmin = async (userId) => {
