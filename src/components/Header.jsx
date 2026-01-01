@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import useUserStore from "../store/userStore";
 import useAuthStore from "../store/authStore";
 import useCollegeStore from "../store/collegeStore";
@@ -77,6 +77,31 @@ const Header = () => {
     setShowAdminDropdown(false);
   };
 
+  const dropdownRef = useRef(null);
+
+  // ✅ 바깥 클릭 시 닫기 (조회/관리자 둘 다 대응)
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!dropdownRef.current) return;
+      if (!dropdownRef.current.contains(e.target)) {
+        setShowQueryDropdown(false);
+        setShowAdminDropdown(false);
+        setShowSubMenu(false);
+        setSelectedCollege(null);
+      }
+    };
+
+    const isAnyDropdownOpen = showQueryDropdown || showAdminDropdown;
+    if (isAnyDropdownOpen) {
+      // 보통 mousedown/pointerdown이 click보다 “즉시” 닫혀서 UX가 좋아요
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showQueryDropdown, showAdminDropdown]);
+
   return (
     <div className="flex flex-col items-center justify-center p-[10px]">
       {/* 로고 */}
@@ -97,7 +122,7 @@ const Header = () => {
       </div>
       {/* 네비바 */}
       <div className="text-sm sm:text-[16px] text-[#002D72] flex items-center justify-evenly font-GmarketLight w-[100%] border-t border-[#4E67EC] border-b py-1 sm:py-3">
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <button
             className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
             onClick={handleQueryClick}

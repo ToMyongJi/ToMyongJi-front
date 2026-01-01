@@ -1,18 +1,18 @@
-import { useNavigate } from 'react-router-dom';
-import { useCallback, useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import { useCallback, useState, useEffect } from "react";
 
-import useAuthStore from '../../store/authStore';
-import useUserStore from '../../store/userStore';
-import { loginUser, fetchMyInfo } from '../../utils/authApi';
+import useAuthStore from "../../store/authStore";
+import useUserStore from "../../store/userStore";
+import { loginUser, fetchMyInfo } from "../../utils/authApi";
 
-import Header from '../../components/Header';
+import Header from "../../components/Header";
 
-import logo from '../../assets/images/logo.png';
+import logo from "../../assets/images/logo.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const setAuthData = useAuthStore((state) => state.setAuthData);
   const setUser = useUserStore((state) => state.setUser);
@@ -20,7 +20,7 @@ const Login = () => {
   const authData = useAuthStore((state) => state.authData);
 
   useEffect(() => {
-    const savedUserId = localStorage.getItem('rememberedUserId');
+    const savedUserId = localStorage.getItem("rememberedUserId");
     if (savedUserId) {
       setUserId(savedUserId);
       setRememberMe(true);
@@ -29,15 +29,19 @@ const Login = () => {
     // 토큰 정보 출력
     if (authData && authData.accessToken) {
       try {
-        const decodedAccessToken = JSON.parse(atob(authData.accessToken.split('.')[1]));
+        const decodedAccessToken = JSON.parse(
+          atob(authData.accessToken.split(".")[1])
+        );
         // console.log('authData', authData);
         // console.log('decodedAccessToken', decodedAccessToken);
         if (authData.refreshToken) {
-          const decodedRefreshToken = JSON.parse(atob(authData.refreshToken.split('.')[1]));
+          const decodedRefreshToken = JSON.parse(
+            atob(authData.refreshToken.split(".")[1])
+          );
           // console.log('decodedRefreshToken', decodedRefreshToken);
         }
       } catch (error) {
-        console.error('토큰 디코딩 실패:', error);
+        console.error("토큰 디코딩 실패:", error);
       }
     }
   }, [authData]);
@@ -63,14 +67,14 @@ const Login = () => {
       // 토큰이 저장될 때까지 잠시 대기
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
       const { id, auth: role, sub: userIdFromToken } = decodedToken;
 
       // 토큰을 직접 전달하여 API 호출
       const userInfoResponse = await fetchMyInfo(id, accessToken);
 
       if (!userInfoResponse.data) {
-        throw new Error('사용자 정보를 가져오는데 실패했습니다.');
+        throw new Error("사용자 정보를 가져오는데 실패했습니다.");
       }
 
       const userData = {
@@ -86,19 +90,19 @@ const Login = () => {
       setUser(userData);
 
       if (rememberMe) {
-        localStorage.setItem('rememberedUserId', userId);
+        localStorage.setItem("rememberedUserId", userId);
       } else {
-        localStorage.removeItem('rememberedUserId');
+        localStorage.removeItem("rememberedUserId");
       }
 
-      if (role === 'ADMIN') {
-        navigate('/home-admin');
+      if (role === "ADMIN") {
+        navigate("/home-admin");
       } else {
-        navigate('/');
+        navigate("/");
       }
     } catch (error) {
-      console.error('로그인 실패:', error);
-      alert('로그인에 실패했습니다. 다시 시도해주세요.');
+      console.error("로그인 실패:", error);
+      alert("로그인에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -144,7 +148,7 @@ const Login = () => {
             <button
               type="button"
               className="text-[#002e72] hover:text-[#CED3FF] transition duration-300"
-              onClick={handleOnClick('/find')}
+              onClick={handleOnClick("/find")}
             >
               아이디 찾기
             </button>
@@ -152,7 +156,7 @@ const Login = () => {
           <button
             type="button"
             className="text-[#002e72] hover:text-[#CED3FF] transition duration-300"
-            onClick={handleOnClick('/sign-up')}
+            onClick={handleOnClick("/sign-up")}
           >
             회원가입
           </button>
