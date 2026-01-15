@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { fetchClubReceipts } from "../../utils/receiptApi";
+import {fetchClubReceiptsWithPage} from "../../utils/receiptApi";
 import useStudentClubStore from "../../store/studentClubStore";
 import Pagination from "../../components/Pagination";
 import Header from "../../components/Header";
@@ -22,11 +22,10 @@ const ReceiptsList = () => {
     new Date().getFullYear().toString()
   );
   const [selectedMonth, setSelectedMonth] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
 
   // 페이지네이션 상태 추가
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // 페이지당 표시할 항목 수
+  const [totalPage, setTotalPage] = useState();
 
   const location = useLocation();
   const clubName = location.state?.clubName || "동아리 이름";
@@ -35,68 +34,26 @@ const ReceiptsList = () => {
     const loadReceipts = async () => {
       try {
         setLoading(true);
-        const response = await fetchClubReceipts(clubId);
-        const receiptsData = response.data || [];
+        const response = await fetchClubReceiptsWithPage(clubId, currentPage, 10, selectedYear, selectedMonth);
+        const receiptsData = response.data.receiptDtoList || [];
+        setTotalPage(response.data.totalPages - 1);
         setReceipts(receiptsData);
-        setFilteredData(receiptsData);
         setError(null);
       } catch (err) {
         setError("영수증을 불러오는 데 실패했습니다.");
         setReceipts([]);
-        setFilteredData([]);
       } finally {
         setLoading(false);
       }
     };
 
     loadReceipts();
-  }, [clubId]);
+  }, [clubId, currentPage, selectedYear, selectedMonth]);
 
-  const filterDataByMonth = () => {
-    if (!Array.isArray(receipts)) return;
-
-    const filtered = receipts.filter((item) => {
-      if (!item || !item.date) return false;
-      if (!selectedYear || !selectedMonth) return true;
-
-      const itemDate = new Date(item.date);
-      const itemYear = itemDate.getFullYear().toString();
-      const itemMonth = String(itemDate.getMonth() + 1).padStart(2, "0");
-      return itemYear === selectedYear && itemMonth === selectedMonth;
-    });
-
-    setFilteredData(filtered);
-  };
-
-  useEffect(() => {
-    filterDataByMonth();
-  }, [receipts, selectedYear, selectedMonth]);
-
-  // 현재 페이지의 데이터만 반환하는 함수
-  const getCurrentPageData = () => {
-    const sortedData = [
-      ...(filteredData.length > 0 ? filteredData : receipts),
-    ].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedData.slice(startIndex, startIndex + itemsPerPage);
-  };
-
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(
-    (filteredData.length > 0 ? filteredData.length : receipts.length) /
-      itemsPerPage
-  );
-
-  // 페이지 변경 핸들러
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  // 필터링 시 페이지 초기화
+  // 필터링시 데이터 초기화
   useEffect(() => {
     setCurrentPage(1);
-  }, [filteredData]);
+  }, [selectedYear, selectedMonth]);
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>{error}</div>;
@@ -188,8 +145,8 @@ const ReceiptsList = () => {
             <span className="w-1/4 text-right">출금</span>
           </div>
           <div className="flex flex-col space-y-7">
-            {Array.isArray(filteredData) && filteredData.length > 0 ? (
-              getCurrentPageData().map((item, index) => (
+            {Array.isArray(receipts) && receipts.length > 0 ? (
+              receipts.map((item, index) => (
                 <div
                   key={`${item.id}-${item.date}-${index}`}
                   className="flex items-center justify-between"
@@ -214,11 +171,11 @@ const ReceiptsList = () => {
               <p>표시할 데이터가 없습니다.</p>
             )}
           </div>
-          {(filteredData.length > 0 || receipts.length > 0) && (
+          { receipts.length > 0 && (
             <Pagination
               currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+              totalPages={totalPage}
+              onPageChange={setCurrentPage}
             />
           )}
         </div>
