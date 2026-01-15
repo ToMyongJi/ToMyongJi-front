@@ -19,12 +19,12 @@ const ReceiptsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear().toString()
+   ""
   );
   const [selectedMonth, setSelectedMonth] = useState("");
 
   // 페이지네이션 상태 추가
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPage, setTotalPage] = useState();
 
   const location = useLocation();
@@ -52,7 +52,7 @@ const ReceiptsList = () => {
 
   // 필터링시 데이터 초기화
   useEffect(() => {
-    setCurrentPage(1);
+    setCurrentPage(0);
   }, [selectedYear, selectedMonth]);
 
   if (loading) return <div>로딩 중...</div>;
@@ -109,7 +109,8 @@ const ReceiptsList = () => {
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
               >
-                {Array.from({ length: 5 }, (_, i) => {
+                <option value="">전체(년도)</option>
+                {Array.from({length: 5}, (_, i) => {
                   const year = new Date().getFullYear() - 2 + i;
                   return (
                     <option key={year} value={year.toString()}>
@@ -123,7 +124,7 @@ const ReceiptsList = () => {
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="w-1/2 px-2 py-2 border focus:outline-none rounded focus:ring-2 focus:ring-[#CED3FF]"
               >
-                <option value="">전체</option>
+                <option value="">전체(월)</option>
                 {Array.from({ length: 12 }, (_, i) => {
                   const month = String(i + 1).padStart(2, "0");
                   return (
