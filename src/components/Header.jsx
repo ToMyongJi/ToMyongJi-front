@@ -41,7 +41,7 @@ const Header = () => {
         }
       };
     },
-    [navigate, user]
+    [navigate, user],
   );
 
   const handleLogout = () => {
@@ -177,7 +177,7 @@ const Header = () => {
           )}
         </div>
         {user && user.role === "ADMIN" && (
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
               className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
               onClick={handleAdminQuery}
