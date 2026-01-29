@@ -78,29 +78,31 @@ const Header = () => {
   };
 
   const dropdownRef = useRef(null);
+  const adminDropdownRef = useRef(null); // 새로운 ref 추가
 
-  // ✅ 바깥 클릭 시 닫기 (조회/관리자 둘 다 대응)
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!dropdownRef.current) return;
-      if (!dropdownRef.current.contains(e.target)) {
-        setShowQueryDropdown(false);
-        setShowAdminDropdown(false);
-        setShowSubMenu(false);
-        setSelectedCollege(null);
-      }
-    };
-
-    const isAnyDropdownOpen = showQueryDropdown || showAdminDropdown;
-    if (isAnyDropdownOpen) {
-      // 보통 mousedown/pointerdown이 click보다 “즉시” 닫혀서 UX가 좋아요
-      document.addEventListener("mousedown", handleClickOutside);
+// ✅ 바깥 클릭 시 닫기 (조회/관리자 둘 다 대응)
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    const isOutsideQuery = dropdownRef.current && !dropdownRef.current.contains(e.target);
+    const isOutsideAdmin = adminDropdownRef.current && !adminDropdownRef.current.contains(e.target);
+    
+    if (isOutsideQuery && isOutsideAdmin) {
+      setShowQueryDropdown(false);
+      setShowAdminDropdown(false);
+      setShowSubMenu(false);
+      setSelectedCollege(null);
     }
+  };
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showQueryDropdown, showAdminDropdown]);
+  const isAnyDropdownOpen = showQueryDropdown || showAdminDropdown;
+  if (isAnyDropdownOpen) {
+    document.addEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showQueryDropdown, showAdminDropdown]);
 
   return (
     <div className="flex flex-col items-center justify-center p-[10px]">
@@ -177,7 +179,7 @@ const Header = () => {
           )}
         </div>
         {user && user.role === "ADMIN" && (
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative" ref={adminDropdownRef}>
             <button
               className="px-2 py-3 hover:font-GmarketMedium transition duration-300 border-b-2 border-transparent hover:border-[#002D72]"
               onClick={handleAdminQuery}
