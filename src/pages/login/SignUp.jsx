@@ -101,11 +101,17 @@ const SignUp = () => {
 
     try {
       setIsSendingCode(true);
-      setIsCodeSent(true);
-      alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
-      await sendEmailVerification(email);
+      const response = await sendEmailVerification(email); 
+      if (response && response.statusCode === 200) { 
+        setIsCodeSent(true);
+        alert('인증코드가 발송되었습니다. 이메일을 확인해주세요.');
+      } else {
+        setIsCodeSent(false);
+        const msg = response?.message || '인증코드 발송에 실패했습니다.';
+        alert(msg); 
+      }
     } catch (error) {
-      alert('인증코드 발송에 실패했습니다. 다시 시도해주세요.');
+      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       setIsCodeSent(false);
     } finally {
       setIsSendingCode(false);
