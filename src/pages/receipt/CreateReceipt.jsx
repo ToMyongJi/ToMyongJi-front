@@ -264,7 +264,7 @@ const CreateReceipt = () => {
 
         alert("영수증 인식이 완료되었습니다. 내용을 확인하고 저장해주세요.");
       } else {
-        throw new Error(response.statusMessage || "OCR 처리에 실패했습니다.");
+        throw new Error(response.message || "OCR 처리에 실패했습니다.");
       }
     } catch (error) {
       console.error("OCR 처리 실패:", error);

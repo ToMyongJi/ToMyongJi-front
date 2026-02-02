@@ -14,7 +14,7 @@ export const fetchClubReceipts = async (clubId) => {
 // 특정 학생회 영수중 조회 (학생용/페이징)
 export const fetchClubReceiptsWithPage = async (clubId, page, size, year, month) => {
   try {
-    const response = await api.get(`/api/receipt/club/${clubId}/paging`,{params: {page, size, year, month}});
+    const response = await api.get(`/api/receipt/club/${clubId}/paging`, { params: { page, size, year, month } });
     return response.data || { data: [] };
   } catch (error) {
     console.error("학생회 영수증 정보를 가져오는 데 실패했습니다:", error);
@@ -100,10 +100,10 @@ export const fetchAllColleges = async () => {
 
 // 학생회 이전
 export const handOverClubs = async (clubId, studentNum, name) => {
-  try{
-    const response = await api.post('/api/club/transfer', {clubId, studentNum, name});
+  try {
+    const response = await api.post('/api/club/transfer', { clubId, studentNum, name });
     return response.data;
-  } catch (error){
+  } catch (error) {
     console.error("학생회 이월을 실패했습니다:", error);
     throw error;
   }

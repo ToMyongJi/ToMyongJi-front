@@ -242,7 +242,7 @@ const MyPage = () => {
         alert("정상적으로 소속원이 추가되었습니다.");
       } else {
         throw new Error(
-          response.statusMessage || "소속원 추가에 실패했습니다."
+          response.message || "소속원 추가에 실패했습니다."
         );
       }
     } catch (error) {
@@ -298,7 +298,7 @@ const MyPage = () => {
         res?.statusCode === 200 || res?.statusCode === 0 || res?.status === 200;
 
       if (!success) {
-        throw new Error(res?.statusMessage || "회원탈퇴에 실패했습니다.");
+        throw new Error(res?.message || "회원탈퇴에 실패했습니다.");
       }
 
       // 1) 로컬 스토리지 정리 (persist 키들)
