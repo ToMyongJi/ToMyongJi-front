@@ -105,7 +105,7 @@ const Admin = () => {
         setNewMember({ clubId: clubId, studentNum: '', name: '' });
         alert('정상적으로 소속원이 추가 되었습니다.');
       } else {
-        throw new Error(response.statusMessage || '부원 추가 중 오류가 발생했습니다.');
+        throw new Error(response.message || '부원 추가 중 오류가 발생했습니다.');
       }
     } catch (error) {
       console.error('부원 추가 중 오류가 발생:', error);
